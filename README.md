@@ -1,2 +1,3 @@
 # Pilz-Clicker
-idk
+
+A simple clicker game, programmed using HTML.
