@@ -254,7 +254,7 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
         <h3>Visuals</h3>
         <div class="srow"><span class="lbl">Particles<small>Spores on harvest</small></span>
           <label class="switch"><input type="checkbox" id="set-part"><span class="track"></span><span class="knob"></span></label></div>
-        <div class="srow"><span class="lbl">Mushroom animation<small>How the mushroom reacts to clicks</small></span>
+        <div class="srow"><span class="lbl">Mushroom animation<small id="manim-sub">How the mushroom reacts to clicks</small></span>
           <select id="set-manim" style="font:inherit;padding:6px;border-radius:6px;background:var(--bg);color:var(--ink);border:2px solid color-mix(in srgb,var(--ink) 15%,transparent);flex:0 0 48%">
             <option value="squish">Squish</option><option value="pop">Pop</option><option value="jelly">Jelly</option><option value="wobble">Wobble</option><option value="bounce">Bounce</option><option value="shake">Shake</option><option value="none">None</option></select></div>
         <div class="srow"><span class="lbl">Idle animation<small>Mushroom plays its animation now and then</small></span>
@@ -538,19 +538,27 @@ const MANIMS={
 const MDUR={squish:300,pop:260,jelly:480,wobble:460,bounce:380,shake:300};
 let mAnim=null,fAnim=null;
 function mushAnim(crit,amp){
-  if(rm)return;const f=MANIMS[SET.manim];if(!f)return;
-  const el=$("mz");if(!el||!el.animate)return;
-  const kf=f(crit?1.7:(amp||1));if(!kf)return;
-  if(mAnim)mAnim.cancel();
-  mAnim=el.animate(kf,{duration:(MDUR[SET.manim]||300)*(crit?1.25:1),easing:"ease-out"});
-  if(crit&&!low){if(fAnim)fAnim.cancel();
-    const g=el.style.filter||"drop-shadow(0 2px 8px rgba(0,0,0,.15))";
-    fAnim=el.animate([{filter:"brightness(1) saturate(1) "+g},{filter:"brightness(1.45) saturate(1.3) "+g,offset:.2},{filter:"brightness(1) saturate(1) "+g}],{duration:380})}
+  try{
+    const f=MANIMS[SET.manim];if(!f)return;
+    const el=$("mz");if(!el)return;
+    /* Systemeinstellung "Bewegung reduzieren" (z.B. Energiesparmodus/Animationen entfernen):
+       die Animation läuft trotzdem, nur etwas sanfter */
+    const a=(crit?1.7:(amp||1))*(rm?.6:1);
+    const kf=f(a);if(!kf)return;
+    if(!el.animate){/* Fallback für sehr alte Browser */
+      el.style.transition="transform .1s";el.style.transform="scale("+(1+.08*a)+")";
+      setTimeout(()=>{el.style.transform=""},110);return}
+    if(mAnim)mAnim.cancel();
+    mAnim=el.animate(kf,{duration:(MDUR[SET.manim]||300)*(crit?1.25:1),easing:"ease-out"});
+    if(crit&&!low&&!rm){if(fAnim)fAnim.cancel();
+      const g=el.style.filter||"drop-shadow(0 2px 8px rgba(0,0,0,.15))";
+      fAnim=el.animate([{filter:"brightness(1) saturate(1) "+g},{filter:"brightness(1.45) saturate(1.3) "+g,offset:.2},{filter:"brightness(1) saturate(1) "+g}],{duration:380})}
+  }catch(e){}
 }
 /* Idle: der Pilz spielt ab und zu von selbst seine gewählte Animation */
 let lastHit=0,idleT=0;
 function idleLoop(){clearTimeout(idleT);idleT=setTimeout(()=>{
-  const busy=document.hidden||sheet||!$("win").hidden||Date.now()-lastHit<3000||(mAnim&&mAnim.playState==="running");
+  const busy=rm||document.hidden||sheet||!$("win").hidden||Date.now()-lastHit<3000||(mAnim&&mAnim.playState==="running");
   if(SET.idle&&!busy)mushAnim(false,.7);
   idleLoop()},3500+Math.random()*5500)}
 idleLoop();
@@ -623,7 +631,7 @@ mq.addEventListener("change",()=>setSheet(false));
 /* ---------- Settings Wiring ---------- */
 function syncSettings(){$("set-sound").checked=SET.sound;$("set-vol").value=SET.vol;$("volval").textContent=SET.vol+" %";
   $("set-part").checked=SET.particles;$("set-anim").checked=SET.anim;$("set-low").checked=SET.low;
-  $("set-theme").value=SET.theme;if(!(SET.manim in MANIMS))SET.manim="squish";$("set-manim").value=SET.manim;$("set-idle").checked=SET.idle;document.documentElement.dataset.manim=SET.manim;$("set-num").value=SET.num;$("set-auto").checked=SET.auto;}
+  $("set-theme").value=SET.theme;if(!(SET.manim in MANIMS))SET.manim="squish";$("set-manim").value=SET.manim;$("set-idle").checked=SET.idle;$("manim-sub").textContent=rm?"Device has reduce-motion on, so animations are gentler":"How the mushroom reacts to clicks";document.documentElement.dataset.manim=SET.manim;$("set-num").value=SET.num;$("set-auto").checked=SET.auto;}
 function setLow(v){SET.low=v;low=v;sizeFx();document.documentElement.classList.toggle("low",v);drawn=-1;saveSet();syncSettings();render()}
 function applySettings(){muted=!SET.sound;low=SET.low;sizeFx();document.documentElement.classList.toggle("low",low);
   applyTheme();
