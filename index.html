@@ -49,6 +49,13 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:1.6rem;margin:0 0 6px;t
 #mushroom:active{transform:none}
 html[data-manim="none"] #mushroom:active{transform:scale(.96)}
 #mz{transform-origin:50% 92%}
+#mushroom{position:relative;overflow:visible}
+#mushroom svg{position:relative;z-index:1;overflow:visible}
+#mushroom::before{content:"";position:absolute;inset:-20%;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,color-mix(in srgb,var(--glow,#fff) 75%,transparent) 0%,transparent 70%);animation:glowpulse 3.2s ease-in-out infinite}
+#mushroom:not([data-glow])::before{display:none}
+@keyframes glowpulse{50%{opacity:.5;transform:scale(1.07)}}
+@media(prefers-reduced-motion:reduce){#mushroom::before{animation:none}}
+.stage h1,.stage .stagelbl,.stage .count,.stage .rate,.stage .stats{position:relative;z-index:2}
 #mushroom svg{display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,.15))}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
 .stats{display:flex;justify-content:center;gap:8px;margin:0 0 12px;flex-wrap:wrap}
@@ -193,6 +200,12 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
  body:not(.sheet) .tab.on::after{display:none}
  body.sheet #scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:25}
 }
+/* Skills farbig wie die Upgrades */
+.skill{border-left:5px solid var(--c,#8b8b80);background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--surface)) var(--p,0%),var(--surface) var(--p,0%))}
+.skill-icon{background:color-mix(in srgb,var(--c,#8b8b80) 24%,transparent)}
+.skill .btn{background:var(--c,var(--ok));color:color-mix(in srgb,var(--c,#000) 18%,#000)}
+.skill .btn:disabled{opacity:.5}
+.sk-lv{color:color-mix(in srgb,var(--c,#8b8b80) 65%,var(--ink));font-weight:700;font-size:.85em;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -244,6 +257,8 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
         <div class="srow"><span class="lbl">Mushroom animation<small>How the mushroom reacts to clicks</small></span>
           <select id="set-manim" style="font:inherit;padding:6px;border-radius:6px;background:var(--bg);color:var(--ink);border:2px solid color-mix(in srgb,var(--ink) 15%,transparent);flex:0 0 48%">
             <option value="squish">Squish</option><option value="pop">Pop</option><option value="jelly">Jelly</option><option value="wobble">Wobble</option><option value="bounce">Bounce</option><option value="shake">Shake</option><option value="none">None</option></select></div>
+        <div class="srow"><span class="lbl">Idle animation<small>Mushroom plays its animation now and then</small></span>
+          <label class="switch"><input type="checkbox" id="set-idle"><span class="track"></span><span class="knob"></span></label></div>
         <div class="srow"><span class="lbl">Animations<small>Floating numbers, shakes</small></span>
           <label class="switch"><input type="checkbox" id="set-anim"><span class="track"></span><span class="knob"></span></label></div>
         <div class="srow"><span class="lbl">Low-power mode<small>Fewer particles, no shadows or glow, lighter sounds</small></span>
@@ -294,13 +309,14 @@ const DEFS=[
 DEFS.sort((a,b)=>a.base-b.base);
 const ICON={hand:"🧤",korb:"🧺",kel:"🕳️",gew:"🌱",lab:"🧪",wald:"🌲",glueck:"🍀",spat:"⛏️",zh:"✨",fab:"🏭",reak:"⚛️",mond:"🌙"};
 const UCOL={hand:"#e07a2f",korb:"#b8863b",kel:"#8a6a4a",gew:"#3fa64f",glueck:"#1fa385",spat:"#e0b41f",lab:"#3aa6c9",wald:"#2f7d4f",zh:"#b05ad6",fab:"#8c96a3",reak:"#d43f6a",mond:"#5b6fd6"};
-const STG=[["Forest Mushroom","#c9533a","#a03420","#f6efdc","#e9dfc4",""],["Blue Mushroom","#5b8fd6","#2d5a9e","#e6f0ff","#e6e2d0",""],["Golden Mushroom","#f0c040","#c58a0f","#fff6c8","#efe3c0","#f0c040"],["Magic Mushroom","#9b5fd0","#5e2a91","#f3dcff","#e8dcec","#b57bff"],["Crystal Mushroom","#4fd1e0","#1f8fa3","#e6fcff","#d5eef0","#4fd1e0"],["Ember Mushroom","#ffa21f","#d8321c","#fff0b3","#f3dfc0","#ff6a2a"],["Moon Mushroom","#4a5596","#1e2347","#fff6c0","#d9d6e8","#c9c4ff"],["Rainbow Mushroom","#ff5fa2","#4aa8ff","#ffffff","#efe9ff","#ffd84a"],["Star Mushroom","#2b2f77","#0d0f33","#ffe9a8","#d7d4ea","#ffd84a"],["Ancient Mushroom","#00e5ff","#b100ff","#ffffff","#f0e6ff","#00e5ff"]];
-const SPOTS=[[60,68,13],[112,46,9],[146,86,14],[92,100,8],[40,100,7],[130,60,6],[78,40,6]];
+const STG=[["Forest Mushroom","#c9533a","#a03420","#f6efdc","#e9dfc4",""],["Blue Mushroom","#5b8fd6","#2d5a9e","#e6f0ff","#e6e2d0",""],["Golden Mushroom","#f0c040","#c58a0f","#fff6c8","#efe3c0","#f0c040"],["Magic Mushroom","#9b5fd0","#5e2a91","#f3dcff","#e8dcec","#b57bff"],["Crystal Mushroom","#4fd1e0","#1f8fa3","#e6fcff","#d5eef0","#4fd1e0"],["Ember Mushroom","#ffa21f","#d8321c","#fff0b3","#f3dfc0","#ff6a2a"],["Moon Mushroom","#4a5596","#1e2347","#fff6c0","#d9d6e8","#c9c4ff"],["Rainbow Mushroom","#ff5fa2","#4aa8ff","#ffffff","#efe9ff","#ffd84a"],["Star Mushroom","#2b2f77","#0d0f33","#ffe9a8","#d7d4ea","#ffd84a"],["Ancient Mushroom","#00e5ff","#b100ff","#ffffff","#f0e6ff","#00e5ff"],
+["Frost Mushroom","#bfe9ff","#5aa9d6","#ffffff","#e3f2fb","#9fe0ff"],["Coral Mushroom","#ff8a75","#e0405a","#fff1e6","#f8dfd0","#ff7a8a"],["Jade Mushroom","#4de0a5","#0c7a58","#eafff5","#d6efe4","#3dffb0"],["Obsidian Mushroom","#4b4f63","#0b0b14","#9ad7ff","#c9c9d6","#7a8cff"],["Solar Mushroom","#fff06a","#ff8a00","#fffbe0","#f7e7c0","#ffd23a"],["Nebula Mushroom","#c04dff","#2a0f6e","#ffd6f6","#e4d6f3","#e06bff"],["Aurora Mushroom","#43ffb4","#6a4dff","#e9fff6","#dff3ec","#55ffe0"],["Cosmic Mushroom","#ff4fd8","#2f1dff","#fff0ff","#e8ddf7","#ff70e8"],["Void Mushroom","#3a0a5e","#000000","#d38bff","#d9cfe3","#a64dff"],["Celestial Mushroom","#fff7d6","#ffb300","#ffffff","#fff3d0","#ffe27a"]];
+const SPOTS=[[60,68,13],[112,46,9],[146,86,14],[92,100,8],[40,100,7],[130,60,6],[78,40,6],[100,70,6],[168,108,5],[34,106,5]];
 const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
 /* ---------- Settings ---------- */
-const SET={sound:true,vol:70,particles:!IS_MOBILE,anim:!IS_MOBILE,low:IS_MOBILE,theme:"auto",num:"short",auto:true,manim:"squish"};
+const SET={sound:true,vol:70,particles:!IS_MOBILE,anim:!IS_MOBILE,low:IS_MOBILE,theme:"auto",num:"short",auto:true,manim:"squish",idle:true};
 try{const r=localStorage.getItem("mushroom-farm-set");if(r)Object.assign(SET,JSON.parse(r))}catch(e){}
 const THEMES=["auto","light","dark","ocean","midnight","sunset","lavender","sakura"];
 function applyTheme(){
@@ -339,7 +355,8 @@ const perClick=()=>((1+DEFS.reduce((a,d)=>a+(d.click||0)*own(d),0))*skillMult("s
 const perSec=()=>DEFS.reduce((a,d)=>a+(d.sec||0)*own(d),0)*(1+skillLevel("mycelium")*.25)*allGain();
 const critP=()=>Math.min(.75,.1+DEFS.reduce((a,d)=>a+(d.crit||0)*own(d),0)+skillLevel("keen")*.04);
 const level=()=>DEFS.reduce((a,d)=>a+own(d),0);
-const stage=()=>Math.min(9,Math.floor(level()/10));
+const MAXSTAGE=19;
+const stage=()=>Math.min(MAXSTAGE,Math.floor(level()/10));
 
 const SHORT=[[1e24,"Sp"],[1e21,"Sx"],[1e18,"Qi"],[1e15,"Qa"],[1e12,"T"],[1e9,"B"],[1e6,"M"],[1e3,"k"]];
 function fmt(v){
@@ -428,19 +445,22 @@ function setT(el,t){if(el.textContent===t)return;el.textContent=t;
   if(booted&&SET.anim&&!low&&!rm&&!IS_MOBILE)el.animate([{transform:"scale(1.35)"},{transform:"scale(1)"}],{duration:280,easing:"cubic-bezier(.2,1.5,.4,1)"})}
 function drawMush(){
   const st=stage();if(st===drawn)return;
-  drawn=st;const m=STG[st],n=4+Math.min(3,st>>1),z=$("mz");
+  drawn=st;const m=STG[st],n=4+Math.min(6,st>>1),z=$("mz");
   z.innerHTML='<defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+m[1]+'"/><stop offset="1" stop-color="'+m[2]+'"/></linearGradient></defs>'+
     '<path d="M70 120h60l-6 62a10 10 0 0 1-10 9H86a10 10 0 0 1-10-9z" fill="'+m[4]+'"/>'+
     '<path d="M12 118C12 58 52 16 100 16s88 42 88 102c0 8-6 12-14 12H26c-8 0-14-4-14-12z" fill="url(#cg)"/>'+
-    SPOTS.slice(0,n).map(p=>'<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+p[2]+'" fill="'+m[3]+'"/>').join("");
-  z.style.filter=(m[5]&&!low)?"drop-shadow(0 0 12px "+m[5]+")":"";
+    SPOTS.slice(0,n).map(p=>'<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+p[2]+'" fill="'+m[3]+'"/>').join("")+
+    (st>=10?'<ellipse cx="70" cy="46" rx="26" ry="9" fill="#fff" opacity=".22" transform="rotate(-24 70 46)"/>':"")+
+    (st>=15?[[22,34,7],[180,44,6],[100,6,5]].map(q=>{const x=q[0],y=q[1],r=q[2];return '<path d="M'+x+' '+(y-r)+'Q'+x+' '+y+' '+(x+r)+' '+y+'Q'+x+' '+y+' '+x+' '+(y+r)+'Q'+x+' '+y+' '+(x-r)+' '+y+'Q'+x+' '+y+' '+x+' '+(y-r)+'Z" fill="'+(m[5]||"#fff")+'" opacity=".9"/>'}).join(""):"");
+  z.style.filter=(m[5]&&!low)?"drop-shadow(0 0 14px "+m[5]+")":"";
+  const mb=$("mushroom");if(m[5]){mb.dataset.glow="1";mb.style.setProperty("--glow",m[5])}else{delete mb.dataset.glow}
   if(prevDrawn>=0&&st>prevDrawn){const r=$("mushroom").getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,true);evolveSfx();mushAnim(true);}
   prevDrawn=st;
 }
 let prevDrawn=-1;
 function renderNow(){
   drawMush();
-  setX($("stg"),"Stage "+(stage()+1)+" · "+STG[stage()][0]+" · "+(stage()>=9?"max":(level()%10)+"/10"));
+  setX($("stg"),"Stage "+(stage()+1)+" · "+STG[stage()][0]+" · "+(stage()>=MAXSTAGE?"max":(level()%10)+"/10"));
   setX($("n"),fmt(s.n));renderStats();renderBoard();renderSkills();
   setT($("rate"),fmt(perSec())+" / sec");setT($("st1"),fmt(perClick()));setT($("st2"),Math.round(critP()*100)+" %");setX($("st3"),fmt(s.total));
   DEFS.forEach((d,i)=>{
@@ -462,7 +482,7 @@ function renderStats(){
   setHTML(el,'<div class="stat-hero"><small>🍄 Total harvested</small><strong>'+fmt(s.total)+'</strong><small>All mushrooms collected during this run</small></div>'+ 
     '<div class="stat-section"><h3>📈 Production</h3>'+R("Current mushrooms",fmt(s.n))+R("Per click",fmt(perClick()))+R("Per second",fmt(perSec()))+'</div>'+ 
     '<div class="stat-section"><h3>✨ Precision</h3>'+R("Total clicks",cl.toLocaleString())+R("Critical hits",cr.toLocaleString())+R("Critical rate",(cl?(cr/cl*100).toFixed(1):"0.0")+"%")+'</div>'+ 
-    '<div class="stat-section"><h3>🌲 Progress</h3>'+R("Mushroom stage",STG[stage()][0]+" ("+(stage()+1)+"/10)")+R("Upgrade levels",level())+R("Play time",(h?h+"h ":"")+m+"m "+sc+"s")+R("Moon Garden reached",s.won?"🏆 Yes":"Not yet")+'</div>');
+    '<div class="stat-section"><h3>🌲 Progress</h3>'+R("Mushroom stage",STG[stage()][0]+" ("+(stage()+1)+"/"+STG.length+")")+R("Upgrade levels",level())+R("Play time",(h?h+"h ":"")+m+"m "+sc+"s")+R("Moon Garden reached",s.won?"🏆 Yes":"Not yet")+'</div>');
 }
 const SKILLS=[
  {id:"strong",icon:"💪",name:"Forager's Grip",desc:"+40% mushrooms per click per rank",max:SKILL_MAX},
@@ -475,18 +495,19 @@ const SKILLS=[
 const skillLevel=id=>Math.max(0,Math.min(SKILL_MAX,Math.floor(Number(s.skills[id])||0)));
 const SP_START=10,SP_STEP=10;
 const earnedPoints=()=>level()<SP_START?0:1+Math.floor((level()-SP_START)/SP_STEP);
-const skillUnlock=i=>SP_START+i*5;
 const skillPoints=()=>Math.max(0,earnedPoints()-SKILLS.reduce((n,k)=>n+skillLevel(k.id),0));
+const SKCOL={strong:"#e07a2f",mycelium:"#8f9bb3",keen:"#1fa385",crit:"#e5502d",harvest:"#b8863b",wisdom:"#e0b41f"};
 function renderSkills(){
- const el=$("skills");const badge=$("skill-badge");if(badge){const pts=skillPoints();badge.textContent=pts;badge.hidden=pts<=0;}
+ const el=$("skills"),badge=$("skill-badge"),pts=skillPoints();
+ if(badge){badge.textContent=pts;badge.hidden=pts<=0}
  if(el.hidden)return;
- const pts=skillPoints();
- setHTML(el,'<div class="skill-head"><div><b>🌱 Mycelium Skilltree</b><small style="display:block;color:var(--muted);margin-top:3px">1 skill point per 10 upgrade levels. '+(SKILLS.length*SKILL_MAX)+' points max out every skill.</small></div><span class="skill-badge">'+pts+' pts</span></div><div class="skill-grid">'+SKILLS.map(k=>{const lv=skillLevel(k.id),locked=level()<skillUnlock(SKILLS.indexOf(k));return '<div class="skill"><div class="skill-icon">'+k.icon+'</div><div><b>'+k.name+' <span style="color:var(--muted)">Lv '+lv+'/'+k.max+'</span></b><small>'+k.desc+(locked?' · Unlocks at '+skillUnlock(SKILLS.indexOf(k))+' upgrade levels':'')+'</small></div><button class="btn" data-skill="'+k.id+'" '+(pts<1||lv>=k.max||locked?'disabled':'')+'>Upgrade · 1 pt</button></div>'}).join('')+'</div><small style="color:var(--muted)">Skill points are permanent until you reset your progress. Choose a build that suits your playstyle.</small>');
-
+ setHTML(el,'<div class="skill-head"><div><b>Mycelium Skilltree</b><small style="display:block;color:var(--muted);margin-top:3px">1 skill point per 10 upgrade levels. '+(SKILLS.length*SKILL_MAX)+' points max out every skill.</small></div><span class="skill-badge">'+pts+' pts</span></div><div class="skill-grid">'+
+  SKILLS.map(k=>{const lv=skillLevel(k.id),full=lv>=k.max,pct=Math.round(lv/k.max*100);
+   return '<div class="skill" style="--c:'+(SKCOL[k.id]||"#8b8b80")+';--p:'+pct+'%"><div class="skill-icon">'+k.icon+'</div><div><b>'+k.name+' <span class="sk-lv">Lv '+lv+'/'+k.max+'</span></b><small>'+k.desc+'</small></div><button class="btn" data-skill="'+k.id+'" '+(pts<1||full?'disabled':'')+'>'+(full?'Max':'Upgrade · 1 pt')+'</button></div>'}).join('')+
+  '</div><small style="color:var(--muted)">Skill points are permanent until you reset your progress. Choose a build that suits your playstyle.</small>');
 }
 $("skills").addEventListener("click",e=>{const b=e.target.closest("[data-skill]");if(!b||b.disabled)return;
   const k=SKILLS.find(x=>x.id===b.dataset.skill);if(!k||skillPoints()<1||skillLevel(k.id)>=k.max)return;
-  if(level()<skillUnlock(SKILLS.indexOf(k)))return;
   s.skills[k.id]=skillLevel(k.id)+1;save();render();renderSkills();uiSfx()});
 const BOTS=[["Alex",1.2e9],["Jordan",3.5e8],["Taylor",8e7],["Morgan",1.2e7],["Casey",9e5],["Riley",1.2e5],["Quinn",1.5e4],["Sam",1200]];
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -516,14 +537,23 @@ const MANIMS={
 };
 const MDUR={squish:300,pop:260,jelly:480,wobble:460,bounce:380,shake:300};
 let mAnim=null,fAnim=null;
-function mushAnim(crit){
+function mushAnim(crit,amp){
   if(rm)return;const f=MANIMS[SET.manim];if(!f)return;
   const el=$("mz");if(!el||!el.animate)return;
-  const kf=f(crit?1.7:1);if(!kf)return;
+  const kf=f(crit?1.7:(amp||1));if(!kf)return;
   if(mAnim)mAnim.cancel();
   mAnim=el.animate(kf,{duration:(MDUR[SET.manim]||300)*(crit?1.25:1),easing:"ease-out"});
-  if(crit&&!low){if(fAnim)fAnim.cancel();fAnim=el.animate([{filter:"brightness(1)"},{filter:"brightness(1.45) saturate(1.3)",offset:.2},{filter:"brightness(1)"}],{duration:380})}
+  if(crit&&!low){if(fAnim)fAnim.cancel();
+    const g=el.style.filter||"drop-shadow(0 2px 8px rgba(0,0,0,.15))";
+    fAnim=el.animate([{filter:"brightness(1) saturate(1) "+g},{filter:"brightness(1.45) saturate(1.3) "+g,offset:.2},{filter:"brightness(1) saturate(1) "+g}],{duration:380})}
 }
+/* Idle: der Pilz spielt ab und zu von selbst seine gewählte Animation */
+let lastHit=0,idleT=0;
+function idleLoop(){clearTimeout(idleT);idleT=setTimeout(()=>{
+  const busy=document.hidden||sheet||!$("win").hidden||Date.now()-lastHit<3000||(mAnim&&mAnim.playState==="running");
+  if(SET.idle&&!busy)mushAnim(false,.7);
+  idleLoop()},3500+Math.random()*5500)}
+idleLoop();
 
 /* ---------- Clicking (optimized for mobile) ---------- */
 let PR=null;
@@ -535,7 +565,7 @@ mushroomEl.addEventListener("contextmenu",e=>e.preventDefault());
 
 /* Maus/Touch lösen schon pointerdown aus (detail>0); Tastatur-Klicks haben detail===0 */
 mushroomEl.addEventListener("click",e=>{if(e.detail===0)hit(e)});
-function hit(e){
+function hit(e){lastHit=Date.now();
   const crit=Math.random()<critP(),g=perClick()*(crit?(5+skillLevel("crit")*2):1);
   s.n+=g;s.total+=g;s.clicks=(s.clicks||0)+1;if(crit)s.crits=(s.crits||0)+1;render();
   let mx=e&&e.clientX,my=e&&e.clientY;if(!mx&&!my){const pr=updRect();mx=pr.left+pr.width/2;my=pr.top+pr.height/2}
@@ -593,7 +623,7 @@ mq.addEventListener("change",()=>setSheet(false));
 /* ---------- Settings Wiring ---------- */
 function syncSettings(){$("set-sound").checked=SET.sound;$("set-vol").value=SET.vol;$("volval").textContent=SET.vol+" %";
   $("set-part").checked=SET.particles;$("set-anim").checked=SET.anim;$("set-low").checked=SET.low;
-  $("set-theme").value=SET.theme;if(!(SET.manim in MANIMS))SET.manim="squish";$("set-manim").value=SET.manim;document.documentElement.dataset.manim=SET.manim;$("set-num").value=SET.num;$("set-auto").checked=SET.auto;}
+  $("set-theme").value=SET.theme;if(!(SET.manim in MANIMS))SET.manim="squish";$("set-manim").value=SET.manim;$("set-idle").checked=SET.idle;document.documentElement.dataset.manim=SET.manim;$("set-num").value=SET.num;$("set-auto").checked=SET.auto;}
 function setLow(v){SET.low=v;low=v;sizeFx();document.documentElement.classList.toggle("low",v);drawn=-1;saveSet();syncSettings();render()}
 function applySettings(){muted=!SET.sound;low=SET.low;sizeFx();document.documentElement.classList.toggle("low",low);
   applyTheme();
@@ -608,6 +638,7 @@ $("set-anim").onchange=e=>{SET.anim=e.target.checked;saveSet()};
 $("set-low").onchange=e=>{setLow(e.target.checked)};
 $("set-theme").onchange=e=>{SET.theme=e.target.value;applyTheme();saveSet()};
 $("set-manim").onchange=e=>{SET.manim=e.target.value;saveSet();syncSettings();const was=sheet;if(was)setSheet(false);setTimeout(()=>{mushAnim(false);setTimeout(()=>mushAnim(true),650);if(was)setTimeout(()=>setSheet(true),1500)},was?250:0)};
+$("set-idle").onchange=e=>{SET.idle=e.target.checked;saveSet()};
 $("set-num").onchange=e=>{SET.num=e.target.value;saveSet();render()};
 $("set-auto").onchange=e=>{SET.auto=e.target.checked;saveSet()};
 // Optional mute control is not present in this version of the interface.
