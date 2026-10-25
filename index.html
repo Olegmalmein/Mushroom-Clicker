@@ -12,11 +12,19 @@
 :root{--bg:#f1ede2;--surface:#e4ddcb;--ink:#26301f;--muted:#6b6f58;--accent:#b4432c;--ok:#3f6b35;color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171d14;--surface:#232c1f;--ink:#ece6d3;--muted:#9aa085;--accent:#e2705a;--ok:#8fc27f;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#171d14;--surface:#232c1f;--ink:#ece6d3;--muted:#9aa085;--accent:#e2705a;--ok:#8fc27f;color-scheme:dark}
+:root[data-theme="light"]{--bg:#f1ede2;--surface:#e4ddcb;--ink:#26301f;--muted:#6b6f58;--accent:#b4432c;--ok:#3f6b35;color-scheme:light}
+/* Farbthemen */
+:root[data-theme="ocean"]{--bg:#0f1a24;--surface:#172a3a;--ink:#e3f0f7;--muted:#8aa5b8;--accent:#ff8a65;--ok:#4fc3f7;color-scheme:dark}
+:root[data-theme="midnight"]{--bg:#0b0d17;--surface:#151a2e;--ink:#e6e8f5;--muted:#8a90b0;--accent:#ff6b9a;--ok:#8c9bff;color-scheme:dark}
+:root[data-theme="sunset"]{--bg:#fbeee0;--surface:#f3d9bf;--ink:#3b2418;--muted:#86644f;--accent:#c2410c;--ok:#a8501a;color-scheme:light}
+:root[data-theme="lavender"]{--bg:#f1edf8;--surface:#ddd4ee;--ink:#2a2142;--muted:#6d6488;--accent:#b83280;--ok:#6b46c1;color-scheme:light}
+:root[data-theme="sakura"]{--bg:#fbeef1;--surface:#f4d6de;--ink:#3a1f28;--muted:#8a5d6b;--accent:#c2185b;--ok:#b8365f;color-scheme:light}
 *{box-sizing:border-box}
 html,body{height:100%;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+input,textarea,select{-webkit-user-select:text;user-select:text}
 body{margin:0;color:var(--ink);font-family:"Trebuchet MS","Segoe UI",sans-serif;overflow:hidden;background:var(--bg)}
 /* Mobile-first layout - full screen on phones */
-main{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+main{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
 main>*{min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
 /* Stage section - sticky top on mobile */
 .stage{position:relative;flex-shrink:0;background:var(--surface);border-radius:0 0 20px 20px;padding:16px 14px 18px;border-bottom:1px solid color-mix(in srgb,var(--ink) 12%,transparent)}
@@ -28,15 +36,16 @@ main>*{min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
  main{flex-direction:row;gap:20px;padding:20px 16px 40px;max-width:880px;margin:0 auto}
  .stage{position:sticky;top:20px;height:max-content;border-radius:20px;padding:20px 16px 24px;border:1px solid color-mix(in srgb,var(--ink) 12%,transparent)}
  .stage.fixed{position:static;flex-shrink:1}
+ .stage-container{flex:0 0 300px;overflow:visible}
  .main-content{flex:1;max-width:420px}
  .shop-container{overflow:auto}
 }
 h1{font-family:Georgia,"Times New Roman",serif;font-size:1.6rem;margin:0 0 6px;text-align:center}
-@media(min-width:760px){h1{text-align:left;font-size:2rem}}
+@media(min-width:760px){h1{text-align:center;font-size:1.9rem}}
 .count{font-family:Georgia,serif;font-size:2.4rem;font-weight:700;line-height:1.1;text-align:center}
 @media(min-width:760px){.count{font-size:3rem}}
 .rate{color:var(--muted);margin:6px 0 12px;text-align:center;font-size:.95rem}
-#mushroom{width:min(220px,65vw);aspect-ratio:1;border:0;background:none;cursor:pointer;padding:0;display:block;margin:8px auto 0}
+#mushroom{-webkit-touch-callout:none;width:min(220px,65vw,30vh);aspect-ratio:1;border:0;background:none;cursor:pointer;padding:0;display:block;margin:8px auto 0}
 #mushroom:active{transform:scale(.96)}
 #mushroom svg{display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,.15))}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
@@ -49,9 +58,11 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:1.6rem;margin:0 0 6px;t
 /* Tabs */
 .tabs-wrapper{position:sticky;top:0;background:var(--surface);padding:4px 0;z-index:5}
 .tabs{display:flex;gap:4px;background:var(--surface);padding:4px;border-radius:12px}
-.tab{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;padding:10px 4px;border-radius:9px;cursor:pointer;font-size:.85rem}
+.tab{flex:1;min-width:0;white-space:nowrap;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;padding:10px 4px;border-radius:9px;cursor:pointer;font-size:.85rem}
 .tab.on{background:var(--bg);color:var(--ink)}
+.tab .skill-badge{min-width:22px;height:22px;padding:0 6px;font-size:.72rem;margin-left:2px;vertical-align:middle}
 .tab:focus-visible{outline:3px solid var(--accent)}
+@media(max-width:420px){.tab{font-size:.72rem;padding:10px 2px}}
 /* Items */
 .item{position:relative;display:grid;grid-template-columns:2.2rem 1fr auto;align-items:center;gap:8px;text-align:left;width:100%;padding:11px 13px;color:var(--ink);border:2px solid transparent;border-left:5px solid var(--c,#8b8b80);border-radius:10px;font:inherit;cursor:pointer;
 background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--surface)) var(--p,0%),var(--surface) var(--p,0%));transition:transform .08s,border-color .08s,opacity .15s}
@@ -76,6 +87,18 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
 .row{display:flex;justify-content:space-between;gap:8px;padding:8px 12px;background:var(--bg);border-radius:8px}
 .row span:first-child{color:var(--muted)}.row b{text-align:right;font-size:1rem}
 .row.me{box-shadow:inset 0 0 0 2px var(--ok)}
+/* Skill tree */
+.skill-head>div{min-width:0}
+.skill-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;background:var(--bg);border-radius:12px;margin:8px 0}
+.skill-badge{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;white-space:nowrap;line-height:1;min-width:30px;height:30px;padding:0 9px;border-radius:999px;background:#c62828;color:white;font-weight:900;box-shadow:0 2px 8px #c6282844}
+.skill-grid{display:grid;gap:9px;padding:4px 0 14px}
+.skill{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:12px;background:var(--surface);border:1px solid color-mix(in srgb,var(--ink) 12%,transparent);border-radius:12px}
+.skill-icon{width:42px;height:42px;display:grid;place-items:center;background:color-mix(in srgb,var(--ok) 18%,var(--bg));border-radius:10px;font-size:1.4rem}
+.skill b{display:block}.skill small{display:block;color:var(--muted);line-height:1.35;margin-top:3px}.skill .btn{padding:8px 10px;white-space:nowrap}.skill .btn:disabled{opacity:.45;cursor:not-allowed}
+/* Stats polish */
+.stat-hero{padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--ok),color-mix(in srgb,var(--ok) 40%,var(--surface)));color:white;margin:8px 0 10px}
+.stat-hero small{display:block;opacity:.85}.stat-hero strong{display:block;font:700 1.8rem Georgia,serif;margin-top:3px}
+.stat-section{margin:8px 0}.stat-section h3{font-family:Georgia,serif;margin:12px 0 6px}
 /* Leaderboard */
 .nm{align-items:center}
 .nm input{background:var(--bg);color:var(--ink);border:2px solid transparent;border-radius:8px;padding:5px 9px;font:inherit;width:8rem;text-align:right}
@@ -117,13 +140,37 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
 /* Animations */
 @keyframes bump{50%{transform:scale(1.06)}}
 @media(prefers-reduced-motion:reduce){.count.bump{animation:none}.lvup,.item.shine::after{animation:none}}
+/* ---------- HUD polish: einheitliche Rundung + hochwertigere Optik ---------- */
+:root{--r:12px;--line:color-mix(in srgb,var(--ink) 12%,transparent)}
+.stage{background:linear-gradient(180deg,color-mix(in srgb,var(--ok) 12%,var(--surface)),var(--surface) 75%);border-radius:0 0 var(--r) var(--r);box-shadow:0 8px 20px -12px rgba(0,0,0,.45)}
+@media(min-width:760px){.stage{border-radius:var(--r)}}
+.stagelbl{text-transform:uppercase;letter-spacing:.08em;font-size:.68rem;font-weight:700}
+.count{text-shadow:0 2px 0 color-mix(in srgb,var(--ink) 10%,transparent)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-width:340px;margin:0 auto 14px}
+.stats div{min-width:0;text-align:center;padding:8px 6px;background:color-mix(in srgb,var(--bg) 75%,transparent);border:1px solid var(--line);border-radius:var(--r);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--ink) 7%,transparent)}
+.stats b{font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats small{display:block;text-transform:uppercase;letter-spacing:.06em;font-size:.6rem;font-weight:700}
+/* Tabs */
+.tabs-wrapper{background:var(--bg);padding:10px 0 8px}
+.tabs{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:4px;gap:2px;box-shadow:inset 0 1px 3px rgba(0,0,0,.14)}
+.tab{position:relative;border-radius:calc(var(--r) - 4px);letter-spacing:.02em;transition:background .15s,color .15s}
+.tab:hover:not(.on){color:var(--ink)}
+.tab.on{background:var(--bg);box-shadow:0 1px 3px rgba(0,0,0,.25),inset 0 0 0 1px var(--line)}
+.tab.on::after{content:"";position:absolute;left:24%;right:24%;bottom:3px;height:2px;border-radius:2px;background:var(--ok)}
+/* Gleiche Rundung überall */
+.item,.item.shine::after{border-radius:var(--r)}
+.item{box-shadow:0 1px 0 color-mix(in srgb,var(--ink) 8%,transparent)}
+.row,.srow{border-radius:var(--r);border:1px solid var(--line)}
+.skill-head,.skill,.stat-hero,.btn,.ta,.win .card,.win button{border-radius:var(--r)}
+.skill-icon{border-radius:calc(var(--r) - 2px)}
+.nm input,select{border-radius:calc(var(--r) - 4px)!important}
 </style>
 </head>
 <body>
 <canvas id="fx"></canvas>
 <div class="win" id="win" role="dialog" aria-modal="true" aria-labelledby="winH" hidden><div class="card"><h2 id="winH">🏆 You won!</h2><p id="winTxt"></p><button id="winBtn">Keep playing</button></div></div>
 <main>
-<div class="stage stage-fixed stage-container">
+<div class="stage-container">
   <section class="stage" id="stage">
     <h1>Mushroom Farm</h1>
     <div class="stagelbl" id="stg"></div>
@@ -148,9 +195,11 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
         <button class="tab" id="tab2" role="tab" aria-selected="false">Stats</button>
         <button class="tab" id="tab3" role="tab" aria-selected="false">Ranking</button>
         <button class="tab" id="tab4" role="tab" aria-selected="false">Settings</button>
+        <button class="tab" id="tab5" role="tab" aria-selected="false">🌱 Skills <span id="skill-badge" class="skill-badge" hidden>0</span></button>
       </div></div>
       <div id="items" class="shop"></div>
       <div id="stats" class="statlist" hidden></div>
+      <div id="skills" class="statlist" hidden></div>
       <div id="board" class="statlist" hidden><div class="row nm"><span>Your name</span><input id="nm" maxlength="14" placeholder="You" autocomplete="off" aria-label="Your name"></div><div id="rows" class="statlist"></div></div>
       <div id="settings" class="setwrap" hidden>
         <h3>Audio</h3>
@@ -166,9 +215,9 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
         <div class="srow"><span class="lbl">Low-power mode<small>Fewer effects, smooth scroll</small></span>
           <label class="switch"><input type="checkbox" id="set-low"><span class="track"></span><span class="knob"></span></label></div>
         <h3>Theme</h3>
-        <div class="srow"><span class="lbl">Appearance<small>Follows system settings</small></span>
+        <div class="srow"><span class="lbl">Appearance<small>Colors for background, tabs &amp; HUD</small></span>
           <select id="set-theme" style="font:inherit;padding:6px;border-radius:6px;background:var(--bg);color:var(--ink);border:2px solid color-mix(in srgb,var(--ink) 15%,transparent);flex:0 0 48%">
-            <option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+            <option value="auto">Auto (System)</option><option value="light">Light</option><option value="dark">Dark</option><option value="ocean">Ocean</option><option value="midnight">Midnight</option><option value="sunset">Sunset</option><option value="lavender">Lavender</option><option value="sakura">Sakura</option></select></div>
         <h3>Gameplay</h3>
         <div class="srow"><span class="lbl">Numbers<small>Short or full display</small></span>
           <select id="set-num" style="font:inherit;padding:6px;border-radius:6px;background:var(--bg);color:var(--ink);border:2px solid color-mix(in srgb,var(--ink) 15%,transparent);flex:0 0 48%">
@@ -192,7 +241,7 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
 <script>
 "use strict";
 const IS_MOBILE=navigator.userAgent.includes("Mobile")||window.innerWidth<760;
-
+ 
 /* ---------- Data ---------- */
 const DEFS=[
  {id:"hand",name:"Better Gloves",desc:"+1 mushroom per click",base:15,mult:1.5,click:1},
@@ -215,31 +264,55 @@ const STG=[["Forest Mushroom","#c9533a","#a03420","#f6efdc","#e9dfc4",""],["Blue
 const SPOTS=[[60,68,13],[112,46,9],[146,86,14],[92,100,8],[40,100,7],[130,60,6],[78,40,6]];
 const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-
+ 
 /* ---------- Settings ---------- */
 const SET={sound:true,vol:70,particles:!IS_MOBILE,anim:!IS_MOBILE,low:IS_MOBILE,theme:"auto",num:"short",auto:true};
 try{const r=localStorage.getItem("mushroom-farm-set");if(r)Object.assign(SET,JSON.parse(r))}catch(e){}
+const THEMES=["auto","light","dark","ocean","midnight","sunset","lavender","sakura"];
+function applyTheme(){
+  if(!THEMES.includes(SET.theme))SET.theme="auto";
+  const r=document.documentElement;
+  if(SET.theme==="auto")r.removeAttribute("data-theme");else r.setAttribute("data-theme",SET.theme);
+  const bg=getComputedStyle(r).getPropertyValue("--bg").trim(),m=document.querySelector('meta[name="theme-color"]');
+  if(m&&bg)m.setAttribute("content",bg);
+}
 const rm=matchMedia("(prefers-reduced-motion:reduce)").matches;
-let low=SET.low||IS_MOBILE;
-
+let low=SET.low;
+ 
 /* ---------- State ---------- */
-let s={n:0,total:0,own:{}};
-try{const r=localStorage.getItem("mushroom-farm-v2");if(r)s=Object.assign(s,JSON.parse(r))}catch(e){}
+function sanitize(o){
+  const r={n:0,total:0,own:{},skills:{}};
+  if(!o||typeof o!=="object")return r;
+  const num=v=>{v=Number(v);return Number.isFinite(v)&&v>=0?v:0};
+  r.n=num(o.n);r.total=Math.max(num(o.total),r.n);
+  const ow=o.own&&typeof o.own==="object"?o.own:{};
+  DEFS.forEach(d=>{let v=Math.floor(num(ow[d.id]));if(d.max)v=Math.min(v,d.max);if(v)r.own[d.id]=v});
+  const sk=o.skills&&typeof o.skills==="object"?o.skills:{};
+  Object.keys(sk).forEach(k=>{const v=Math.min(5,Math.floor(num(sk[k])));if(v)r.skills[k]=v});
+  if(typeof o.name==="string")r.name=o.name.slice(0,14);
+  r.time=num(o.time);r.clicks=Math.floor(num(o.clicks));r.crits=Math.floor(num(o.crits));
+  if(o.won)r.won=true;
+  return r;
+}
+let s=sanitize(null);
+try{const r=localStorage.getItem("mushroom-farm-v2");if(r)s=sanitize(JSON.parse(r))}catch(e){}
 const own=d=>s.own[d.id]||0;
 const cost=d=>Math.ceil(d.base*Math.pow(d.mult,own(d)));
-const perClick=()=>1+DEFS.reduce((a,d)=>a+(d.click||0)*own(d),0);
-const perSec=()=>DEFS.reduce((a,d)=>a+(d.sec||0)*own(d),0);
-const critP=()=>.1+DEFS.reduce((a,d)=>a+(d.crit||0)*own(d),0);
+const skillMult=id=>1+skillLevel(id)*({strong:.25,harvest:.10,wisdom:.01}[id]||0);
+const allGain=()=>skillMult("harvest")*(1+skillLevel("wisdom")*.01*Math.floor(level()/10));
+const perClick=()=>((1+DEFS.reduce((a,d)=>a+(d.click||0)*own(d),0))*skillMult("strong")*allGain());
+const perSec=()=>DEFS.reduce((a,d)=>a+(d.sec||0)*own(d),0)*(1+skillLevel("mycelium")*.15)*allGain();
+const critP=()=>Math.min(.75,.1+DEFS.reduce((a,d)=>a+(d.crit||0)*own(d),0)+skillLevel("keen")*.02);
 const level=()=>DEFS.reduce((a,d)=>a+own(d),0);
 const stage=()=>Math.min(9,Math.floor(level()/10));
-
+ 
 const SHORT=[[1e24,"Sp"],[1e21,"Sx"],[1e18,"Qi"],[1e15,"Qa"],[1e12,"T"],[1e9,"B"],[1e6,"M"],[1e3,"k"]];
 function fmt(v){
   if(SET.num==="full")return Math.floor(v).toLocaleString("en-US");
   for(const [lim,suf] of SHORT)if(v>=lim)return (v/lim).toFixed(v/lim<10?2:v/lim<100?1:0)+suf;
   return Math.floor(v).toLocaleString("en-US");
 }
-
+ 
 /* ---------- Audio ---------- */
 let ac=null,master=null,muted=!SET.sound;
 function audio(){
@@ -273,7 +346,7 @@ function sweep(f1,f2,dur,vol,delay){
 const PENT=[0,2,4,7,9,12,14,16];
 const rnd=()=>Math.pow(2,PENT[Math.floor(Math.random()*PENT.length)]/12)*(1+(Math.random()-.5)*.02);
 let lastPop=0,lastBuy=0,buyStreak=0;
-
+ 
 function popSfx(crit){
   if(muted)return;const now=performance.now();
   if(now-lastPop<40)return;lastPop=now;
@@ -291,7 +364,7 @@ function buySfx(item){
 function evolveSfx(){[523.25,659.25,783.99,1046.5,1318.5,1568].forEach((f,i)=>tone(f,1.5,.13,i*.09))}
 function winSfx(){[523.25,659.25,783.99,1046.5,783.99,1046.5,1318.5,1568].forEach((f,i)=>tone(f,1.7,.13,i*.13))}
 function uiSfx(){tone(660,.12,.09,0,"triangle")}
-
+ 
 /* ---------- Shop ---------- */
 const box=$("items");
 const btns=DEFS.map(d=>{
@@ -309,11 +382,12 @@ const btns=DEFS.map(d=>{
   };
   box.appendChild(b);return b;
 });
-
+ 
 /* ---------- Rendering ---------- */
 let rq=0,booted=false,drawn=-1;
 function render(){if(rq)return;rq=requestAnimationFrame(()=>{rq=0;renderNow()})}
 setTimeout(()=>{booted=true},800);
+function setHTML(el,h){if(el._h!==h){el._h=h;el.innerHTML=h}}
 function setX(el,t){if(el.textContent!==t)el.textContent=t}
 function setT(el,t){if(el.textContent===t)return;el.textContent=t;
   if(booted&&SET.anim&&!low&&!rm&&!IS_MOBILE)el.animate([{transform:"scale(1.35)"},{transform:"scale(1)"}],{duration:280,easing:"cubic-bezier(.2,1.5,.4,1)"})}
@@ -332,7 +406,7 @@ let prevDrawn=-1;
 function renderNow(){
   drawMush();
   setX($("stg"),"Stage "+(stage()+1)+" · "+STG[stage()][0]+" · "+(stage()>=9?"max":(level()%10)+"/10"));
-  setX($("n"),fmt(s.n));renderStats();renderBoard();
+  setX($("n"),fmt(s.n));renderStats();renderBoard();renderSkills();
   setT($("rate"),fmt(perSec())+" / sec");setT($("st1"),fmt(perClick()));setT($("st2"),Math.round(critP()*100)+" %");setX($("st3"),fmt(s.total));
   DEFS.forEach((d,i)=>{
     const b=btns[i],c=cost(d),mx=d.max&&own(d)>=d.max,hid=!(own(d)>0||s.total>=d.base*.6);
@@ -350,36 +424,64 @@ function renderStats(){
   const t=Math.floor(s.time||0),h=Math.floor(t/3600),m=Math.floor(t%3600/60),sc=t%60;
   const cl=s.clicks||0,cr=s.crits||0;
   const R=(a,b)=>'<div class="row"><span>'+a+'</span><b>'+b+'</b></div>';
-  el.innerHTML=R("Now",fmt(s.n))+R("Total",fmt(s.total))+R("Clicks",cl.toLocaleString())+R("Crits",cr.toLocaleString()+(cl?" ("+(cr/cl*100).toFixed(1)+"%)":""))+
-    R("/click",fmt(perClick()))+R("/sec",fmt(perSec()))+R("Crit%",Math.round(critP()*100)+"%")+
-    R("Type",STG[stage()][0]+" ("+(stage()+1)+")")+R("Levels",level())+R("Time",(h?h+"h ":"")+m+"m"+sc+"s")+R("Won",s.won?"🏆Yes":"No");
+  setHTML(el,'<div class="stat-hero"><small>🍄 Total harvested</small><strong>'+fmt(s.total)+'</strong><small>All mushrooms collected during this run</small></div>'+ 
+    '<div class="stat-section"><h3>📈 Production</h3>'+R("Current mushrooms",fmt(s.n))+R("Per click",fmt(perClick()))+R("Per second",fmt(perSec()))+'</div>'+ 
+    '<div class="stat-section"><h3>✨ Precision</h3>'+R("Total clicks",cl.toLocaleString())+R("Critical hits",cr.toLocaleString())+R("Critical rate",(cl?(cr/cl*100).toFixed(1):"0.0")+"%")+'</div>'+ 
+    '<div class="stat-section"><h3>🌲 Progress</h3>'+R("Mushroom stage",STG[stage()][0]+" ("+(stage()+1)+"/10)")+R("Upgrade levels",level())+R("Play time",(h?h+"h ":"")+m+"m "+sc+"s")+R("Moon Garden reached",s.won?"🏆 Yes":"Not yet")+'</div>');
 }
+const SKILLS=[
+ {id:"strong",icon:"💪",name:"Forager's Grip",desc:"+25% mushrooms per click per rank",max:5},
+ {id:"mycelium",icon:"🕸️",name:"Living Mycelium",desc:"+15% passive production per rank",max:5},
+ {id:"keen",icon:"🍀",name:"Lucky Spores",desc:"+2% critical chance per rank",max:5},
+ {id:"crit",icon:"💥",name:"Critical Bloom",desc:"Critical hits become 1× stronger per rank",max:5},
+ {id:"harvest",icon:"🧺",name:"Deep Pockets",desc:"+10% to all mushroom gains per rank",max:5},
+ {id:"wisdom",icon:"🌟",name:"Ancient Wisdom",desc:"+1% bonus per rank for every 10 upgrade levels",max:5}
+];
+const skillLevel=id=>Math.max(0,Math.min(5,Math.floor(Number(s.skills[id])||0)));
+const SP_START=10,SP_STEP=5;
+const earnedPoints=()=>level()<SP_START?0:1+Math.floor((level()-SP_START)/SP_STEP);
+const skillUnlock=i=>SP_START+i*SP_STEP;
+const skillPoints=()=>Math.max(0,earnedPoints()-SKILLS.reduce((n,k)=>n+skillLevel(k.id),0));
+function renderSkills(){
+ const el=$("skills");const badge=$("skill-badge");if(badge){const pts=skillPoints();badge.textContent=pts;badge.hidden=pts<=0;}
+ if(el.hidden)return;
+ const pts=skillPoints();
+ setHTML(el,'<div class="skill-head"><div><b>🌱 Mycelium Skilltree</b><small style="display:block;color:var(--muted);margin-top:3px">First skill point at 10 upgrade levels, then 1 more every 5 levels.</small></div><span class="skill-badge">'+pts+' pts</span></div><div class="skill-grid">'+SKILLS.map(k=>{const lv=skillLevel(k.id),locked=level()<skillUnlock(SKILLS.indexOf(k));return '<div class="skill"><div class="skill-icon">'+k.icon+'</div><div><b>'+k.name+' <span style="color:var(--muted)">Lv '+lv+'/'+k.max+'</span></b><small>'+k.desc+(locked?' · Unlocks at '+skillUnlock(SKILLS.indexOf(k))+' upgrade levels':'')+'</small></div><button class="btn" data-skill="'+k.id+'" '+(pts<1||lv>=k.max||locked?'disabled':'')+'>Upgrade · 1 pt</button></div>'}).join('')+'</div><small style="color:var(--muted)">Skill points are permanent until you reset your progress. Choose a build that suits your playstyle.</small>');
+ 
+}
+$("skills").addEventListener("click",e=>{const b=e.target.closest("[data-skill]");if(!b||b.disabled)return;
+  const k=SKILLS.find(x=>x.id===b.dataset.skill);if(!k||skillPoints()<1||skillLevel(k.id)>=k.max)return;
+  if(level()<skillUnlock(SKILLS.indexOf(k)))return;
+  s.skills[k.id]=skillLevel(k.id)+1;save();render();renderSkills();uiSfx()});
 const BOTS=[["Alex",1.2e9],["Jordan",3.5e8],["Taylor",8e7],["Morgan",1.2e7],["Casey",9e5],["Riley",1.2e5],["Quinn",1.5e4],["Sam",1200]];
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function renderBoard(){
   const el=$("board");if(el.hidden)return;
   const me=s.name||"You",L=Math.max(2e9,s.total*1.5+1e6);
   const list=[{n:"Admin",v:L,king:1}].concat(BOTS.map(b=>({n:b[0],v:b[1]})),[{n:me,v:s.total,me:1}]).sort((a,b)=>b.v-a.v);
-  $("rows").innerHTML=list.map((p,i)=>'<div class="row'+(p.me?' me':'')+(p.king?' king':'')+'"><span>'+(i+1)+'. '+(p.king?'👑 ':'')+esc(p.n)+'</span><b>'+fmt(p.v)+'</b></div>').join("");
+  setHTML($("rows"),list.map((p,i)=>'<div class="row'+(p.me?' me':'')+(p.king?' king':'')+'"><span>'+(i+1)+'. '+(p.king?'👑 ':'')+esc(p.n)+'</span><b>'+fmt(p.v)+'</b></div>').join(""));
 }
-
+ 
 /* ---------- Persistence ---------- */
 function save(){try{localStorage.setItem("mushroom-farm-v2",JSON.stringify(s));localStorage.setItem("mushroom-farm-set",JSON.stringify(SET))}catch(e){}}
-let svT=0;function saveSoon(){if(svT)return;svT=setTimeout(()=>{svT=0;save()},1500)}
+let svT=0;function saveSoon(){if(svT||!SET.auto)return;svT=setTimeout(()=>{svT=0;save()},1500)}
+setInterval(()=>{if(SET.auto&&!document.hidden)save()},10000);
 addEventListener("pagehide",save);addEventListener("visibilitychange",()=>{if(document.hidden)save()});
-
+ 
 /* ---------- Clicking (optimized for mobile) ---------- */
 let PR=null;
 const updRect=()=>{const r=$("mushroom").getBoundingClientRect();PR=r;return r};
 let lastPD=0;
 const mushroomEl=$("mushroom");
-mushroomEl.addEventListener("pointerdown",e=>{e.preventDefault();lastPD=Date.now();hit(e)});
-mushroomEl.addEventListener("touchstart",e=>{e.preventDefault();lastPD=Date.now();hit(e)},{passive:false});
-mushroomEl.addEventListener("click",e=>{if(Date.now()-lastPD>400)hit(e)});
+mushroomEl.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;e.preventDefault();hit(e)});
+mushroomEl.addEventListener("contextmenu",e=>e.preventDefault());
+ 
+/* Maus/Touch lösen schon pointerdown aus (detail>0); Tastatur-Klicks haben detail===0 */
+mushroomEl.addEventListener("click",e=>{if(e.detail===0)hit(e)});
 function hit(e){
-  const crit=Math.random()<critP(),g=perClick()*(crit?5:1);
+  const crit=Math.random()<critP(),g=perClick()*(crit?(5+skillLevel("crit")):1);
   s.n+=g;s.total+=g;s.clicks=(s.clicks||0)+1;if(crit)s.crits=(s.crits||0)+1;render();
-  const pr=PR||updRect(),mx=(e&&e.clientX)||pr.left+pr.width/2,my=(e&&e.clientY)||pr.top+pr.height/2;
+  let mx=e&&e.clientX,my=e&&e.clientY;if(!mx&&!my){const pr=updRect();mx=pr.left+pr.width/2;my=pr.top+pr.height/2}
   if(SET.particles)burst(mx,my,crit);popSfx(crit);
   const tn=Date.now();
   if(SET.anim&&!low){lastBump=tn;$("n").parentNode.animate([{transform:"scale(1.06)"},{transform:"scale(1)"}],{duration:120})}
@@ -387,7 +489,7 @@ function hit(e){
 }
 let lastBump=0,last=Date.now();
 setInterval(()=>{const now=Date.now(),dt=(now-last)/1000;last=now;if(!document.hidden){s.time=(s.time||0)+Math.min(dt,1);const g=perSec()*dt;if(g>0){s.n+=g;s.total+=g;render()}}},200);
-
+ 
 /* ---------- Particles (FPS optimized for mobile) ---------- */
 const cv=$("fx"),c2=cv.getContext("2d",{alpha:true,desynchronized:false});
 let P=[],raf=0,lastT=0;
@@ -402,7 +504,7 @@ function burst(x,y,big,col){
   if(big&&!rm)P.push({x,y,ring:1,l:1,c:col});kick();
 }
 function popText(x,y,t,crit){
-  let c=0;P.push({txt:t,x,y,t0:performance.now(),dx:Math.random()*50-25,crit,l:99,f:(crit?"700 32px":"600 22px")+" Georgia"});
+  let c=0;P.push({txt:t,x,y,t0:performance.now(),dx:Math.random()*70-35,crit,l:99,f:(crit?"900 36px":"800 25px")+" Georgia"});
   for(let i=P.length-1;i>=0;i--)if(P[i].txt&&++c>6)P.splice(i,1);kick();
 }
 function kick(){if(!raf){lastT=0;raf=requestAnimationFrame(loop)}}
@@ -411,22 +513,25 @@ function loop(){
   for(const p of P){p.l-=p.d||0.03;c2.globalAlpha=Math.max(p.l,0);
     if(p.txt){const k=(performance.now()-p.t0)/1000;if(k>=1){p.l=0;continue}
       const sc=k<.2?.3+k/2:1-k;if(k<.2)c2.fillStyle=p.crit?"#ffe27a":"#fff6d6";else{c2.fillStyle=p.crit?"#ffe27a":"#fff6d6";c2.globalAlpha=1-k;}
-      c2.font=p.f;c2.textAlign="center";c2.fillText(p.txt,p.x+p.dx*k,p.y-k*60);}
+      c2.font=p.f;c2.textAlign="center";const px=p.x+p.dx*k,py=p.y-k*78; c2.save();c2.translate(px,py);c2.scale(1+Math.sin(Math.min(k/.18,1)*Math.PI)*.18,1+Math.sin(Math.min(k/.18,1)*Math.PI)*.18);c2.lineJoin="round";c2.lineWidth=p.crit?5:4;c2.strokeStyle=p.crit?"#7b3d00":"rgba(38,48,31,.9)";c2.shadowColor=p.crit?"#ffb300":"rgba(0,0,0,.35)";c2.shadowBlur=p.crit?18:7;c2.strokeText(p.txt,0,0);c2.fillStyle=p.crit?"#ffe27a":"#fff6d6";c2.fillText(p.txt,0,0);if(p.crit){c2.font="900 12px sans-serif";c2.fillStyle="#fff";c2.fillText("CRITICAL!",0,-25)}c2.restore();}
     else if(p.ring){p.ring+=4;c2.strokeStyle=p.c||"#e8b923";c2.lineWidth=2;c2.beginPath();c2.arc(p.x,p.y,p.ring,0,6.283);c2.stroke();}
     else{p.x+=p.vx;p.y+=p.vy;p.vy+=.08;c2.fillStyle=p.c;c2.beginPath();c2.arc(p.x,p.y,p.r,0,6.283);c2.fill();}}
   c2.globalAlpha=1;raf=P.length?requestAnimationFrame(loop):0;
 }
-
+ 
 /* ---------- Tabs ---------- */
-const PANES=["items","stats","board","settings"];
-function tab(i){PANES.forEach((id,k)=>{$(id).hidden=i!==k+1});[1,2,3,4].forEach(k=>{$("tab"+k).classList.toggle("on",i===k)})}
-[1,2,3,4].forEach(k=>{$("tab"+k).onclick=()=>{tab(k);uiSfx()}});
-
+const PANES=["items","stats","board","settings","skills"];
+function tab(i){PANES.forEach((id,k)=>{$(id).hidden=i!==k+1});[1,2,3,4,5].forEach(k=>{$("tab"+k).classList.toggle("on",i===k);$("tab"+k).setAttribute("aria-selected",i===k?"true":"false")});renderStats();renderBoard();renderSkills()}
+[1,2,3,4,5].forEach(k=>{$("tab"+k).onclick=()=>{tab(k);uiSfx()}});
+ 
 /* ---------- Settings Wiring ---------- */
 function syncSettings(){$("set-sound").checked=SET.sound;$("set-vol").value=SET.vol;$("volval").textContent=SET.vol+" %";
   $("set-part").checked=SET.particles;$("set-anim").checked=SET.anim;$("set-low").checked=SET.low;
   $("set-theme").value=SET.theme;$("set-num").value=SET.num;$("set-auto").checked=SET.auto;}
-function setLow(v){SET.low=v;low=v;saveSet();syncSettings();render()}
+function setLow(v){SET.low=v;low=v;document.documentElement.classList.toggle("low",v);drawn=-1;saveSet();syncSettings();render()}
+function applySettings(){muted=!SET.sound;low=SET.low;document.documentElement.classList.toggle("low",low);
+  applyTheme();
+  applyVol();drawn=-1;syncSettings()}
 function applyVol(){if(master)master.gain.value=(SET.vol/100)*.35}
 function saveSet(){try{localStorage.setItem("mushroom-farm-set",JSON.stringify(SET))}catch(e){}}
 $("set-sound").onchange=e=>{SET.sound=e.target.checked;muted=!SET.sound;if(SET.sound)audio();saveSet();syncSettings()};
@@ -435,27 +540,32 @@ $("set-vol").onchange=()=>{uiSfx();saveSet()};
 $("set-part").onchange=e=>{SET.particles=e.target.checked;saveSet()};
 $("set-anim").onchange=e=>{SET.anim=e.target.checked;saveSet()};
 $("set-low").onchange=e=>{setLow(e.target.checked)};
-$("set-theme").onchange=e=>{SET.theme=e.target.value;if(SET.theme==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",SET.theme);saveSet()};
+$("set-theme").onchange=e=>{SET.theme=e.target.value;applyTheme();saveSet()};
 $("set-num").onchange=e=>{SET.num=e.target.value;saveSet();render()};
 $("set-auto").onchange=e=>{SET.auto=e.target.checked;saveSet()};
-$("mute").textContent=SET.sound?"🔊":"🔇";
-
+// Optional mute control is not present in this version of the interface.
+ 
 /* Save Import/Export */
 function encodeSave(){return btoa(unescape(encodeURIComponent(JSON.stringify({v:2,s:s,set:SET}))));}
-function decodeSave(str){try{return JSON.parse(decodeURIComponent(escape(atob(str.trim()))));}catch(e){return null}}
-$("exp").onclick=()=>{$("savetext").value=encodeSave();$("savetext").select();try{document.execCommand("copy")}catch(e){}$("exp").textContent="Copied!";setTimeout(()=>{$("exp").textContent="Copy code"},1500);uiSfx()};
+function decodeSave(str){str=(str||"").trim();if(!str)return null;try{if(str[0]==="{")return JSON.parse(str);return JSON.parse(decodeURIComponent(escape(atob(str))))}catch(e){return null}}
+$("exp").onclick=()=>{const code=encodeSave();$("savetext").value=code;$("savetext").select();let ok=false;try{ok=document.execCommand("copy")}catch(e){}if(!ok&&navigator.clipboard)navigator.clipboard.writeText(code).catch(()=>{});$("exp").textContent="Copied!";setTimeout(()=>{$("exp").textContent="Copy code"},1500);uiSfx()};
 $("imp-open").onclick=()=>{$("savetext").focus();$("savetext").select();uiSfx()};
 $("exp-file").onclick=()=>{const blob=new Blob([JSON.stringify({v:2,s:s,set:SET},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="mushroom-save.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);uiSfx()};
-$("imp-do").onclick=()=>{const data=decodeSave($("savetext").value);if(data&&data.s){s=data.s;if(data.set)Object.assign(SET,data.set);save();drawn=-1;render();syncSettings();$("imp-do").textContent="Loaded!";setTimeout(()=>{$("imp-do").textContent="Load"},1500);uiSfx()}else{$("imp-do").textContent="Invalid";setTimeout(()=>{$("imp-do").textContent="Load"},1500)}};
-
+$("imp-do").onclick=()=>{const data=decodeSave($("savetext").value),btn=$("imp-do");
+  const flash=m=>{btn.textContent=m;setTimeout(()=>{btn.textContent="Load"},1500)};
+  if(!data||!data.s||typeof data.s!=="object"||!Number.isFinite(Number(data.s.n))||!Number.isFinite(Number(data.s.total))||!data.s.own||typeof data.s.own!=="object"){flash("Invalid");return}
+  s=sanitize(data.s);
+  if(data.set&&typeof data.set==="object")for(const k in SET)if(k in data.set&&typeof data.set[k]===typeof SET[k])SET[k]=data.set[k];
+  applySettings();prevDrawn=-1;$("nm").value=s.name||"";save();render();flash("Loaded!");uiSfx()};
+ 
 /* Reset */
-let rt=0;$("reset").onclick=()=>{const b=$("reset");if(!rt){b.textContent="Confirm? Click again";rt=setTimeout(()=>{rt=0;b.textContent="Reset all progress"},2500);return}clearTimeout(rt);rt=0;b.textContent="Reset all progress";s={n:0,total:0,own:{}};save();drawn=-1;render();$("stage").animate([{opacity:.2},{opacity:1}],{duration:400})};
+let rt=0;$("reset").onclick=()=>{const b=$("reset");if(!rt){b.textContent="Confirm? Click again";rt=setTimeout(()=>{rt=0;b.textContent="Reset all progress"},2500);return}clearTimeout(rt);rt=0;b.textContent="Reset all progress";s=sanitize(null);prevDrawn=-1;$("nm").value="";save();drawn=-1;render();$("stage").animate([{opacity:.2},{opacity:1}],{duration:400})};
 $("nm").value=s.name||"";$("nm").oninput=e=>{s.name=e.target.value.trim().slice(0,14);renderBoard();saveSoon()};
-
+ 
 /* Win Modal */
 function win(){s.won=true;save();$("winTxt").textContent="You harvested "+fmt(s.total)+" mushrooms and built the Moon Garden!";$("win").hidden=false;$("winBtn").focus();winSfx();for(let i=0;i<6;i++)setTimeout(()=>burst(innerWidth*(.15+Math.random()*.7),innerHeight*(.2+Math.random()*.4),true),i*150)}
 $("winBtn").onclick=()=>{$("win").hidden=true};addEventListener("keydown",e=>{if(e.key==="Escape")$("win").hidden=true});
-
+ 
 /* Gamepad Support */
 let gi=0,prevB=[],axT=0,aT=0,padOn=false;
 const curTab=()=>PANES.findIndex(id=>!$(id).hidden)+1||1;
@@ -467,13 +577,13 @@ function padLoop(t){const pads=navigator.getGamepads?[...navigator.getGamepads()
     else{if(B(0)&&t-aT>100){aT=t;hit({button:0})}
       const ay=g.axes[1]||0;if(P(12))selItem(gi-1);else if(P(13))selItem(gi+1);
       else if(Math.abs(ay)>.5&&t-axT>150){selItem(gi+(ay<0?-1:1));axT=t}
-      if(P(4))tab(Math.max(1,curTab()-1));if(P(5))tab(Math.min(4,curTab()+1));if(P(2)&&curTab()===1){btns[gi].click()}}
+      if(P(4))tab(Math.max(1,curTab()-1));if(P(5))tab(Math.min(5,curTab()+1));if(P(2)&&curTab()===1){btns[gi].click()}}
     prevB=g.buttons.map(b=>b.pressed);requestAnimationFrame(padLoop);}
   else{if(padOn){padOn=false;document.body.classList.remove("pad");prevB=[]}setTimeout(()=>requestAnimationFrame(padLoop),400)}}
 requestAnimationFrame(padLoop);
-
+ 
 /* Boot */
-if(SET.theme!=="auto")document.documentElement.setAttribute("data-theme",SET.theme);
+applyTheme();
 document.documentElement.classList.toggle("low",SET.low);syncSettings();render();
 </script>
 </body>
