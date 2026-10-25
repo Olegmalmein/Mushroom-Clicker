@@ -22,9 +22,9 @@
 *{box-sizing:border-box}
 html,body{height:100%;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 input,textarea,select{-webkit-user-select:text;user-select:text}
-body{margin:0;color:var(--ink);font-family:"Trebuchet MS","Segoe UI",sans-serif;overflow:hidden;background:var(--bg);position:relative}
+body{margin:0;color:var(--ink);font-family:"Trebuchet MS","Segoe UI",sans-serif;overflow:hidden;background:var(--bg)}
 /* Mobile-first layout - full screen on phones */
-main{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative;z-index:1}
+main{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
 main>*{min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
 /* Stage section - sticky top on mobile */
 .stage{position:relative;flex-shrink:0;background:var(--surface);border-radius:0 0 20px 20px;padding:16px 14px 18px;border-bottom:1px solid color-mix(in srgb,var(--ink) 12%,transparent)}
@@ -53,10 +53,19 @@ html[data-manim="none"] #mushroom:active{transform:scale(.96)}
 #mushroom svg{position:relative;z-index:1;overflow:visible}
 #mushroom::before{content:"";position:absolute;inset:-20%;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,color-mix(in srgb,var(--glow,#fff) 75%,transparent) 0%,transparent 70%);animation:glowpulse 3.2s ease-in-out infinite}
 #mushroom:not([data-glow])::before{display:none}
+/* Feuer, wenn man schnell hintereinander klickt */
+#mushroom::after{content:"";position:absolute;inset:-14%;border-radius:50%;pointer-events:none;z-index:0;opacity:0;transition:opacity .25s;background:radial-gradient(circle,rgba(var(--fa,255,170,40),.75) 0%,rgba(var(--fb,255,90,20),.45) 40%,transparent 70%)}
+#mushroom.burning::after{opacity:1;animation:firepulse .35s ease-in-out infinite alternate}
+@keyframes firepulse{from{transform:scale(.96)}to{transform:scale(1.08)}}
 body.sheet #fx{z-index:40}
-#bg{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:0}
+#bg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;border-radius:inherit}
 .ncell{position:relative;display:inline-block}
+.cfire{position:absolute;left:100%;top:50%;transform:translateY(-50%);margin-left:10px;font:900 .42em/1 "Trebuchet MS","Segoe UI",sans-serif;color:#fff3c4;text-shadow:none;white-space:nowrap;background:linear-gradient(90deg,rgb(var(--fb,255,90,20)),rgb(var(--fa,255,170,40)));border-radius:99px;padding:.32em .65em;box-shadow:0 2px 12px rgba(var(--fa,255,170,40),.7);animation:cfirepop .3s cubic-bezier(.2,1.6,.4,1)}
+@keyframes cfirepop{from{transform:translateY(-50%) scale(.4);opacity:0}}
+.count.burning #n{color:#fff3c4;text-shadow:0 0 5px #fff,0 -4px 10px rgb(var(--fa,255,170,40)),0 -9px 18px rgb(var(--fb,255,90,20));animation:numfire .18s ease-in-out infinite alternate}
+@keyframes numfire{from{text-shadow:0 0 4px #fff,0 -2px 8px rgb(var(--fa,255,170,40)),0 -6px 14px rgb(var(--fb,255,90,20)),0 -12px 24px rgba(var(--fb,255,90,20),.7)}to{text-shadow:0 0 6px #fff,2px -4px 10px rgb(var(--fa,255,170,40)),-2px -9px 18px rgb(var(--fb,255,90,20)),0 -16px 30px rgba(var(--fb,255,90,20),.6)}}
 @keyframes glowpulse{50%{opacity:.5;transform:scale(1.07)}}
+@media(prefers-reduced-motion:reduce){#mushroom::before,#mushroom.burning::after{animation:none}}
 .stage h1,.stage .stagelbl,.stage .count,.stage .rate,.stage .stats{position:relative;z-index:2}
 #mushroom svg{display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,.15))}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
@@ -153,7 +162,7 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
 /* Animations */
 @keyframes bump{50%{transform:scale(1.06)}}
 @media(prefers-reduced-motion:reduce){.count.bump{animation:none}.lvup,.item.shine::after{animation:none}}
-/* HUD polish */
+/* ---------- HUD polish: einheitliche Rundung + hochwertigere Optik ---------- */
 :root{--r:12px;--line:color-mix(in srgb,var(--ink) 12%,transparent)}
 .stage{background:linear-gradient(180deg,color-mix(in srgb,var(--ok) 12%,var(--surface)),var(--surface) 75%);border-radius:0 0 var(--r) var(--r);box-shadow:0 8px 20px -12px rgba(0,0,0,.45)}
 @media(min-width:760px){.stage{border-radius:var(--r)}}
@@ -177,7 +186,7 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
 .skill-head,.skill,.stat-hero,.btn,.ta,.win .card,.win button{border-radius:var(--r)}
 .skill-icon{border-radius:calc(var(--r) - 2px)}
 .nm input,select{border-radius:calc(var(--r) - 4px)!important}
-/* Handy Layout */
+/* ---------- Handy: Pilz in der Mitte, Menü als Bottom-Sheet ---------- */
 #scrim,.sheet-close{display:none}
 .sheet-close{position:relative;width:100%;height:36px;align-items:center;justify-content:center;background:none;border:0;color:var(--muted);font:inherit;cursor:pointer;flex:none}
 .sheet-close .grab{width:40px;height:4px;border-radius:4px;background:color-mix(in srgb,var(--ink) 28%,transparent)}
@@ -202,7 +211,7 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
  body:not(.sheet) .tab.on::after{display:none}
  body.sheet #scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:25}
 }
-/* Skills Styling */
+/* Skills farbig wie die Upgrades */
 .skill{border-left:5px solid var(--c,#8b8b80);background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--surface)) var(--p,0%),var(--surface) var(--p,0%))}
 .skill-icon{background:color-mix(in srgb,var(--c,#8b8b80) 24%,transparent)}
 .skill .btn{background:var(--c,var(--ok));color:color-mix(in srgb,var(--c,#000) 18%,#000)}
@@ -219,16 +228,16 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
 </style>
 </head>
 <body>
-<canvas id="bg" aria-hidden="true"></canvas>
 <canvas id="fx"></canvas>
 <div class="win" id="win" role="dialog" aria-modal="true" aria-labelledby="winH" hidden><div class="card"><h2 id="winH">🏆 You won!</h2><p id="winTxt"></p><button id="winBtn">Keep playing</button></div></div>
 <div id="scrim"></div>
 <main>
 <div class="stage-container">
   <section class="stage" id="stage">
+    <canvas id="bg" aria-hidden="true"></canvas>
     <h1>Mushroom Farm</h1>
     <div class="stagelbl" id="stg"></div>
-    <div class="count"><span class="ncell"><span id="n">0</span></span></div>
+    <div class="count"><span class="ncell"><span id="n">0</span><span class="cfire" id="cfire" hidden>×1.5</span></span></div>
     <div class="rate" id="rate"></div>
     <div class="stats"><div><b id="st1"></b><small>per click</small></div><div><b id="st2"></b><small>crit hits</small></div><div><b id="st3"></b><small>total</small></div></div>
     <button id="mushroom" aria-label="Harvest mushroom">
@@ -268,7 +277,7 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
         <div class="srow"><span class="lbl">Mushroom animation<small id="manim-sub">How the mushroom reacts to clicks</small></span>
           <select id="set-manim" style="font:inherit;padding:6px;border-radius:6px;background:var(--bg);color:var(--ink);border:2px solid color-mix(in srgb,var(--ink) 15%,transparent);flex:0 0 48%">
             <option value="squish">Squish</option><option value="pop">Pop</option><option value="jelly">Jelly</option><option value="wobble">Wobble</option><option value="bounce">Bounce</option><option value="shake">Shake</option><option value="none">None</option></select></div>
-        <div class="srow"><span class="lbl">Background animation<small>Floating effect behind the theme</small></span>
+        <div class="srow"><span class="lbl">Background animation<small>Floating effect behind the mushroom</small></span>
           <select id="set-bg" style="font:inherit;padding:6px;border-radius:6px;background:var(--bg);color:var(--ink);border:2px solid color-mix(in srgb,var(--ink) 15%,transparent);flex:0 0 48%">
             <option value="spores">Spores</option><option value="fireflies">Fireflies</option><option value="embers">Embers</option><option value="snow">Snow</option><option value="rain">Rain</option><option value="bubbles">Bubbles</option><option value="stars">Stars</option><option value="none">None</option></select></div>
         <div class="srow"><span class="lbl">Idle animation<small>Mushroom plays its animation now and then</small></span>
@@ -307,8 +316,10 @@ const IS_MOBILE=navigator.userAgent.includes("Mobile")||window.innerWidth<760;
 
 /* ---------- Data ---------- */
 const DEFS=[
- /* Better gloves mult angepasst von 1.35 auf 1.15 */
- {id:"hand",name:"Better Gloves",desc:"+1 mushroom per click",base:15,mult:1.15,click:1},
+ /* Balancing: einheitliche Wachstumsraten pro Familie (Passiv 1.18, Klick 1.35, Crit 1.5)
+    und Basiskosten, die mit jedem Tier schneller steigen als der Ertrag. So bleibt jedes Upgrade
+    eine Weile attraktiv und es gibt keine harte Wand mehr im Late Game. */
+ {id:"hand",name:"Better Gloves",desc:"+1 mushroom per click",base:15,mult:1.35,click:1},
  {id:"korb",name:"Gathering Basket",desc:"+5 mushrooms per click",base:450,mult:1.35,click:5},
  {id:"kel",name:"Mushroom Cellar",desc:"+1 mushroom per second",base:50,mult:1.18,sec:1},
  {id:"gew",name:"Greenhouse",desc:"+8 mushrooms per second",base:1200,mult:1.18,sec:8},
@@ -362,11 +373,13 @@ function sanitize(o){
 }
 let s=sanitize(null);
 try{const r=localStorage.getItem("mushroom-farm-v2");if(r)s=sanitize(JSON.parse(r))}catch(e){}
+let burning=false;
 const own=d=>s.own[d.id]||0;
 const cost=d=>Math.ceil(d.base*Math.pow(d.mult,own(d)));
 const skillMult=id=>1+skillLevel(id)*({strong:.40,harvest:.15,wisdom:.02}[id]||0);
 const allGain=()=>skillMult("harvest")*(1+skillLevel("wisdom")*.02*Math.floor(level()/10));
-const perClick=()=>((1+DEFS.reduce((a,d)=>a+(d.click||0)*own(d),0))*skillMult("strong")*allGain());
+const perClick=()=>((1+DEFS.reduce((a,d)=>a+(d.click||0)*own(d),0))*skillMult("strong")*allGain()*fireMult());
+const fireMult=()=>burning?1+.5*skillLevel("fire"):1;
 const perSec=()=>DEFS.reduce((a,d)=>a+(d.sec||0)*own(d),0)*(1+skillLevel("mycelium")*.25)*allGain();
 const critP=()=>Math.min(.75,.1+DEFS.reduce((a,d)=>a+(d.crit||0)*own(d),0)+skillLevel("keen")*.04);
 const level=()=>DEFS.reduce((a,d)=>a+own(d),0);
@@ -442,7 +455,12 @@ function noise(dur,vol,f0,f1,delay,q){
   src.connect(f);f.connect(g);g.connect(master);src.start(t);src.stop(t+dur+.05);
   src.onended=()=>{try{g.disconnect()}catch(e){}};
 }
-
+function fireSfx(on,rk){
+  if(on){noise(.5,.26,300,2600,0,.9);sweep(120,520+rk*120,.45,.14,0);
+    if(!low){[0,1,2].slice(0,rk).forEach(i=>tone(392*Math.pow(1.5,i),.7,.07,.12+i*.08,"triangle"));noise(.25,.1,4000,1500,.1,2)}}
+  else{noise(.45,.14,2000,200,0,.8);sweep(420,110,.35,.09,0)}
+}
+/* Jeder Skill klingt anders; höherer Rang = höherer Ton, Max-Rang bekommt zusätzlich eine kleine Fanfare */
 function skillSfx(id,lv,max){
   if(muted)return;const up=1+(lv-1)*.12;
   switch(id){
@@ -452,6 +470,7 @@ function skillSfx(id,lv,max){
     case"crit":noise(.14,.3,5000,700,0,1.2);tone(1760*up,.35,.1,.02,"square");sweep(600*up,120,.25,.2,0);break;
     case"harvest":[0,1,2].forEach(i=>tone(1046*up*Math.pow(1.335,i),.35,.09,i*.07,"triangle"));tone(2093*up,.5,.05,.18,"sine");break;
     case"wisdom":[1,1.5,2,3].forEach((m,i)=>tone(262*up*m,1.6,.08,i*.05,"sine"));break;
+    case"fire":fireSfx(true,lv);break;
     default:uiSfx()}
   if(lv>=max){const b=523.25*up;[1,1.25,1.5,2,2.5].forEach((m,i)=>tone(b*m,1.3,.1,.3+i*.07));if(!low)noise(.6,.05,5000,9000,.3,.6)}
 }
@@ -523,62 +542,37 @@ function renderStats(){
     '<div class="stat-section"><h3>✨ Precision</h3>'+R("Total clicks",cl.toLocaleString())+R("Critical hits",cr.toLocaleString())+R("Critical rate",(cl?(cr/cl*100).toFixed(1):"0.0")+"%")+'</div>'+ 
     '<div class="stat-section"><h3>🌲 Progress</h3>'+R("Mushroom stage",STG[stage()][0]+" ("+(stage()+1)+"/"+STG.length+")")+R("Upgrade levels",level())+R("Play time",(h?h+"h ":"")+m+"m "+sc+"s")+R("Moon Garden reached",s.won?"🏆 Yes":"Not yet")+'</div>');
 }
-
 const SKILLS=[
  {id:"strong",icon:"💪",name:"Forager's Grip",desc:"+40% mushrooms per click per rank",max:SKILL_MAX},
  {id:"mycelium",icon:"🕸️",name:"Living Mycelium",desc:"+25% passive production per rank",max:SKILL_MAX},
  {id:"keen",icon:"🍀",name:"Lucky Spores",desc:"+4% critical chance per rank",max:SKILL_MAX},
  {id:"crit",icon:"💥",name:"Critical Bloom",desc:"Critical multiplier +2× per rank (base 5×)",max:SKILL_MAX},
  {id:"harvest",icon:"🧺",name:"Deep Pockets",desc:"+15% to all mushroom gains per rank",max:SKILL_MAX},
- {id:"wisdom",icon:"🌟",name:"Ancient Wisdom",desc:"+2% bonus per rank for every 10 upgrade levels",max:SKILL_MAX}
+ {id:"wisdom",icon:"🌟",name:"Ancient Wisdom",desc:"+2% bonus per rank for every 10 upgrade levels",max:SKILL_MAX},
+ {id:"fire",icon:"🔥",name:"Blazing Touch",desc:"Click fast to set the mushroom on fire: clicks ×1.5 / ×2 / ×2.5 while burning. Ignites quicker per rank",max:SKILL_MAX}
 ];
-
 const skillLevel=id=>Math.max(0,Math.min(SKILL_MAX,Math.floor(Number(s.skills[id])||0)));
 const SP_START=10,SP_STEP=10;
-
-/* Berechnung der verbrauchten Punkte basierend auf den Level-Kosten (Lv1: 1 Pt, Lv2: 2 Pts, Lv3: 3 Pts) */
-const getSpentSkillPoints=()=>{
-  return SKILLS.reduce((acc, k)=>{
-    const lv = skillLevel(k.id);
-    let costSum = 0;
-    for(let i = 1; i <= lv; i++) costSum += i;
-    return acc + costSum;
-  }, 0);
-};
-
 const earnedPoints=()=>level()<SP_START?0:1+Math.floor((level()-SP_START)/SP_STEP);
-const skillPoints=()=>Math.max(0,earnedPoints()-getSpentSkillPoints());
-const SKCOL={strong:"#e07a2f",mycelium:"#8f9bb3",keen:"#1fa385",crit:"#e5502d",harvest:"#b8863b",wisdom:"#e0b41f"};
-
+const skillPoints=()=>Math.max(0,earnedPoints()-SKILLS.reduce((n,k)=>n+skillLevel(k.id),0));
+const SKCOL={strong:"#e07a2f",mycelium:"#8f9bb3",keen:"#1fa385",crit:"#e5502d",harvest:"#b8863b",wisdom:"#e0b41f",fire:"#ff6a2a"};
 function renderSkills(){
  const el=$("skills"),badge=$("skill-badge"),pts=skillPoints();
  if(badge){badge.textContent=pts;badge.hidden=pts<=0}
  if(el.hidden)return;
- setHTML(el,'<div class="skill-head"><div><b>Mycelium Skilltree</b><small style="display:block;color:var(--muted);margin-top:3px">1 Skill Point per 10 Upgrade-Level. Skills kosten mit höherem Level mehr Punkte!</small></div><span class="skill-badge">'+pts+' pts</span></div><div class="skill-grid">'+
-  SKILLS.map(k=>{
-    const lv=skillLevel(k.id),full=lv>=k.max,pct=Math.round(lv/k.max*100);
-    const nextCost = full ? 0 : (lv + 1);
-    const canAfford = pts >= nextCost;
-    return '<div class="skill'+(full?' maxed':'')+'" style="--c:'+(SKCOL[k.id]||"#8b8b80")+';--p:'+pct+'%"><div class="skill-icon">'+k.icon+'</div><div><b>'+k.name+' <span class="sk-lv">Lv '+lv+'/'+k.max+'</span><span class="pips">'+Array.from({length:k.max},(_,i)=>'<i'+(i<lv?' class="on"':'')+'></i>').join('')+'</span></b><small>'+k.desc+'</small></div><button class="btn" data-skill="'+k.id+'" '+(!canAfford||full?'disabled':'')+'>'+(full?'Max':'Upgrade · '+nextCost+' pt'+(nextCost>1?'s':''))+'</button></div>'
-  }).join('')+
+ setHTML(el,'<div class="skill-head"><div><b>Mycelium Skilltree</b><small style="display:block;color:var(--muted);margin-top:3px">1 skill point per 10 upgrade levels. '+(SKILLS.length*SKILL_MAX)+' points max out every skill.</small></div><span class="skill-badge">'+pts+' pts</span></div><div class="skill-grid">'+
+  SKILLS.map(k=>{const lv=skillLevel(k.id),full=lv>=k.max,pct=Math.round(lv/k.max*100);
+   return '<div class="skill'+(full?' maxed':'')+'" style="--c:'+(SKCOL[k.id]||"#8b8b80")+';--p:'+pct+'%"><div class="skill-icon">'+k.icon+'</div><div><b>'+k.name+' <span class="sk-lv">Lv '+lv+'/'+k.max+'</span><span class="pips">'+Array.from({length:k.max},(_,i)=>'<i'+(i<lv?' class="on"':'')+'></i>').join('')+'</span></b><small>'+k.desc+'</small></div><button class="btn" data-skill="'+k.id+'" '+(pts<1||full?'disabled':'')+'>'+(full?'Max':'Upgrade · 1 pt')+'</button></div>'}).join('')+
   '</div><small style="color:var(--muted)">Skill points are permanent until you reset your progress. Choose a build that suits your playstyle.</small>');
 }
-
-$("skills").addEventListener("click",e=>{
-  const b=e.target.closest("[data-skill]");if(!b||b.disabled)return;
-  const k=SKILLS.find(x=>x.id===b.dataset.skill);
-  if(!k) return;
-  const currentLv = skillLevel(k.id);
-  const costPt = currentLv + 1;
-  if(skillPoints() < costPt || currentLv >= k.max) return;
+$("skills").addEventListener("click",e=>{const b=e.target.closest("[data-skill]");if(!b||b.disabled)return;
+  const k=SKILLS.find(x=>x.id===b.dataset.skill);if(!k||skillPoints()<1||skillLevel(k.id)>=k.max)return;
   const rect=b.closest(".skill").getBoundingClientRect();
-  s.skills[k.id]=currentLv+1;save();render();renderSkills();
+  s.skills[k.id]=skillLevel(k.id)+1;save();render();renderSkills();
   const card=$("skills").querySelector('[data-skill="'+k.id+'"]'),c=card&&card.closest(".skill");
   if(c){c.classList.add("ranked");setTimeout(()=>c.classList.remove("ranked"),900)}
-  skillFx(k.id,skillLevel(k.id),k.max,rect)
-});
-
-/* Effekte beim Skill-Kauf */
+  skillFx(k.id,skillLevel(k.id),k.max,rect)});
+/* Effekte beim Skill-Kauf: Partikel, Ring, Funken, Text und eigener Sound pro Skill */
 function skillFx(id,lv,max,rect){
   const col=SKCOL[id]||"#e8b923",x=rect.left+40,y=rect.top+rect.height/2;
   skillSfx(id,lv,max);
@@ -591,10 +585,10 @@ function skillFx(id,lv,max,rect){
     if(lv>=max)setTimeout(()=>{P.push({x,y,ring:1,l:1,d:.025,c:"#ffe27a"});kick()},140);
   }
   popText(x+40,y-10,lv>=max?"MAX!":"Rank "+lv,false,col,true);
+  if(id==="fire")fireUI();
 }
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-
-/* ---------- Online-Ranking ---------- */
+/* ---------- Online-Ranking (echte Spieler, Abgleich alle 10 Minuten) ---------- */
 const BOARD_MS=10*60*1000;
 const net={db:null,uid:null,write:true,list:[],last:0,state:"loading"};
 async function netInit(){
@@ -658,9 +652,11 @@ function mushAnim(crit,amp){
   try{
     const f=MANIMS[SET.manim];if(!f)return;
     const el=$("mz");if(!el)return;
+    /* Systemeinstellung "Bewegung reduzieren" (z.B. Energiesparmodus/Animationen entfernen):
+       die Animation läuft trotzdem, nur etwas sanfter */
     const a=(crit?1.7:(amp||1))*(rm?.6:1);
     const kf=f(a);if(!kf)return;
-    if(!el.animate){
+    if(!el.animate){/* Fallback für sehr alte Browser */
       el.style.transition="transform .1s";el.style.transform="scale("+(1+.08*a)+")";
       setTimeout(()=>{el.style.transform=""},110);return}
     if(mAnim)mAnim.cancel();
@@ -670,6 +666,7 @@ function mushAnim(crit,amp){
       fAnim=el.animate([{filter:"brightness(1) saturate(1) "+g},{filter:"brightness(1.45) saturate(1.3) "+g,offset:.2},{filter:"brightness(1) saturate(1) "+g}],{duration:380})}
   }catch(e){}
 }
+/* Idle: der Pilz spielt ab und zu von selbst seine gewählte Animation */
 let lastHit=0,idleT=0;
 function idleLoop(){clearTimeout(idleT);idleT=setTimeout(()=>{
   const busy=rm||document.hidden||sheet||!$("win").hidden||Date.now()-lastHit<3000||(mAnim&&mAnim.playState==="running");
@@ -677,7 +674,43 @@ function idleLoop(){clearTimeout(idleT);idleT=setTimeout(()=>{
   idleLoop()},3500+Math.random()*5500)}
 idleLoop();
 
-/* ---------- Clicking ---------- */
+/* ---------- Feuer-Skill: schnelles Klicken lässt den Pilz brennen (Multiplikator) ---------- */
+const FIRE_GAP=300,   /* max. Pause (ms) zwischen zwei Klicks, damit die Combo weiterläuft */
+      FIRE_END=700;   /* so lange ohne Klick (ms), dann geht das Feuer aus */
+const fireRank=()=>skillLevel("fire");
+const FP=[null,["#ffe27a","#ff9a1f","#e2431f"],["#fff2a8","#ff7a1a","#c81e1e"],["#ffffff","#7fd8ff","#3a6bff"]];
+const FCOL=[null,["255,170,40","255,90,20"],["255,150,30","230,50,20"],["140,215,255","60,110,255"]];
+let combo=0,lastComboT=0,fireT=0;
+function fireUI(){const r=fireRank()||1,f=FCOL[r],rt=document.documentElement.style,t="×"+(1+.5*r);rt.setProperty("--fa",f[0]);rt.setProperty("--fb",f[1]);$("cfire").textContent=t}
+function flameAt(x,y,n,rk,sz){if(P.length>(low?36:130))return;for(let i=0;i<n;i++)P.push({fl:1,pi:rk,x:x+(Math.random()-.5)*30,y:y+(Math.random()-.5)*10,vx:(Math.random()-.5)*.8,vy:-(1+Math.random()*1.6),r:(sz||4)+Math.random()*(sz||4),l:1,d:.05+Math.random()*.03,ph:Math.random()*6.283})}
+function fireCombo(t){combo=(t-lastComboT<FIRE_GAP)?combo+1:1;lastComboT=t;const r=fireRank();if(r&&!burning&&combo>=12-2*r)setFire(true)}
+function emitFlames(){
+  const rk=fireRank()||1,cap=low?40:140;if(P.length>=cap-8)return;
+  const r=updRect(),n=low?1:(rm?1:2+rk);
+  for(let i=0;i<n;i++){
+    P.push({fl:1,pi:rk,x:r.left+r.width*(.12+Math.random()*.76),y:r.top+r.height*(.18+Math.random()*.38),vx:(Math.random()-.5)*.8,vy:-(1.2+Math.random()*2.2),
+      r:(low?7:5)+Math.random()*(low?9:8)*r.width/220*(1+(rk-1)*.15),l:1,d:.035+Math.random()*.03,ph:Math.random()*6.283});
+  }
+  const nr=$("n").getBoundingClientRect();
+  if(nr.width>0)for(let i=0;i<(low?1:2);i++)P.push({fl:1,pi:rk,x:nr.left+nr.width*Math.random(),y:nr.top+nr.height*(.15+Math.random()*.25),vx:(Math.random()-.5)*.5,vy:-(.8+Math.random()*1.4),r:2.5+Math.random()*3.5,l:1,d:.05+Math.random()*.03,ph:Math.random()*6.283});
+  if(rk>=2&&!low&&Math.random()<.5)P.push({sp:1,x:r.left+r.width*(.15+Math.random()*.7),y:r.top+r.height*(.2+Math.random()*.3),vx:(Math.random()-.5)*1.2,vy:-(1.5+Math.random()*2),r:3+Math.random()*3,l:1,d:.02,c:FP[rk][0],ph:Math.random()*6});
+  if(Math.random()<(low?.06:.15))noise(.04+Math.random()*.05,.06,2200+Math.random()*3000,null,0,2);
+  kick();
+}
+function setFire(v){
+  if(burning===v)return;burning=v;
+  $("mushroom").classList.toggle("burning",v);$("cfire").hidden=!v;$("n").closest(".count").classList.toggle("burning",v);
+  clearInterval(fireT);fireT=0;
+  if(v){
+    fireUI();const rk=fireRank()||1,r=updRect();
+    burst(r.left+r.width/2,r.top+r.height*.3,true,FP[rk][1]);
+    fireSfx(true,rk);mushAnim(true);emitFlames();fireT=setInterval(emitFlames,low?90:55);
+  }else fireSfx(false,0);
+  render();
+}
+setInterval(()=>{if(burning&&(Date.now()-lastComboT>FIRE_END||document.hidden||!fireRank())){combo=0;setFire(false)}},100);
+
+/* ---------- Clicking (optimized for mobile) ---------- */
 let PR=null;
 const updRect=()=>{const r=$("mushroom").getBoundingClientRect();PR=r;return r};
 let lastPD=0;
@@ -685,20 +718,21 @@ const mushroomEl=$("mushroom");
 mushroomEl.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;e.preventDefault();hit(e)});
 mushroomEl.addEventListener("contextmenu",e=>e.preventDefault());
 
+/* Maus/Touch lösen schon pointerdown aus (detail>0); Tastatur-Klicks haben detail===0 */
 mushroomEl.addEventListener("click",e=>{if(e.detail===0)hit(e)});
-function hit(e){lastHit=Date.now();
+function hit(e){lastHit=Date.now();fireCombo(lastHit);
   const crit=Math.random()<critP(),g=perClick()*(crit?(5+skillLevel("crit")*2):1);
   s.n+=g;s.total+=g;s.clicks=(s.clicks||0)+1;if(crit)s.crits=(s.crits||0)+1;render();
   let mx=e&&e.clientX,my=e&&e.clientY;if(!mx&&!my){const pr=updRect();mx=pr.left+pr.width/2;my=pr.top+pr.height/2}
-  if(SET.particles)burst(mx,my,crit);popSfx(crit);mushAnim(crit);
+  if(SET.particles)burst(mx,my,crit);popSfx(crit);if(burning){noise(.06,.08,3200,1200,0,3);flameAt(mx,my-16,low?1:3,fireRank()||1,3)}mushAnim(crit);
   const tn=Date.now();
   if(SET.anim&&!low){lastBump=tn;$("n").parentNode.animate([{transform:"scale(1.06)"},{transform:"scale(1)"}],{duration:120})}
-  popText(mx,my-16,"+"+fmt(g)+(crit?"!":""),crit,null);
+  popText(mx,my-16,"+"+fmt(g)+(crit?"!":""),crit,(burning&&!crit)?FP[fireRank()||1][1]:null);
 }
 let lastBump=0,last=Date.now(),lastRender=0;
 setInterval(()=>{const now=Date.now(),dt=(now-last)/1000;last=now;if(!document.hidden){s.time=(s.time||0)+Math.min(dt,1);const g=perSec()*dt;if(g>0){s.n+=g;s.total+=g;if(!low||now-lastRender>500){lastRender=now;render()}}}},200);
 
-/* ---------- Particles ---------- */
+/* ---------- Particles (FPS optimized for mobile) ---------- */
 const cv=$("fx"),c2=cv.getContext("2d",{alpha:true,desynchronized:false});
 let P=[],raf=0,lastT=0;
 function sizeFx(){const d=low?1:Math.min(devicePixelRatio||1,1.25);cv.width=innerWidth*d;cv.height=innerHeight*d;c2.setTransform(d,0,0,d,0,0)}
@@ -721,15 +755,17 @@ function loop(){
   for(const p of P){p.l-=p.d||0.03;c2.globalAlpha=Math.max(p.l,0);
     if(p.txt){const k=(performance.now()-p.t0)/1000;if(k>=1){p.l=0;continue}
       const sc=k<.2?.3+k/2:1-k;if(k<.2)c2.fillStyle=p.crit?"#ffe27a":"#fff6d6";else{c2.fillStyle=p.crit?"#ffe27a":"#fff6d6";c2.globalAlpha=1-k;}
-      c2.font=p.f;c2.textAlign="center";const px=p.x+p.dx*k,py=p.y-k*78; c2.save();c2.translate(px,py);c2.scale(1+Math.sin(Math.min(k/.18,1)*Math.PI)*.18,1+Math.sin(Math.min(k/.18,1)*Math.PI)*.18);c2.lineJoin="round";c2.lineWidth=p.crit?5:4;c2.strokeStyle=p.crit?"#7b3d00":"rgba(38,48,31,.9)";if(!low){c2.shadowColor=p.crit?"#ffb300":"rgba(0,0,0,.35)";c2.shadowBlur=p.crit?18:7}c2.strokeText(p.txt,0,0);c2.fillStyle=p.col||(p.crit?"#ffe27a":"#fff6d6");c2.fillText(p.txt,0,0);if(p.crit){c2.font="900 12px sans-serif";c2.fillStyle="#fff";c2.fillText("CRITICAL!",0,-25)}c2.restore();}
+      c2.font=p.f;c2.textAlign="center";const px=p.x+p.dx*k,py=p.y-k*78; c2.save();c2.translate(px,py);c2.scale(1+Math.sin(Math.min(k/.18,1)*Math.PI)*.18,1+Math.sin(Math.min(k/.18,1)*Math.PI)*.18);c2.lineJoin="round";c2.lineWidth=p.crit?5:4;c2.strokeStyle=p.crit?"#7b3d00":"rgba(38,48,31,.9)";if(!low){c2.shadowColor=p.fire?"#ff8a1f":(p.crit?"#ffb300":"rgba(0,0,0,.35)");c2.shadowBlur=p.fire?16:(p.crit?18:7)}c2.strokeText(p.txt,0,0);c2.fillStyle=p.col||(p.crit?"#ffe27a":"#fff6d6");c2.fillText(p.txt,0,0);if(p.crit){c2.font="900 12px sans-serif";c2.fillStyle="#fff";c2.fillText("CRITICAL!",0,-25)}c2.restore();}
+    else if(p.fl){p.x+=p.vx+Math.sin(p.l*9+p.ph)*.6;p.y+=p.vy;p.r*=.965;c2.globalAlpha=Math.max(p.l,0)*.85;
+      {const pl=FP[p.pi||1];c2.fillStyle=p.l>.66?pl[0]:p.l>.33?pl[1]:pl[2]}c2.beginPath();c2.arc(p.x,p.y,Math.max(p.r,.5),0,6.283);c2.fill();}
     else if(p.sp){p.x+=p.vx;p.y+=p.vy;const r=p.r*(.6+.4*Math.sin(p.l*14+p.ph));c2.globalAlpha=Math.max(p.l,0);c2.fillStyle=p.c;c2.beginPath();
-      c2.moveTo(p.x,p.y-r);c2.quadraticCurveTo(p.x,p.y,p.x+r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y+r);c2.quadraticCurveTo(p.x,p.y,p.x-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y-r);c2.fill();}
+      c2.moveTo(p.x,p.y-r);c2.quadraticCurveTo(p.x,p.y,p.x+r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y+r);c2.quadraticCurveTo(p.x,p.y,p.x-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y+r);c2.quadraticCurveTo(p.x,p.y,p.x-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y-r);c2.fill();}
     else if(p.ring){p.ring+=4;c2.strokeStyle=p.c||"#e8b923";c2.lineWidth=2;c2.beginPath();c2.arc(p.x,p.y,p.ring,0,6.283);c2.stroke();}
     else{p.x+=p.vx;p.y+=p.vy;p.vy+=.08;c2.fillStyle=p.c;c2.beginPath();c2.arc(p.x,p.y,p.r,0,6.283);c2.fill();}}
   c2.globalAlpha=1;raf=P.length?requestAnimationFrame(loop):0;
 }
 
-/* ---------- Hintergrund-Animationen (Theme-weit) ---------- */
+/* ---------- Hintergrund-Animationen (wählbar in den Einstellungen) ---------- */
 const BGS={spores:1,fireflies:1,embers:1,snow:1,rain:1,bubbles:1,stars:1,none:1};
 const BGN={spores:34,fireflies:16,embers:32,snow:50,rain:70,bubbles:22,stars:45};
 const bgc=$("bg"),bx=bgc.getContext("2d");
@@ -741,8 +777,8 @@ function bgColors(){
   bgCol={ok:g("--ok")||"#3f6b35",accent:g("--accent")||"#b4432c",dark};
 }
 function bgSize(){
-  const d=low?1:Math.min(devicePixelRatio||1,1.5);
-  bgW=window.innerWidth;bgH=window.innerHeight;bgc.width=Math.round(bgW*d);bgc.height=Math.round(bgH*d);bx.setTransform(d,0,0,d,0,0);bgP=[];
+  const r=$("stage").getBoundingClientRect(),d=low?1:Math.min(devicePixelRatio||1,1.5);
+  bgW=Math.max(1,r.width);bgH=Math.max(1,r.height);bgc.width=Math.round(bgW*d);bgc.height=Math.round(bgH*d);bx.setTransform(d,0,0,d,0,0);bgP=[];
 }
 function bgSpawn(init){
   const R=Math.random,W=bgW,H=bgH,p={x:R()*W,y:R()*H,ph:R()*6.283,a:.25+R()*.5,vx:0,vy:0,r:2,k:R()};
@@ -760,123 +796,160 @@ function bgSpawn(init){
 function bgLoop(t){
   bgRaf=0;if(SET.bg==="none"||document.hidden)return;
   const dt=Math.min(3,(t-(bgT||t))/16.7)||1,sp=(rm?.4:1)*dt;bgT=t;
-  if(!bgP.length){const n=Math.round((BGN[SET.bg]||30)*(low?.5:1));for(let i=0;i<n;i++)bgP.push(bgSpawn(true))}
-  if(t-bgColT>2000){bgColT=t;bgColors()}
-  const c=bx,W=bgW,H=bgH,m=SET.bg,K=bgCol;c.clearRect(0,0,W,H);
+  if(!bgP.length){const n=Math.round((BGN[SET.bg]||30)*(low?.4:1));for(let i=0;i<n;i++)bgP.push(bgSpawn(true))}
+  bx.clearRect(0,0,bgW,bgH);
+  if(t-bgColT>1500){bgColT=t;bgColors()}
+  const dark=bgCol.dark,accent=bgCol.accent,ok=bgCol.ok;
   for(let i=0;i<bgP.length;i++){
-    const p=bgP[i];p.ph+=.03*sp;
-    if(m==="spores"){p.x+=(p.vx+Math.sin(p.ph)*.25)*sp;p.y+=p.vy*sp;
-      if(p.y<-10||p.x<-10||p.x>W+10){bgP[i]=bgSpawn(false);continue}
-      c.globalAlpha=p.a*.55*Math.min(1,p.y/(H*.3));c.fillStyle=K.ok;c.beginPath();c.arc(p.x,p.y,p.r,0,6.283);c.fill()}
-    else if(m==="fireflies"){p.x+=(p.vx+Math.sin(p.ph*.7)*.5)*sp;p.y+=(p.vy+Math.cos(p.ph*.5)*.5)*sp;
-      p.x=(p.x+W)%W;p.y=(p.y+H)%H;const g=Math.pow(.5+.5*Math.sin(p.ph*2+p.k*6),2);
-      if(!low){c.globalAlpha=g*.22;c.fillStyle="#ffe27a";c.beginPath();c.arc(p.x,p.y,p.r*4,0,6.283);c.fill()}
-      c.globalAlpha=.25+g*.75;c.fillStyle=K.dark?"#fff2a8":"#e0b41f";c.beginPath();c.arc(p.x,p.y,p.r,0,6.283);c.fill()}
-    else if(m==="embers"){p.x+=(p.vx+Math.sin(p.ph*2)*.4)*sp;p.y+=p.vy*sp;
-      if(p.y<-10){bgP[i]=bgSpawn(false);continue}
-      c.globalAlpha=p.a*(.55+.45*Math.sin(p.ph*3))*Math.min(1,p.y/(H*.5)+.2);c.fillStyle=p.k<.33?"#ffd84a":p.k<.66?"#ff8a1f":K.accent;c.beginPath();c.arc(p.x,p.y,p.r,0,6.283);c.fill()}
-    else if(m==="snow"){p.x+=(p.vx+Math.sin(p.ph)*.4)*sp;p.y+=p.vy*sp;
-      if(p.y>H+8){bgP[i]=bgSpawn(false);continue}
-      c.globalAlpha=p.a*.8;c.fillStyle=K.dark?"#ffffff":"#8fb4d8";c.beginPath();c.arc((p.x+W)%W,p.y,p.r,0,6.283);c.fill()}
-    else if(m==="rain"){p.x+=p.vx*sp;p.y+=p.vy*sp;
-      if(p.y>H+20||p.x<-10){bgP[i]=bgSpawn(false);continue}
-      c.globalAlpha=p.a;c.strokeStyle=K.dark?"#9fc4ff":"#4a6f9c";c.lineWidth=1;c.beginPath();c.moveTo(p.x,p.y);c.lineTo(p.x-p.vx*1.8,p.y-p.r);c.stroke()}
-    else if(m==="bubbles"){p.x+=(p.vx+Math.sin(p.ph)*.3)*sp;p.y+=p.vy*sp;
-      if(p.y<-20){bgP[i]=bgSpawn(false);continue}
-      c.globalAlpha=p.a*.7;c.strokeStyle=K.ok;c.lineWidth=1.3;c.beginPath();c.arc(p.x,p.y,p.r,0,6.283);c.stroke();
-      c.globalAlpha=p.a*.5;c.fillStyle=K.ok;c.beginPath();c.arc(p.x-p.r*.35,p.y-p.r*.35,Math.max(.8,p.r*.18),0,6.283);c.fill()}
-    else if(m==="stars"){c.globalAlpha=p.a*(.45+.55*Math.sin(p.ph*1.5+p.k*6));c.fillStyle=K.dark?"#fff6d6":"#c9a227";c.beginPath();c.arc(p.x,p.y,p.r,0,6.283);c.fill()}
+    const p=bgP[i];p.ph+=.025*sp;
+    switch(SET.bg){
+      case"spores":p.x+=p.vx*sp+Math.sin(p.ph)*.3*sp;p.y+=p.vy*sp;
+        if(p.y<-12||p.x<-10||p.x>bgW+10)bgP[i]=bgSpawn(false);
+        bx.fillStyle=accent;bx.globalAlpha=(.12+.28*(.5+.5*Math.sin(p.ph)))*(dark?1.3:.75);
+        bx.beginPath();bx.arc(p.x,p.y,p.r,0,6.283);bx.fill();break;
+      case"fireflies":p.x+=p.vx*sp+Math.sin(p.ph*1.3)*.4*sp;p.y+=p.vy*sp+Math.cos(p.ph*.9)*.4*sp;
+        if(p.x<0||p.x>bgW)p.vx*=-1;if(p.y<0||p.y>bgH)p.vy*=-1;
+        const fa=.25+.65*(.5+.5*Math.sin(p.ph*2));
+        bx.globalAlpha=fa*.8;bx.fillStyle="#ffee77";bx.beginPath();bx.arc(p.x,p.y,p.r,0,6.283);bx.fill();
+        if(!low&&fa>.5){bx.globalAlpha=(fa-.5)*.6;bx.fillStyle="#ffcc00";bx.beginPath();bx.arc(p.x,p.y,p.r*2.6,0,6.283);bx.fill();}break;
+      case"embers":p.x+=p.vx*sp+Math.sin(p.ph*1.7)*.5*sp;p.y+=p.vy*sp;
+        if(p.y<-10)bgP[i]=bgSpawn(false);
+        bx.fillStyle=p.k>.5?"#ff7722":"#ffbb33";bx.globalAlpha=(.2+.5*(.5+.5*Math.sin(p.ph)))*.9;
+        bx.beginPath();bx.arc(p.x,p.y,p.r,0,6.283);bx.fill();break;
+      case"snow":p.x+=p.vx*sp+Math.sin(p.ph)*.5*sp;p.y+=p.vy*sp;
+        if(p.y>bgH+10)bgP[i]=bgSpawn(false);
+        bx.fillStyle=dark?"#ffffff":"#4a6b82";bx.globalAlpha=(.25+.4*(.5+.5*Math.sin(p.ph)))*(dark?.85:.45);
+        bx.beginPath();bx.arc(p.x,p.y,p.r,0,6.283);bx.fill();break;
+      case"rain":p.x+=p.vx*sp;p.y+=p.vy*sp;
+        if(p.y>bgH+20||p.x<-20)bgP[i]=bgSpawn(false);
+        bx.strokeStyle=dark?"#a0c8e6":"#4a7596";bx.lineWidth=1.2;bx.globalAlpha=p.a*(dark?.6:.4);
+        bx.beginPath();bx.moveTo(p.x,p.y);bx.lineTo(p.x+p.vx*1.8,p.y+p.r);bx.stroke();break;
+      case"bubbles":p.x+=p.vx*sp+Math.sin(p.ph)*.4*sp;p.y+=p.vy*sp;
+        if(p.y<-20)bgP[i]=bgSpawn(false);
+        bx.strokeStyle=ok;bx.lineWidth=1.2;bx.globalAlpha=(.18+.25*(.5+.5*Math.sin(p.ph)))*(dark?1.1:.7);
+        bx.beginPath();bx.arc(p.x,p.y,p.r,0,6.283);bx.stroke();
+        if(!low){bx.fillStyle="#ffffff";bx.globalAlpha=.25;bx.beginPath();bx.arc(p.x-p.r*.3,p.y-p.r*.3,p.r*.25,0,6.283);bx.fill();}break;
+      case"stars":const sa=.15+.7*(.5+.5*Math.sin(p.ph*1.4));
+        bx.fillStyle=dark?"#ffffff":"#2a3545";bx.globalAlpha=sa*(dark?.9:.4);
+        bx.beginPath();bx.arc(p.x,p.y,p.r,0,6.283);bx.fill();break;
+    }
   }
-  if(m==="stars"){
-    if(!bgShoot&&Math.random()<.004*sp)bgShoot={x:Math.random()*W*.8,y:Math.random()*H*.4,l:1};
-    if(bgShoot){const q=bgShoot;q.x+=5*sp;q.y+=2.5*sp;q.l-=.025*sp;
-      if(q.l<=0)bgShoot=null;else{c.globalAlpha=q.l;c.strokeStyle=K.dark?"#ffffff":"#c9a227";c.lineWidth=1.6;c.beginPath();c.moveTo(q.x,q.y);c.lineTo(q.x-26,q.y-13);c.stroke()}}
+  if(SET.bg==="stars"&&!low){
+    if(!bgShoot&&Math.random()<.008){bgShoot={x:Math.random()*bgW*.7,y:Math.random()*bgH*.4,len:40+Math.random()*60,vx:4+Math.random()*3,vy:2+Math.random()*2,l:1}}
+    if(bgShoot){const s=bgShoot;s.x+=s.vx*sp;s.y+=s.vy*sp;s.l-=.03*sp;
+      if(s.l<=0)bgShoot=null;else{bx.strokeStyle=dark?"#ffffff":"#3a4860";bx.lineWidth=1.5;bx.globalAlpha=s.l*(dark?.8:.4);bx.beginPath();bx.moveTo(s.x,s.y);bx.lineTo(s.x-s.vx*(s.len/8),s.y-s.vy*(s.len/8));bx.stroke();}}
   }
-  c.globalAlpha=1;bgRaf=requestAnimationFrame(bgLoop);
+  bx.globalAlpha=1;bgRaf=requestAnimationFrame(bgLoop);
 }
-function bgStart(){if(bgRaf||SET.bg==="none"||document.hidden)return;bgT=0;bgRaf=requestAnimationFrame(bgLoop)}
-function setBg(){if(!(SET.bg in BGS))SET.bg="spores";cancelAnimationFrame(bgRaf);bgRaf=0;bgP=[];bgShoot=null;bx.clearRect(0,0,bgW,bgH);bgColors();bgStart()}
-document.addEventListener("visibilitychange",bgStart);
-addEventListener("resize",bgSize);
+function startBg(){if(!bgRaf&&SET.bg!=="none")bgRaf=requestAnimationFrame(bgLoop)}
+bgSize();bgColors();startBg();
+addEventListener("resize",()=>{bgSize();bgColors();startBg()});
 
 /* ---------- Tabs ---------- */
-const PANES=["items","stats","board","settings","skills"];
-function tab(i){PANES.forEach((id,k)=>{$(id).hidden=i!==k+1});[1,2,3,4,5].forEach(k=>{$("tab"+k).classList.toggle("on",i===k);$("tab"+k).setAttribute("aria-selected",i===k?"true":"false")});renderStats();renderBoard();renderSkills()}
-const mq=matchMedia("(max-width:759.98px)");
+let tabId="tab1";
+function openTab(id){
+  tabId=id;
+  ["tab1","tab2","tab3","tab4","tab5"].forEach(t=>{const b=$(t),on=t===id;if(b){b.classList.toggle("on",on);b.setAttribute("aria-selected",on)}});
+  $("items").hidden=id!=="tab1";$("stats").hidden=id!=="tab2";$("board").hidden=id!=="tab3";$("settings").hidden=id!=="tab4";$("skills").hidden=id!=="tab5";
+  if(id==="tab2")renderStats();if(id==="tab3")renderBoard();if(id==="tab4")syncSettings();if(id==="tab5")renderSkills();
+}
+["tab1","tab2","tab3","tab4","tab5"].forEach(id=>$(id).onclick=()=>{uiSfx();openTab(id);if(IS_MOBILE)openSheet()});
+
+/* ---------- Bottom-Sheet (Handy) ---------- */
 let sheet=false;
-function setSheet(v){sheet=!!v&&mq.matches;document.body.classList.toggle("sheet",sheet)}
-[1,2,3,4,5].forEach(k=>{$("tab"+k).onclick=()=>{
-  if(mq.matches&&sheet&&curTab()===k)setSheet(false);
-  else{tab(k);if(mq.matches)setSheet(true)}
-  uiSfx()}});
-$("sheet-close").onclick=()=>{setSheet(false);uiSfx()};
-$("scrim").onclick=()=>setSheet(false);
-mq.addEventListener("change",()=>setSheet(false));
+function openSheet(){if(!IS_MOBILE)return;sheet=true;document.body.classList.add("sheet")}
+function closeSheet(){sheet=false;document.body.classList.remove("sheet")}
+$("sheet-close").onclick=()=>{uiSfx();closeSheet()};
+$("scrim").onclick=closeSheet;
 
-/* ---------- Settings Wiring ---------- */
-function syncSettings(){$("set-sound").checked=SET.sound;$("set-vol").value=SET.vol;$("volval").textContent=SET.vol+" %";
-  $("set-part").checked=SET.particles;$("set-anim").checked=SET.anim;$("set-low").checked=SET.low;
-  $("set-theme").value=SET.theme;if(!(SET.bg in BGS))SET.bg="spores";$("set-bg").value=SET.bg;if(!(SET.manim in MANIMS))SET.manim="squish";$("set-manim").value=SET.manim;$("set-idle").checked=SET.idle;$("manim-sub").textContent=rm?"Device has reduce-motion on, so animations are gentler":"How the mushroom reacts to clicks";document.documentElement.dataset.manim=SET.manim;$("set-num").value=SET.num;$("set-auto").checked=SET.auto;}
-function setLow(v){SET.low=v;low=v;sizeFx();bgSize();setBg();document.documentElement.classList.toggle("low",v);drawn=-1;saveSet();syncSettings();render()}
-function applySettings(){muted=!SET.sound;low=SET.low;sizeFx();document.documentElement.classList.toggle("low",low);
-  applyTheme();
-  applyVol();drawn=-1;syncSettings();bgSize();setBg()}
-function applyVol(){if(master)master.gain.value=(SET.vol/100)*.35}
-function saveSet(){try{localStorage.setItem("mushroom-farm-set",JSON.stringify(SET))}catch(e){}}
-$("set-sound").onchange=e=>{SET.sound=e.target.checked;muted=!SET.sound;if(SET.sound)audio();saveSet();syncSettings()};
-$("set-vol").oninput=e=>{SET.vol=+e.target.value;$("volval").textContent=SET.vol+" %";applyVol();saveSet()};
-$("set-vol").onchange=()=>{uiSfx();saveSet()};
-$("set-part").onchange=e=>{SET.particles=e.target.checked;saveSet()};
-$("set-anim").onchange=e=>{SET.anim=e.target.checked;saveSet()};
-$("set-low").onchange=e=>{setLow(e.target.checked)};
-$("set-theme").onchange=e=>{SET.theme=e.target.value;applyTheme();saveSet()};
-$("set-manim").onchange=e=>{SET.manim=e.target.value;saveSet();syncSettings();const was=sheet;if(was)setSheet(false);setTimeout(()=>{mushAnim(false);setTimeout(()=>mushAnim(true),650);if(was)setTimeout(()=>setSheet(true),1500)},was?250:0)};
-$("set-bg").onchange=e=>{SET.bg=e.target.value;saveSet();setBg()};
-$("set-idle").onchange=e=>{SET.idle=e.target.checked;saveSet()};
-$("set-num").onchange=e=>{SET.num=e.target.value;saveSet();render()};
-$("set-auto").onchange=e=>{SET.auto=e.target.checked;saveSet()};
+/* ---------- Settings UI Sync ---------- */
+function syncSettings(){
+  $("set-sound").checked=SET.sound;
+  $("set-vol").value=SET.vol;
+  $("volval").textContent=SET.vol+" %";
+  $("set-part").checked=SET.particles;
+  $("set-anim").checked=SET.anim;
+  $("set-low").checked=SET.low;
+  $("set-theme").value=SET.theme;
+  $("set-bg").value=SET.bg;
+  $("set-manim").value=SET.manim;
+  $("set-idle").checked=SET.idle;
+  $("set-num").value=SET.num;
+  $("set-auto").checked=SET.auto;
+}
+$("set-sound").onchange=e=>{SET.sound=e.target.checked;muted=!SET.sound;if(!muted)tone(523,0.1,0.1);save()};
+$("set-vol").oninput=e=>{SET.vol=Number(e.target.value);$("volval").textContent=SET.vol+" %";if(master)master.gain.value=(SET.vol/100)*.35;save()};
+$("set-part").onchange=e=>{SET.particles=e.target.checked;save()};
+$("set-anim").onchange=e=>{SET.anim=e.target.checked;save()};
+$("set-low").onchange=e=>{
+  SET.low=e.target.checked;low=SET.low;
+  document.documentElement.classList.toggle("low",low);
+  bgP=[];startBg();render();save();
+};
+$("set-theme").onchange=e=>{SET.theme=e.target.value;applyTheme();bgColors();save()};
+$("set-bg").onchange=e=>{SET.bg=e.target.value;bgP=[];startBg();save()};
+$("set-manim").onchange=e=>{SET.manim=e.target.value;document.documentElement.setAttribute("data-manim",SET.manim);mushAnim(false,1);save()};
+$("set-idle").onchange=e=>{SET.idle=e.target.checked;save()};
+$("set-num").onchange=e=>{SET.num=e.target.value;render();save()};
+$("set-auto").onchange=e=>{SET.auto=e.target.checked;save()};
 
-/* Save Import/Export */
-function encodeSave(){return btoa(unescape(encodeURIComponent(JSON.stringify({v:2,s:s,set:SET}))));}
-function decodeSave(str){str=(str||"").trim();if(!str)return null;try{if(str[0]==="{")return JSON.parse(str);return JSON.parse(decodeURIComponent(escape(atob(str))))}catch(e){return null}}
-$("exp").onclick=()=>{const code=encodeSave();$("savetext").value=code;$("savetext").select();let ok=false;try{ok=document.execCommand("copy")}catch(e){}if(!ok&&navigator.clipboard)navigator.clipboard.writeText(code).catch(()=>{});$("exp").textContent="Copied!";setTimeout(()=>{$("exp").textContent="Copy code"},1500);uiSfx()};
-$("imp-open").onclick=()=>{$("savetext").focus();$("savetext").select();uiSfx()};
-$("exp-file").onclick=()=>{const blob=new Blob([JSON.stringify({v:2,s:s,set:SET},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="mushroom-save.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);uiSfx()};
-$("imp-do").onclick=()=>{const data=decodeSave($("savetext").value),btn=$("imp-do");
-  const flash=m=>{btn.textContent=m;setTimeout(()=>{btn.textContent="Load"},1500)};
-  if(!data||!data.s||typeof data.s!=="object"||!Number.isFinite(Number(data.s.n))||!Number.isFinite(Number(data.s.total))||!data.s.own||typeof data.s.own!=="object"){flash("Invalid");return}
-  s=sanitize(data.s);
-  if(data.set&&typeof data.set==="object")for(const k in SET)if(k in data.set&&typeof data.set[k]===typeof SET[k])SET[k]=data.set[k];
-  applySettings();prevDrawn=-1;$("nm").value=s.name||"";save();render();flash("Loaded!");uiSfx()};
+/* ---------- Import / Export ---------- */
+$("exp").onclick=()=>{
+  const txt=btoa(JSON.stringify(s));
+  $("savetext").value=txt;
+  try{navigator.clipboard.writeText(txt)}catch(e){}
+  uiSfx();
+};
+$("exp-file").onclick=()=>{
+  const blob=new Blob([JSON.stringify(s,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="mushroom-farm-save.json";
+  a.click();
+  uiSfx();
+};
+$("imp-open").onclick=()=>{
+  $("savetext").focus();
+  try{
+    navigator.clipboard.readText().then(t=>{if(t)$("savetext").value=t});
+  }catch(e){}
+  uiSfx();
+};
+$("imp-do").onclick=()=>{
+  try{
+    let txt=$("savetext").value.trim();
+    if(txt.startsWith("{"))s=sanitize(JSON.parse(txt));
+    else s=sanitize(JSON.parse(atob(txt)));
+    save();render();uiSfx();
+  }catch(e){
+    uiSfx();
+  }
+};
+$("reset").onclick=()=>{
+  if(confirm("Are you sure you want to reset all progress?")){
+    s=sanitize(null);
+    save();render();uiSfx();
+  }
+};
 
-/* Reset */
-let rt=0;$("reset").onclick=()=>{const b=$("reset");if(!rt){b.textContent="Confirm? Click again";rt=setTimeout(()=>{rt=0;b.textContent="Reset all progress"},2500);return}clearTimeout(rt);rt=0;b.textContent="Reset all progress";s=sanitize(null);prevDrawn=-1;$("nm").value="";save();drawn=-1;render();$("stage").animate([{opacity:.2},{opacity:1}],{duration:400})};
-$("nm").value=s.name||"";$("nm").oninput=e=>{s.name=e.target.value.trim().slice(0,14);renderBoard();saveSoon();netSyncSoon()};
+/* ---------- Win Modal ---------- */
+function win(){
+  s.won=true;winSfx();
+  $("winTxt").textContent="You unlocked the Moon Garden and produced "+fmt(s.total)+" mushrooms!";
+  $("win").hidden=false;
+}
+$("winBtn").onclick=()=>{uiSfx();$("win").hidden=true};
 
-/* Win Modal */
-function win(){s.won=true;save();$("winTxt").textContent="You harvested "+fmt(s.total)+" mushrooms and built the Moon Garden!";$("win").hidden=false;$("winBtn").focus();winSfx();for(let i=0;i<6;i++)setTimeout(()=>burst(innerWidth*(.15+Math.random()*.7),innerHeight*(.2+Math.random()*.4),true),i*150)}
-$("winBtn").onclick=()=>{$("win").hidden=true};addEventListener("keydown",e=>{if(e.key==="Escape"){$("win").hidden=true;setSheet(false)}});
-
-/* Gamepad Support */
-let gi=0,prevB=[],axT=0,aT=0,padOn=false;
-const curTab=()=>PANES.findIndex(id=>!$(id).hidden)+1||1;
-function selItem(n){gi=(n+btns.length)%btns.length;btns.forEach((b,i)=>b.classList.toggle("sel",i===gi));btns[gi]?.scrollIntoView({block:"nearest"})}
-function padLoop(t){const pads=navigator.getGamepads?[...navigator.getGamepads()]:[];const g=pads.find(p=>p?.connected);
-  if(g){if(!padOn){padOn=true;document.body.classList.add("pad");selItem(gi)}
-    const B=i=>!!(g.buttons[i]?.pressed),P=i=>B(i)&&!prevB[i];
-    if(!$("win").hidden){if(P(0)||P(1))$("win").hidden=true}
-    else{if(B(0)&&t-aT>100){aT=t;hit({button:0})}
-      const ay=g.axes[1]||0;if(P(12))selItem(gi-1);else if(P(13))selItem(gi+1);
-      else if(Math.abs(ay)>.5&&t-axT>150){selItem(gi+(ay<0?-1:1));axT=t}
-      if(P(4))tab(Math.max(1,curTab()-1));if(P(5))tab(Math.min(5,curTab()+1));if(P(2)&&curTab()===1){btns[gi].click()}}
-    prevB=g.buttons.map(b=>b.pressed);requestAnimationFrame(padLoop);}
-  else{if(padOn){padOn=false;document.body.classList.remove("pad");prevB=[]}setTimeout(()=>requestAnimationFrame(padLoop),400)}}
-requestAnimationFrame(padLoop);
-
-/* Boot */
+/* ---------- Initialisation ---------- */
 applyTheme();
-document.documentElement.classList.toggle("low",SET.low);syncSettings();bgSize();setBg();render();
-netInit().then(()=>{netSync();setInterval(netSync,BOARD_MS)});
+document.documentElement.classList.toggle("low",low);
+document.documentElement.setAttribute("data-manim",SET.manim);
+if(s.name)$("nm").value=s.name;
+$("nm").oninput=e=>{s.name=e.target.value.slice(0,14);saveSoon();netSyncSoon()};
+
+render();
+netInit().then(netSync);
+setInterval(netSync,BOARD_MS);
 </script>
 </body>
 </html>
