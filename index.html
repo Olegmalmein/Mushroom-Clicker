@@ -126,7 +126,7 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
 /* Settings */
 .setwrap{display:grid;gap:8px;padding:8px 0}
 .setwrap h3{margin:6px 0 0;font-family:Georgia,serif;font-size:1rem;color:var(--ink)}
-.srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:99px 12px;background:var(--bg);border-radius:8px}
+.srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:8px}
 .srow .lbl{display:flex;flex-direction:column}
 .srow .lbl small{color:var(--muted);font-size:.72rem}
 .switch{position:relative;flex:0 0 auto;width:50px;height:28px;cursor:pointer}
@@ -316,9 +316,6 @@ const IS_MOBILE=navigator.userAgent.includes("Mobile")||window.innerWidth<760;
 
 /* ---------- Data ---------- */
 const DEFS=[
- /* Balancing: einheitliche Wachstumsraten pro Familie (Passiv 1.18, Klick 1.35, Crit 1.5)
-    und Basiskosten, die mit jedem Tier schneller steigen als der Ertrag. So bleibt jedes Upgrade
-    eine Weile attraktiv und es gibt keine harte Wand mehr im Late Game. */
  {id:"hand",name:"Better Gloves",desc:"+1 mushroom per click",base:15,mult:1.35,click:1},
  {id:"korb",name:"Gathering Basket",desc:"+5 mushrooms per click",base:450,mult:1.35,click:5},
  {id:"kel",name:"Mushroom Cellar",desc:"+1 mushroom per second",base:50,mult:1.18,sec:1},
@@ -652,11 +649,9 @@ function mushAnim(crit,amp){
   try{
     const f=MANIMS[SET.manim];if(!f)return;
     const el=$("mz");if(!el)return;
-    /* Systemeinstellung "Bewegung reduzieren" (z.B. Energiesparmodus/Animationen entfernen):
-       die Animation läuft trotzdem, nur etwas sanfter */
     const a=(crit?1.7:(amp||1))*(rm?.6:1);
     const kf=f(a);if(!kf)return;
-    if(!el.animate){/* Fallback für sehr alte Browser */
+    if(!el.animate){
       el.style.transition="transform .1s";el.style.transform="scale("+(1+.08*a)+")";
       setTimeout(()=>{el.style.transform=""},110);return}
     if(mAnim)mAnim.cancel();
@@ -759,13 +754,13 @@ function loop(){
     else if(p.fl){p.x+=p.vx+Math.sin(p.l*9+p.ph)*.6;p.y+=p.vy;p.r*=.965;c2.globalAlpha=Math.max(p.l,0)*.85;
       {const pl=FP[p.pi||1];c2.fillStyle=p.l>.66?pl[0]:p.l>.33?pl[1]:pl[2]}c2.beginPath();c2.arc(p.x,p.y,Math.max(p.r,.5),0,6.283);c2.fill();}
     else if(p.sp){p.x+=p.vx;p.y+=p.vy;const r=p.r*(.6+.4*Math.sin(p.l*14+p.ph));c2.globalAlpha=Math.max(p.l,0);c2.fillStyle=p.c;c2.beginPath();
-      c2.moveTo(p.x,p.y-r);c2.quadraticCurveTo(p.x,p.y,p.x+r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y+r);c2.quadraticCurveTo(p.x,p.y,p.x-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y+r);c2.quadraticCurveTo(p.x,p.y,p.x-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y-r);c2.fill();}
+      c2.moveTo(p.x,p.y-r);c2.quadraticCurveTo(p.x,p.y,p.x+r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y+r);c2.quadraticCurveTo(p.x,p.y,p.x,p.y+r);c2.quadraticCurveTo(p.x,p.y,p.x-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y+r);c2.quadraticCurveTo(p.x,p.y,p.x-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y-r);c2.fill();}
     else if(p.ring){p.ring+=4;c2.strokeStyle=p.c||"#e8b923";c2.lineWidth=2;c2.beginPath();c2.arc(p.x,p.y,p.ring,0,6.283);c2.stroke();}
     else{p.x+=p.vx;p.y+=p.vy;p.vy+=.08;c2.fillStyle=p.c;c2.beginPath();c2.arc(p.x,p.y,p.r,0,6.283);c2.fill();}}
   c2.globalAlpha=1;raf=P.length?requestAnimationFrame(loop):0;
 }
 
-/* ---------- Hintergrund-Animationen (wählbar in den Einstellungen) ---------- */
+/* ---------- Hintergrund-Animationen ---------- */
 const BGS={spores:1,fireflies:1,embers:1,snow:1,rain:1,bubbles:1,stars:1,none:1};
 const BGN={spores:34,fireflies:16,embers:32,snow:50,rain:70,bubbles:22,stars:45};
 const bgc=$("bg"),bx=bgc.getContext("2d");
@@ -784,172 +779,164 @@ function bgSpawn(init){
   const R=Math.random,W=bgW,H=bgH,p={x:R()*W,y:R()*H,ph:R()*6.283,a:.25+R()*.5,vx:0,vy:0,r:2,k:R()};
   switch(SET.bg){
     case"spores":p.r=1.5+R()*3.5;p.vx=(R()-.5)*.15;p.vy=-(.15+R()*.35);if(!init)p.y=H+10;break;
-    case"fireflies":p.r=1.6+R()*1.6;p.vx=(R()-.5)*.4;p.vy=(R()-.5)*.4;break;
-    case"embers":p.r=1+R()*2.4;p.vx=(R()-.5)*.5;p.vy=-(.5+R()*1.1);if(!init)p.y=H+8;break;
-    case"snow":p.r=1.5+R()*2.8;p.vx=(R()-.5)*.3;p.vy=.4+R()*.9;if(!init)p.y=-8;break;
-    case"rain":p.r=8+R()*10;p.vx=-1.2;p.vy=7+R()*5;p.a=.15+R()*.25;p.x=R()*(W+40);if(!init)p.y=-20;break;
-    case"bubbles":p.r=3+R()*9;p.vx=(R()-.5)*.2;p.vy=-(.3+R()*.7);if(!init)p.y=H+14;break;
-    case"stars":p.r=.6+R()*1.5;p.a=.3+R()*.6;break;
+    case"fireflies":p.r=2+R()*3;p.vx=(R()-.5)*.4;p.vy=(R()-.5)*.4;break;
+    case"embers":p.r=1.2+R()*2.8;p.vx=(R()-.5)*.35;p.vy=-(.4+R()*.8);if(!init)p.y=H+10;break;
+    case"snow":p.r=1.5+R()*3;p.vx=(R()-.5)*.25;p.vy=.4+R()*.7;if(!init)p.y=-10;break;
+    case"rain":p.r=12+R()*14;p.vx=-.4;p.vy=8+R()*6;p.a=.15+R()*.25;if(!init)p.y=-20;break;
+    case"bubbles":p.r=3+R()*7;p.vx=(R()-.5)*.2;p.vy=-(.3+R()*.6);if(!init)p.y=H+15;break;
+    case"stars":p.r=1+R()*2.2;p.a=.2+R()*.7;break;
   }
   return p;
 }
+function bgInit(){
+  bgColors();bgSize();
+  const n=low?Math.round((BGN[SET.bg]||30)*.4): (BGN[SET.bg]||30);
+  bgP=[];for(let i=0;i<n;i++)bgP.push(bgSpawn(true));
+  if(SET.bg!=="none"&&!bgRaf)bgLoop();
+}
 function bgLoop(t){
-  bgRaf=0;if(SET.bg==="none"||document.hidden)return;
-  const dt=Math.min(3,(t-(bgT||t))/16.7)||1,sp=(rm?.4:1)*dt;bgT=t;
-  if(!bgP.length){const n=Math.round((BGN[SET.bg]||30)*(low?.4:1));for(let i=0;i<n;i++)bgP.push(bgSpawn(true))}
+  if(SET.bg==="none"){bx.clearRect(0,0,bgW,bgH);bgRaf=0;return}
+  const dt=t?(t-bgT)/1000:0.016;bgT=t||performance.now();
   bx.clearRect(0,0,bgW,bgH);
-  if(t-bgColT>1500){bgColT=t;bgColors()}
-  const dark=bgCol.dark,accent=bgCol.accent,ok=bgCol.ok;
-  for(let i=0;i<bgP.length;i++){
-    const p=bgP[i];p.ph+=.025*sp;
+  const W=bgW,H=bgH,m=STG[stage()],mainC=m[5]||bgCol.ok,secC=m[1];
+  for(let p of bgP){
+    p.ph+=dt*(1+p.k);
     switch(SET.bg){
-      case"spores":p.x+=p.vx*sp+Math.sin(p.ph)*.3*sp;p.y+=p.vy*sp;
-        if(p.y<-12||p.x<-10||p.x>bgW+10)bgP[i]=bgSpawn(false);
-        bx.fillStyle=accent;bx.globalAlpha=(.12+.28*(.5+.5*Math.sin(p.ph)))*(dark?1.3:.75);
+      case"spores":
+        p.x+=p.vx+Math.sin(p.ph)*.15;p.y+=p.vy;
+        if(p.y<-10||p.x<-10||p.x>W+10)Object.assign(p,bgSpawn(false));
+        bx.fillStyle=p.k>.5?mainC:bgCol.ok;bx.globalAlpha=p.a*(.6+.4*Math.sin(p.ph));
         bx.beginPath();bx.arc(p.x,p.y,p.r,0,6.283);bx.fill();break;
-      case"fireflies":p.x+=p.vx*sp+Math.sin(p.ph*1.3)*.4*sp;p.y+=p.vy*sp+Math.cos(p.ph*.9)*.4*sp;
-        if(p.x<0||p.x>bgW)p.vx*=-1;if(p.y<0||p.y>bgH)p.vy*=-1;
-        const fa=.25+.65*(.5+.5*Math.sin(p.ph*2));
-        bx.globalAlpha=fa*.8;bx.fillStyle="#ffee77";bx.beginPath();bx.arc(p.x,p.y,p.r,0,6.283);bx.fill();
-        if(!low&&fa>.5){bx.globalAlpha=(fa-.5)*.6;bx.fillStyle="#ffcc00";bx.beginPath();bx.arc(p.x,p.y,p.r*2.6,0,6.283);bx.fill();}break;
-      case"embers":p.x+=p.vx*sp+Math.sin(p.ph*1.7)*.5*sp;p.y+=p.vy*sp;
-        if(p.y<-10)bgP[i]=bgSpawn(false);
-        bx.fillStyle=p.k>.5?"#ff7722":"#ffbb33";bx.globalAlpha=(.2+.5*(.5+.5*Math.sin(p.ph)))*.9;
+      case"fireflies":
+        p.x+=Math.sin(p.ph*.7)*.6;p.y+=Math.cos(p.ph*.9)*.5;
+        if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+        bx.fillStyle="#ffe875";bx.globalAlpha=Math.max(0,Math.sin(p.ph)*.8);
         bx.beginPath();bx.arc(p.x,p.y,p.r,0,6.283);bx.fill();break;
-      case"snow":p.x+=p.vx*sp+Math.sin(p.ph)*.5*sp;p.y+=p.vy*sp;
-        if(p.y>bgH+10)bgP[i]=bgSpawn(false);
-        bx.fillStyle=dark?"#ffffff":"#4a6b82";bx.globalAlpha=(.25+.4*(.5+.5*Math.sin(p.ph)))*(dark?.85:.45);
+      case"embers":
+        p.x+=p.vx+Math.sin(p.ph*1.2)*.4;p.y+=p.vy;
+        if(p.y<-10)Object.assign(p,bgSpawn(false));
+        bx.fillStyle=p.k>.6?"#ff4a1c":(p.k>.3?"#ff9d1c":"#ffd438");
+        bx.globalAlpha=p.a*(.7+.3*Math.sin(p.ph*2));
         bx.beginPath();bx.arc(p.x,p.y,p.r,0,6.283);bx.fill();break;
-      case"rain":p.x+=p.vx*sp;p.y+=p.vy*sp;
-        if(p.y>bgH+20||p.x<-20)bgP[i]=bgSpawn(false);
-        bx.strokeStyle=dark?"#a0c8e6":"#4a7596";bx.lineWidth=1.2;bx.globalAlpha=p.a*(dark?.6:.4);
-        bx.beginPath();bx.moveTo(p.x,p.y);bx.lineTo(p.x+p.vx*1.8,p.y+p.r);bx.stroke();break;
-      case"bubbles":p.x+=p.vx*sp+Math.sin(p.ph)*.4*sp;p.y+=p.vy*sp;
-        if(p.y<-20)bgP[i]=bgSpawn(false);
-        bx.strokeStyle=ok;bx.lineWidth=1.2;bx.globalAlpha=(.18+.25*(.5+.5*Math.sin(p.ph)))*(dark?1.1:.7);
-        bx.beginPath();bx.arc(p.x,p.y,p.r,0,6.283);bx.stroke();
-        if(!low){bx.fillStyle="#ffffff";bx.globalAlpha=.25;bx.beginPath();bx.arc(p.x-p.r*.3,p.y-p.r*.3,p.r*.25,0,6.283);bx.fill();}break;
-      case"stars":const sa=.15+.7*(.5+.5*Math.sin(p.ph*1.4));
-        bx.fillStyle=dark?"#ffffff":"#2a3545";bx.globalAlpha=sa*(dark?.9:.4);
+      case"snow":
+        p.x+=p.vx+Math.sin(p.ph)*.3;p.y+=p.vy;
+        if(p.y>H+10)Object.assign(p,bgSpawn(false));
+        bx.fillStyle="#ffffff";bx.globalAlpha=p.a;
+        bx.beginPath();bx.arc(p.x,p.y,p.r,0,6.283);bx.fill();break;
+      case"rain":
+        p.x+=p.vx;p.y+=p.vy;
+        if(p.y>H+20)Object.assign(p,bgSpawn(false));
+        bx.strokeStyle="#aed8f2";bx.lineWidth=1.2;bx.globalAlpha=p.a;
+        bx.beginPath();bx.moveTo(p.x,p.y);bx.lineTo(p.x+p.vx*2,p.y+p.r);bx.stroke();break;
+      case"bubbles":
+        p.x+=p.vx+Math.sin(p.ph)*.2;p.y+=p.vy;
+        if(p.y<-20)Object.assign(p,bgSpawn(false));
+        bx.strokeStyle=mainC;bx.lineWidth=1;bx.globalAlpha=p.a*.6;
+        bx.beginPath();bx.arc(p.x,p.y,p.r,0,6.283);bx.stroke();break;
+      case"stars":
+        bx.fillStyle=p.k>.7?"#ffe9a8":"#ffffff";
+        bx.globalAlpha=Math.max(0.1,p.a*(.5+.5*Math.sin(p.ph*1.5)));
         bx.beginPath();bx.arc(p.x,p.y,p.r,0,6.283);bx.fill();break;
     }
   }
-  if(SET.bg==="stars"&&!low){
-    if(!bgShoot&&Math.random()<.008){bgShoot={x:Math.random()*bgW*.7,y:Math.random()*bgH*.4,len:40+Math.random()*60,vx:4+Math.random()*3,vy:2+Math.random()*2,l:1}}
-    if(bgShoot){const s=bgShoot;s.x+=s.vx*sp;s.y+=s.vy*sp;s.l-=.03*sp;
-      if(s.l<=0)bgShoot=null;else{bx.strokeStyle=dark?"#ffffff":"#3a4860";bx.lineWidth=1.5;bx.globalAlpha=s.l*(dark?.8:.4);bx.beginPath();bx.moveTo(s.x,s.y);bx.lineTo(s.x-s.vx*(s.len/8),s.y-s.vy*(s.len/8));bx.stroke();}}
-  }
   bx.globalAlpha=1;bgRaf=requestAnimationFrame(bgLoop);
 }
-function startBg(){if(!bgRaf&&SET.bg!=="none")bgRaf=requestAnimationFrame(bgLoop)}
-bgSize();bgColors();startBg();
-addEventListener("resize",()=>{bgSize();bgColors();startBg()});
+addEventListener("resize",()=>{bgSize();if(SET.bg!=="none"&&!bgRaf)bgLoop()});
 
-/* ---------- Tabs ---------- */
-let tabId="tab1";
-function openTab(id){
-  tabId=id;
-  ["tab1","tab2","tab3","tab4","tab5"].forEach(t=>{const b=$(t),on=t===id;if(b){b.classList.toggle("on",on);b.setAttribute("aria-selected",on)}});
-  $("items").hidden=id!=="tab1";$("stats").hidden=id!=="tab2";$("board").hidden=id!=="tab3";$("settings").hidden=id!=="tab4";$("skills").hidden=id!=="tab5";
-  if(id==="tab2")renderStats();if(id==="tab3")renderBoard();if(id==="tab4")syncSettings();if(id==="tab5")renderSkills();
-}
-["tab1","tab2","tab3","tab4","tab5"].forEach(id=>$(id).onclick=()=>{uiSfx();openTab(id);if(IS_MOBILE)openSheet()});
+/* ---------- Win Modal & Menu Controls ---------- */
+function win(){s.won=true;save();winSfx();$("winTxt").textContent="You created the Moon Garden and finished all stages! Keep playing to collect millions of mushrooms.";$("win").hidden=false}
+$("winBtn").onclick=()=>{uiSfx();$("win").hidden=true};
 
-/* ---------- Bottom-Sheet (Handy) ---------- */
 let sheet=false;
-function openSheet(){if(!IS_MOBILE)return;sheet=true;document.body.classList.add("sheet")}
-function closeSheet(){sheet=false;document.body.classList.remove("sheet")}
-$("sheet-close").onclick=()=>{uiSfx();closeSheet()};
-$("scrim").onclick=closeSheet;
-
-/* ---------- Settings UI Sync ---------- */
-function syncSettings(){
-  $("set-sound").checked=SET.sound;
-  $("set-vol").value=SET.vol;
-  $("volval").textContent=SET.vol+" %";
-  $("set-part").checked=SET.particles;
-  $("set-anim").checked=SET.anim;
-  $("set-low").checked=SET.low;
-  $("set-theme").value=SET.theme;
-  $("set-bg").value=SET.bg;
-  $("set-manim").value=SET.manim;
-  $("set-idle").checked=SET.idle;
-  $("set-num").value=SET.num;
-  $("set-auto").checked=SET.auto;
+function setSheet(open){
+  if(window.innerWidth>=760)return;sheet=open;
+  document.body.classList.toggle("sheet",open);
+  if(!open)document.activeElement?.blur?.();
 }
-$("set-sound").onchange=e=>{SET.sound=e.target.checked;muted=!SET.sound;if(!muted)tone(523,0.1,0.1);save()};
-$("set-vol").oninput=e=>{SET.vol=Number(e.target.value);$("volval").textContent=SET.vol+" %";if(master)master.gain.value=(SET.vol/100)*.35;save()};
-$("set-part").onchange=e=>{SET.particles=e.target.checked;save()};
-$("set-anim").onchange=e=>{SET.anim=e.target.checked;save()};
-$("set-low").onchange=e=>{
-  SET.low=e.target.checked;low=SET.low;
-  document.documentElement.classList.toggle("low",low);
-  bgP=[];startBg();render();save();
-};
-$("set-theme").onchange=e=>{SET.theme=e.target.value;applyTheme();bgColors();save()};
-$("set-bg").onchange=e=>{SET.bg=e.target.value;bgP=[];startBg();save()};
-$("set-manim").onchange=e=>{SET.manim=e.target.value;document.documentElement.setAttribute("data-manim",SET.manim);mushAnim(false,1);save()};
-$("set-idle").onchange=e=>{SET.idle=e.target.checked;save()};
-$("set-num").onchange=e=>{SET.num=e.target.value;render();save()};
-$("set-auto").onchange=e=>{SET.auto=e.target.checked;save()};
+$("sheet-close").onclick=()=>{uiSfx();setSheet(false)};
+$("scrim").onclick=()=>{uiSfx();setSheet(false)};
 
-/* ---------- Import / Export ---------- */
+const tabBtns=[$("tab1"),$("tab2"),$("tab3"),$("tab4"),$("tab5")];
+const tabViews=[$("items"),$("stats"),$("board"),$("settings"),$("skills")];
+tabBtns.forEach((tb,idx)=>{
+  tb.onclick=()=>{
+    uiSfx();tabBtns.forEach((b,i)=>{
+      const on=i===idx;b.classList.toggle("on",on);b.setAttribute("aria-selected",on);
+      tabViews[i].hidden=!on;
+    });
+    if(idx===1)renderStats();if(idx===2){renderBoard();if(Date.now()-net.last>BOARD_MS)netSync()}
+    if(idx===4)renderSkills();
+    setSheet(true);
+  };
+});
+
+/* ---------- Settings Panel Binding ---------- */
+const sSound=$("set-sound"),sVol=$("set-vol"),sPart=$("set-part"),sMAnim=$("set-manim");
+const sBg=$("set-bg"),sIdle=$("set-idle"),sAnim=$("set-anim"),sLow=$("set-low");
+const sTheme=$("set-theme"),sNum=$("set-num"),sAuto=$("set-auto");
+
+function loadSettingsUI(){
+  sSound.checked=SET.sound;sVol.value=SET.vol;$("volval").textContent=SET.vol+" %";
+  sPart.checked=SET.particles;sMAnim.value=SET.manim;sBg.value=SET.bg;
+  sIdle.checked=SET.idle;sAnim.checked=SET.anim;sLow.checked=SET.low;
+  sTheme.value=SET.theme;sNum.value=SET.num;sAuto.checked=SET.auto;
+}
+loadSettingsUI();
+
+sSound.onchange=e=>{SET.sound=e.target.checked;muted=!SET.sound;uiSfx();save()};
+sVol.oninput=e=>{SET.vol=Number(e.target.value);$("volval").textContent=SET.vol+" %";if(master)master.gain.value=(SET.vol/100)*.35;save()};
+sPart.onchange=e=>{SET.particles=e.target.checked;uiSfx();save()};
+sMAnim.onchange=e=>{SET.manim=e.target.value;uiSfx();save()};
+sBg.onchange=e=>{SET.bg=e.target.value;uiSfx();bgInit();save()};
+sIdle.onchange=e=>{SET.idle=e.target.checked;uiSfx();save()};
+sAnim.onchange=e=>{SET.anim=e.target.checked;uiSfx();save()};
+sLow.onchange=e=>{
+  SET.low=e.target.checked;low=SET.low;
+  document.body.classList.toggle("low",low);
+  uiSfx();bgInit();render();save();
+};
+sTheme.onchange=e=>{SET.theme=e.target.value;applyTheme();bgColors();uiSfx();save()};
+sNum.onchange=e=>{SET.num=e.target.value;uiSfx();render();save()};
+sAuto.onchange=e=>{SET.auto=e.target.checked;uiSfx();save()};
+
+/* Import / Export Save Data */
 $("exp").onclick=()=>{
-  const txt=btoa(JSON.stringify(s));
-  $("savetext").value=txt;
-  try{navigator.clipboard.writeText(txt)}catch(e){}
-  uiSfx();
+  uiSfx();const str=btoa(JSON.stringify(s));$("savetext").value=str;
+  document.execCommand("copy");
+  popText(innerWidth/2,innerHeight/2,"Save code copied!",false,"#8fc27f",true);
 };
 $("exp-file").onclick=()=>{
-  const blob=new Blob([JSON.stringify(s,null,2)],{type:"application/json"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="mushroom-farm-save.json";
-  a.click();
-  uiSfx();
+  uiSfx();const blob=new Blob([btoa(JSON.stringify(s))],{type:"text/plain"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="mushroom-farm-save.txt";a.click();
 };
-$("imp-open").onclick=()=>{
-  $("savetext").focus();
-  try{
-    navigator.clipboard.readText().then(t=>{if(t)$("savetext").value=t});
-  }catch(e){}
-  uiSfx();
-};
+$("imp-open").onclick=()=>{uiSfx();$("savetext").focus();$("savetext").select()};
 $("imp-do").onclick=()=>{
-  try{
-    let txt=$("savetext").value.trim();
-    if(txt.startsWith("{"))s=sanitize(JSON.parse(txt));
-    else s=sanitize(JSON.parse(atob(txt)));
-    save();render();uiSfx();
-  }catch(e){
-    uiSfx();
+  uiSfx();try{
+    const raw=atob($("savetext").value.trim());
+    const data=JSON.parse(raw);
+    s=sanitize(data);save();render();
+    popText(innerWidth/2,innerHeight/2,"Save loaded!",false,"#8fc27f",true);
+  }catch(err){
+    popText(innerWidth/2,innerHeight/2,"Invalid save code!",false,"#e2705a",true);
   }
 };
 $("reset").onclick=()=>{
-  if(confirm("Are you sure you want to reset all progress?")){
-    s=sanitize(null);
-    save();render();uiSfx();
-  }
+  if(!confirm("Are you sure you want to reset all progress? This cannot be undone."))return;
+  uiSfx();s=sanitize(null);save();render();
+  popText(innerWidth/2,innerHeight/2,"Progress reset!",false,"#e2705a",true);
 };
-
-/* ---------- Win Modal ---------- */
-function win(){
-  s.won=true;winSfx();
-  $("winTxt").textContent="You unlocked the Moon Garden and produced "+fmt(s.total)+" mushrooms!";
-  $("win").hidden=false;
-}
-$("winBtn").onclick=()=>{uiSfx();$("win").hidden=true};
-
-/* ---------- Initialisation ---------- */
-applyTheme();
-document.documentElement.classList.toggle("low",low);
-document.documentElement.setAttribute("data-manim",SET.manim);
-if(s.name)$("nm").value=s.name;
 $("nm").oninput=e=>{s.name=e.target.value.slice(0,14);saveSoon();netSyncSoon()};
 
-render();
-netInit().then(netSync);
-setInterval(netSync,BOARD_MS);
+/* ---------- Initialization ---------- */
+window.onload=function(){
+  applyTheme();
+  if(low)document.body.classList.toggle("low",true);
+  if(s.name)$("nm").value=s.name;
+  render();
+  bgInit();
+  netInit().then(netSync);
+};
 </script>
 </body>
 </html>
