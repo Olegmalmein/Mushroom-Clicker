@@ -1,3 +1,3 @@
-# Pilz-Clicker
+# Mushroom-Clicker
 
 A simple clicker game, programmed using HTML.
