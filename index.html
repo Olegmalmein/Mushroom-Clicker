@@ -164,25 +164,37 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
 .skill-head,.skill,.stat-hero,.btn,.ta,.win .card,.win button{border-radius:var(--r)}
 .skill-icon{border-radius:calc(var(--r) - 2px)}
 .nm input,select{border-radius:calc(var(--r) - 4px)!important}
-/* ---------- Handy: kompakter Kopfbereich, damit die Liste genug Platz hat ---------- */
+/* ---------- Handy: Pilz in der Mitte, Menü als Bottom-Sheet ---------- */
+#scrim,.sheet-close{display:none}
+.sheet-close{position:relative;width:100%;height:36px;align-items:center;justify-content:center;background:none;border:0;color:var(--muted);font:inherit;cursor:pointer;flex:none}
+.sheet-close .grab{width:40px;height:4px;border-radius:4px;background:color-mix(in srgb,var(--ink) 28%,transparent)}
+.sheet-close .x{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:1.05rem;font-weight:700;width:30px;height:30px;display:grid;place-items:center;border-radius:calc(var(--r) - 4px);background:var(--surface)}
+.sheet-close:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
 @media(max-width:759.98px){
- .stage-container{overflow:visible;position:relative;z-index:10}
- .stage{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:1fr auto 1fr auto;grid-template-areas:"mush lbl" "mush count" "mush rate" "stats stats";column-gap:14px;align-items:center;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 12px}
- .stage h1{display:none}
- .stagelbl{grid-area:lbl;text-align:left;align-self:end;margin:0}
- .count{grid-area:count;text-align:left;font-size:2rem}
- .rate{grid-area:rate;text-align:left;margin:0;align-self:start}
- #mushroom{grid-area:mush;width:min(116px,30vw);margin:0}
- .stats{grid-area:stats;max-width:none;width:100%;margin:10px 0 0}
- .stats div{padding:6px 4px}
- .stats b{font-size:.95rem}
- .shop-container{padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+ .stage-container{flex:1 1 auto;display:flex;overflow:visible;min-height:0}
+ .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:0;box-shadow:none;border-bottom:0;padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(92px + env(safe-area-inset-bottom,0px))}
+ .stage h1{font-size:1.5rem;margin:0 0 4px}
+ .count{font-size:2.6rem}
+ .stats{width:100%;max-width:340px;margin:0 auto 6px}
+ #mushroom{width:min(260px,68vw,34vh);margin:14px auto 0}
+ .main-content{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;flex-direction:column;background:var(--bg);border-radius:var(--r) var(--r) 0 0;box-shadow:0 -8px 22px -10px rgba(0,0,0,.5);overflow:hidden}
+ .shop-container{flex:none;overflow:hidden;padding:0}
+ .shop-container>.shop{display:flex;flex-direction:column;gap:0;max-height:72dvh}
+ .tabs-wrapper{order:3;position:static;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);flex:none}
+ .shop-container>.shop>:is(#items,#stats,#skills,#board,#settings){order:1;flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:12px 14px 14px;-webkit-overflow-scrolling:touch}
+ .sheet-close{order:0}
+ body.sheet .sheet-close{display:flex}
+ body:not(.sheet) .shop-container>.shop>:not(.tabs-wrapper){display:none!important}
+ body:not(.sheet) .tab.on{background:none;box-shadow:none;color:var(--muted)}
+ body:not(.sheet) .tab.on::after{display:none}
+ body.sheet #scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:25}
 }
 </style>
 </head>
 <body>
 <canvas id="fx"></canvas>
 <div class="win" id="win" role="dialog" aria-modal="true" aria-labelledby="winH" hidden><div class="card"><h2 id="winH">🏆 You won!</h2><p id="winTxt"></p><button id="winBtn">Keep playing</button></div></div>
+<div id="scrim"></div>
 <main>
 <div class="stage-container">
   <section class="stage" id="stage">
@@ -204,6 +216,7 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
 <div class="main-content">
   <div class="shop-container">
     <section class="shop">
+      <button class="sheet-close" id="sheet-close" type="button" aria-label="Close menu"><span class="grab"></span><span class="x">✕</span></button>
       <div class="tabs-wrapper"><div class="tabs" role="tablist">
         <button class="tab on" id="tab1" role="tab" aria-selected="true">Upgrades</button>
         <button class="tab" id="tab2" role="tab" aria-selected="false">Stats</button>
@@ -537,7 +550,16 @@ function loop(){
 /* ---------- Tabs ---------- */
 const PANES=["items","stats","board","settings","skills"];
 function tab(i){PANES.forEach((id,k)=>{$(id).hidden=i!==k+1});[1,2,3,4,5].forEach(k=>{$("tab"+k).classList.toggle("on",i===k);$("tab"+k).setAttribute("aria-selected",i===k?"true":"false")});renderStats();renderBoard();renderSkills()}
-[1,2,3,4,5].forEach(k=>{$("tab"+k).onclick=()=>{tab(k);uiSfx()}});
+const mq=matchMedia("(max-width:759.98px)");
+let sheet=false;
+function setSheet(v){sheet=!!v&&mq.matches;document.body.classList.toggle("sheet",sheet)}
+[1,2,3,4,5].forEach(k=>{$("tab"+k).onclick=()=>{
+  if(mq.matches&&sheet&&curTab()===k)setSheet(false);
+  else{tab(k);if(mq.matches)setSheet(true)}
+  uiSfx()}});
+$("sheet-close").onclick=()=>{setSheet(false);uiSfx()};
+$("scrim").onclick=()=>setSheet(false);
+mq.addEventListener("change",()=>setSheet(false));
 
 /* ---------- Settings Wiring ---------- */
 function syncSettings(){$("set-sound").checked=SET.sound;$("set-vol").value=SET.vol;$("volval").textContent=SET.vol+" %";
@@ -579,7 +601,7 @@ $("nm").value=s.name||"";$("nm").oninput=e=>{s.name=e.target.value.trim().slice(
 
 /* Win Modal */
 function win(){s.won=true;save();$("winTxt").textContent="You harvested "+fmt(s.total)+" mushrooms and built the Moon Garden!";$("win").hidden=false;$("winBtn").focus();winSfx();for(let i=0;i<6;i++)setTimeout(()=>burst(innerWidth*(.15+Math.random()*.7),innerHeight*(.2+Math.random()*.4),true),i*150)}
-$("winBtn").onclick=()=>{$("win").hidden=true};addEventListener("keydown",e=>{if(e.key==="Escape")$("win").hidden=true});
+$("winBtn").onclick=()=>{$("win").hidden=true};addEventListener("keydown",e=>{if(e.key==="Escape"){$("win").hidden=true;setSheet(false)}});
 
 /* Gamepad Support */
 let gi=0,prevB=[],axT=0,aT=0,padOn=false;
