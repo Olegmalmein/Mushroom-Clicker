@@ -53,8 +53,12 @@ html[data-manim="none"] #mushroom:active{transform:scale(.96)}
 #mushroom svg{position:relative;z-index:1;overflow:visible}
 #mushroom::before{content:"";position:absolute;inset:-20%;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,color-mix(in srgb,var(--glow,#fff) 75%,transparent) 0%,transparent 70%);animation:glowpulse 3.2s ease-in-out infinite}
 #mushroom:not([data-glow])::before{display:none}
+/* Feuer, wenn man schnell hintereinander klickt */
+#mushroom::after{content:"";position:absolute;inset:-14%;border-radius:50%;pointer-events:none;z-index:0;opacity:0;transition:opacity .25s;background:radial-gradient(circle,rgba(255,170,40,.75) 0%,rgba(255,90,20,.45) 40%,transparent 70%)}
+#mushroom.burning::after{opacity:1;animation:firepulse .35s ease-in-out infinite alternate}
+@keyframes firepulse{from{transform:scale(.96)}to{transform:scale(1.08)}}
 @keyframes glowpulse{50%{opacity:.5;transform:scale(1.07)}}
-@media(prefers-reduced-motion:reduce){#mushroom::before{animation:none}}
+@media(prefers-reduced-motion:reduce){#mushroom::before,#mushroom.burning::after{animation:none}}
 .stage h1,.stage .stagelbl,.stage .count,.stage .rate,.stage .stats{position:relative;z-index:2}
 #mushroom svg{display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,.15))}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
@@ -293,18 +297,21 @@ const IS_MOBILE=navigator.userAgent.includes("Mobile")||window.innerWidth<760;
 
 /* ---------- Data ---------- */
 const DEFS=[
- {id:"hand",name:"Better Gloves",desc:"+1 mushroom per click",base:15,mult:1.5,click:1},
- {id:"korb",name:"Gathering Basket",desc:"+5 mushrooms per click",base:250,mult:1.6,click:5},
- {id:"kel",name:"Mushroom Cellar",desc:"+1 mushroom per second",base:50,mult:1.15,sec:1},
- {id:"gew",name:"Greenhouse",desc:"+8 mushrooms per second",base:500,mult:1.17,sec:8},
- {id:"lab",name:"Mycelium Lab",desc:"+50 mushrooms per second",base:4000,mult:1.2,sec:50},
- {id:"wald",name:"Enchanted Forest",desc:"+400 mushrooms per second",base:35000,mult:1.22,sec:400},
- {id:"glueck",name:"Lucky Charm",desc:"+2% crit chance (max 10)",base:1000,mult:1.9,crit:.02,max:10},
- {id:"spat",name:"Golden Spade",desc:"+25 mushrooms per click",base:3000,mult:1.6,click:25},
- {id:"zh",name:"Magic Gauntlet",desc:"+150 mushrooms per click",base:40000,mult:1.7,click:150},
- {id:"fab",name:"Spore Factory",desc:"+2,500 mushrooms per second",base:300000,mult:1.23,sec:2500},
- {id:"reak",name:"Mushroom Reactor",desc:"+15,000 mushrooms per second",base:2500000,mult:1.25,sec:15000},
- {id:"mond",name:"Moon Garden",desc:"+100,000 mushrooms per second",base:20000000,mult:1.27,sec:100000}
+ /* Balancing: einheitliche Wachstumsraten pro Familie (Passiv 1.18, Klick 1.35, Crit 1.5)
+    und Basiskosten, die mit jedem Tier schneller steigen als der Ertrag. So bleibt jedes Upgrade
+    eine Weile attraktiv und es gibt keine harte Wand mehr im Late Game. */
+ {id:"hand",name:"Better Gloves",desc:"+1 mushroom per click",base:15,mult:1.35,click:1},
+ {id:"korb",name:"Gathering Basket",desc:"+5 mushrooms per click",base:450,mult:1.35,click:5},
+ {id:"kel",name:"Mushroom Cellar",desc:"+1 mushroom per second",base:50,mult:1.18,sec:1},
+ {id:"gew",name:"Greenhouse",desc:"+8 mushrooms per second",base:1200,mult:1.18,sec:8},
+ {id:"lab",name:"Mycelium Lab",desc:"+50 mushrooms per second",base:20000,mult:1.18,sec:50},
+ {id:"wald",name:"Enchanted Forest",desc:"+400 mushrooms per second",base:350000,mult:1.18,sec:400},
+ {id:"glueck",name:"Lucky Charm",desc:"+2% crit chance (max 10)",base:3000,mult:1.5,crit:.02,max:10},
+ {id:"spat",name:"Golden Spade",desc:"+25 mushrooms per click",base:12000,mult:1.35,click:25},
+ {id:"zh",name:"Magic Gauntlet",desc:"+150 mushrooms per click",base:420000,mult:1.35,click:150},
+ {id:"fab",name:"Spore Factory",desc:"+2,500 mushrooms per second",base:6000000,mult:1.18,sec:2500},
+ {id:"reak",name:"Mushroom Reactor",desc:"+15,000 mushrooms per second",base:100000000,mult:1.18,sec:15000},
+ {id:"mond",name:"Moon Garden",desc:"+100,000 mushrooms per second",base:1800000000,mult:1.18,sec:100000}
 ];
 DEFS.sort((a,b)=>a.base-b.base);
 const ICON={hand:"🧤",korb:"🧺",kel:"🕳️",gew:"🌱",lab:"🧪",wald:"🌲",glueck:"🍀",spat:"⛏️",zh:"✨",fab:"🏭",reak:"⚛️",mond:"🌙"};
@@ -509,13 +516,46 @@ function renderSkills(){
 $("skills").addEventListener("click",e=>{const b=e.target.closest("[data-skill]");if(!b||b.disabled)return;
   const k=SKILLS.find(x=>x.id===b.dataset.skill);if(!k||skillPoints()<1||skillLevel(k.id)>=k.max)return;
   s.skills[k.id]=skillLevel(k.id)+1;save();render();renderSkills();uiSfx()});
-const BOTS=[["Alex",1.2e9],["Jordan",3.5e8],["Taylor",8e7],["Morgan",1.2e7],["Casey",9e5],["Riley",1.2e5],["Quinn",1.5e4],["Sam",1200]];
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+/* ---------- Online-Ranking (echte Spieler, Abgleich alle 10 Minuten) ---------- */
+const BOARD_MS=10*60*1000;
+const net={db:null,uid:null,write:true,list:[],last:0,state:"loading"};
+async function netInit(){
+  try{
+    if(!window.claude||!claude.use){net.state="offline";return}
+    const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
+    if(!db||!user){net.state="offline";return}
+    net.uid=await user.id();
+    if(!net.uid){net.state="offline";return}
+    try{net.write=(await user.can("data.write"))!==false}catch(e){}
+    net.db=db;
+  }catch(e){net.state="offline"}
+}
+let netBusy=false;
+async function netSync(){
+  if(!net.db||netBusy)return;netBusy=true;
+  try{
+    if(net.write&&s.total>0)await net.db.doc("scores/"+net.uid).set({name:(s.name||"Player").slice(0,14),total:Math.floor(s.total),t:Date.now()});
+    const q=await net.db.collection("scores").orderBy("total","desc").limit(100).get();
+    net.list=q.docs.map(d=>{const v=d.data()||{};return{id:d.id,n:String(v.name||"Player").slice(0,14),v:Number(v.total)||0}}).filter(p=>Number.isFinite(p.v));
+    net.last=Date.now();net.state="ok";
+  }catch(e){net.state="error"}
+  netBusy=false;renderBoard();
+}
+let nameSyncT=0;
+function netSyncSoon(){clearTimeout(nameSyncT);nameSyncT=setTimeout(netSync,3000)}
 function renderBoard(){
   const el=$("board");if(el.hidden)return;
-  const me=s.name||"You",L=Math.max(2e9,s.total*1.5+1e6);
-  const list=[{n:"Admin",v:L,king:1}].concat(BOTS.map(b=>({n:b[0],v:b[1]})),[{n:me,v:s.total,me:1}]).sort((a,b)=>b.v-a.v);
-  setHTML($("rows"),list.map((p,i)=>'<div class="row'+(p.me?' me':'')+(p.king?' king':'')+'"><span>'+(i+1)+'. '+(p.king?'👑 ':'')+esc(p.n)+'</span><b>'+fmt(p.v)+'</b></div>').join(""));
+  const me=s.name||"You";
+  const list=net.list.filter(p=>p.id!==net.uid).map(p=>({n:p.n,v:p.v}));
+  list.push({n:me,v:s.total,me:1});
+  list.sort((a,b)=>b.v-a.v);
+  let note;
+  if(net.state==="offline")note="Online ranking is only available in the shared version while signed in.";
+  else if(net.state==="loading")note="Loading players...";
+  else if(net.state==="error")note="Could not reach the ranking. Trying again in 10 minutes.";
+  else note="Updates every 10 minutes"+(net.last?" · last update "+new Date(net.last).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"")+(net.write?"":" · view only");
+  setHTML($("rows"),list.map((p,i)=>'<div class="row'+(p.me?' me':'')+'"><span>'+(i+1)+'. '+esc(p.n)+'</span><b>'+fmt(p.v)+'</b></div>').join("")+'<small style="color:var(--muted);padding:4px 2px">'+note+'</small>');
 }
 
 /* ---------- Persistence ---------- */
@@ -563,6 +603,34 @@ function idleLoop(){clearTimeout(idleT);idleT=setTimeout(()=>{
   idleLoop()},3500+Math.random()*5500)}
 idleLoop();
 
+/* ---------- Feuer: schnelles Klicken lässt den Pilz brennen ---------- */
+const FIRE_GAP=300,   /* max. Pause (ms) zwischen zwei Klicks, damit die Combo weiterläuft */
+      FIRE_NEED=10,   /* so viele schnelle Klicks hintereinander entzünden den Pilz */
+      FIRE_END=700;   /* so lange ohne Klick (ms), dann geht das Feuer aus */
+let combo=0,lastComboT=0,burning=false,fireT=0;
+function fireCombo(t){combo=(t-lastComboT<FIRE_GAP)?combo+1:1;lastComboT=t;if(!burning&&combo>=FIRE_NEED)setFire(true)}
+function emitFlames(){
+  const cap=low?40:120;if(P.length>=cap-6)return;
+  const r=updRect(),n=low?1:(rm?1:3);
+  for(let i=0;i<n;i++){
+    const l=.05+Math.random()*.2;
+    P.push({fl:1,x:r.left+r.width*(.12+Math.random()*.76),y:r.top+r.height*(.18+Math.random()*.38),vx:(Math.random()-.5)*.8,vy:-(1.2+Math.random()*2.2),
+      r:(low?7:5)+Math.random()*(low?9:8)*r.width/220,l:1,d:.035+Math.random()*.03,ph:Math.random()*6.283});
+  }
+  kick();
+}
+function setFire(v){
+  if(burning===v)return;burning=v;
+  $("mushroom").classList.toggle("burning",v);
+  clearInterval(fireT);fireT=0;
+  if(v){
+    const r=updRect();burst(r.left+r.width/2,r.top+r.height*.3,true,"#ff9a1f");
+    sweep(160,620,.4,.14,0);tone(330,.5,.08,.05,"triangle");mushAnim(true);
+    emitFlames();fireT=setInterval(emitFlames,low?90:55);
+  }
+}
+setInterval(()=>{if(burning&&(Date.now()-lastComboT>FIRE_END||document.hidden)){combo=0;setFire(false)}},100);
+
 /* ---------- Clicking (optimized for mobile) ---------- */
 let PR=null;
 const updRect=()=>{const r=$("mushroom").getBoundingClientRect();PR=r;return r};
@@ -573,7 +641,7 @@ mushroomEl.addEventListener("contextmenu",e=>e.preventDefault());
 
 /* Maus/Touch lösen schon pointerdown aus (detail>0); Tastatur-Klicks haben detail===0 */
 mushroomEl.addEventListener("click",e=>{if(e.detail===0)hit(e)});
-function hit(e){lastHit=Date.now();
+function hit(e){lastHit=Date.now();fireCombo(lastHit);
   const crit=Math.random()<critP(),g=perClick()*(crit?(5+skillLevel("crit")*2):1);
   s.n+=g;s.total+=g;s.clicks=(s.clicks||0)+1;if(crit)s.crits=(s.crits||0)+1;render();
   let mx=e&&e.clientX,my=e&&e.clientY;if(!mx&&!my){const pr=updRect();mx=pr.left+pr.width/2;my=pr.top+pr.height/2}
@@ -609,6 +677,8 @@ function loop(){
     if(p.txt){const k=(performance.now()-p.t0)/1000;if(k>=1){p.l=0;continue}
       const sc=k<.2?.3+k/2:1-k;if(k<.2)c2.fillStyle=p.crit?"#ffe27a":"#fff6d6";else{c2.fillStyle=p.crit?"#ffe27a":"#fff6d6";c2.globalAlpha=1-k;}
       c2.font=p.f;c2.textAlign="center";const px=p.x+p.dx*k,py=p.y-k*78; c2.save();c2.translate(px,py);c2.scale(1+Math.sin(Math.min(k/.18,1)*Math.PI)*.18,1+Math.sin(Math.min(k/.18,1)*Math.PI)*.18);c2.lineJoin="round";c2.lineWidth=p.crit?5:4;c2.strokeStyle=p.crit?"#7b3d00":"rgba(38,48,31,.9)";if(!low){c2.shadowColor=p.crit?"#ffb300":"rgba(0,0,0,.35)";c2.shadowBlur=p.crit?18:7}c2.strokeText(p.txt,0,0);c2.fillStyle=p.crit?"#ffe27a":"#fff6d6";c2.fillText(p.txt,0,0);if(p.crit){c2.font="900 12px sans-serif";c2.fillStyle="#fff";c2.fillText("CRITICAL!",0,-25)}c2.restore();}
+    else if(p.fl){p.x+=p.vx+Math.sin(p.l*9+p.ph)*.6;p.y+=p.vy;p.r*=.965;c2.globalAlpha=Math.max(p.l,0)*.85;
+      c2.fillStyle=p.l>.66?"#ffe27a":p.l>.33?"#ff9a1f":"#e2431f";c2.beginPath();c2.arc(p.x,p.y,Math.max(p.r,.5),0,6.283);c2.fill();}
     else if(p.ring){p.ring+=4;c2.strokeStyle=p.c||"#e8b923";c2.lineWidth=2;c2.beginPath();c2.arc(p.x,p.y,p.ring,0,6.283);c2.stroke();}
     else{p.x+=p.vx;p.y+=p.vy;p.vy+=.08;c2.fillStyle=p.c;c2.beginPath();c2.arc(p.x,p.y,p.r,0,6.283);c2.fill();}}
   c2.globalAlpha=1;raf=P.length?requestAnimationFrame(loop):0;
@@ -666,7 +736,7 @@ $("imp-do").onclick=()=>{const data=decodeSave($("savetext").value),btn=$("imp-d
 
 /* Reset */
 let rt=0;$("reset").onclick=()=>{const b=$("reset");if(!rt){b.textContent="Confirm? Click again";rt=setTimeout(()=>{rt=0;b.textContent="Reset all progress"},2500);return}clearTimeout(rt);rt=0;b.textContent="Reset all progress";s=sanitize(null);prevDrawn=-1;$("nm").value="";save();drawn=-1;render();$("stage").animate([{opacity:.2},{opacity:1}],{duration:400})};
-$("nm").value=s.name||"";$("nm").oninput=e=>{s.name=e.target.value.trim().slice(0,14);renderBoard();saveSoon()};
+$("nm").value=s.name||"";$("nm").oninput=e=>{s.name=e.target.value.trim().slice(0,14);renderBoard();saveSoon();netSyncSoon()};
 
 /* Win Modal */
 function win(){s.won=true;save();$("winTxt").textContent="You harvested "+fmt(s.total)+" mushrooms and built the Moon Garden!";$("win").hidden=false;$("winBtn").focus();winSfx();for(let i=0;i<6;i++)setTimeout(()=>burst(innerWidth*(.15+Math.random()*.7),innerHeight*(.2+Math.random()*.4),true),i*150)}
@@ -691,6 +761,7 @@ requestAnimationFrame(padLoop);
 /* Boot */
 applyTheme();
 document.documentElement.classList.toggle("low",SET.low);syncSettings();render();
+netInit().then(()=>{netSync();setInterval(netSync,BOARD_MS)});
 </script>
 </body>
 </html>
