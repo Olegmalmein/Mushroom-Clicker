@@ -164,6 +164,20 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
 .skill-head,.skill,.stat-hero,.btn,.ta,.win .card,.win button{border-radius:var(--r)}
 .skill-icon{border-radius:calc(var(--r) - 2px)}
 .nm input,select{border-radius:calc(var(--r) - 4px)!important}
+/* ---------- Handy: kompakter Kopfbereich, damit die Liste genug Platz hat ---------- */
+@media(max-width:759.98px){
+ .stage-container{overflow:visible;position:relative;z-index:10}
+ .stage{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:1fr auto 1fr auto;grid-template-areas:"mush lbl" "mush count" "mush rate" "stats stats";column-gap:14px;align-items:center;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 12px}
+ .stage h1{display:none}
+ .stagelbl{grid-area:lbl;text-align:left;align-self:end;margin:0}
+ .count{grid-area:count;text-align:left;font-size:2rem}
+ .rate{grid-area:rate;text-align:left;margin:0;align-self:start}
+ #mushroom{grid-area:mush;width:min(116px,30vw);margin:0}
+ .stats{grid-area:stats;max-width:none;width:100%;margin:10px 0 0}
+ .stats div{padding:6px 4px}
+ .stats b{font-size:.95rem}
+ .shop-container{padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+}
 </style>
 </head>
 <body>
@@ -195,7 +209,7 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
         <button class="tab" id="tab2" role="tab" aria-selected="false">Stats</button>
         <button class="tab" id="tab3" role="tab" aria-selected="false">Ranking</button>
         <button class="tab" id="tab4" role="tab" aria-selected="false">Settings</button>
-        <button class="tab" id="tab5" role="tab" aria-selected="false">🌱 Skills <span id="skill-badge" class="skill-badge" hidden>0</span></button>
+        <button class="tab" id="tab5" role="tab" aria-selected="false">Skills <span id="skill-badge" class="skill-badge" hidden>0</span></button>
       </div></div>
       <div id="items" class="shop"></div>
       <div id="stats" class="statlist" hidden></div>
@@ -241,7 +255,7 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
 <script>
 "use strict";
 const IS_MOBILE=navigator.userAgent.includes("Mobile")||window.innerWidth<760;
- 
+
 /* ---------- Data ---------- */
 const DEFS=[
  {id:"hand",name:"Better Gloves",desc:"+1 mushroom per click",base:15,mult:1.5,click:1},
@@ -264,7 +278,7 @@ const STG=[["Forest Mushroom","#c9533a","#a03420","#f6efdc","#e9dfc4",""],["Blue
 const SPOTS=[[60,68,13],[112,46,9],[146,86,14],[92,100,8],[40,100,7],[130,60,6],[78,40,6]];
 const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
- 
+
 /* ---------- Settings ---------- */
 const SET={sound:true,vol:70,particles:!IS_MOBILE,anim:!IS_MOBILE,low:IS_MOBILE,theme:"auto",num:"short",auto:true};
 try{const r=localStorage.getItem("mushroom-farm-set");if(r)Object.assign(SET,JSON.parse(r))}catch(e){}
@@ -278,8 +292,9 @@ function applyTheme(){
 }
 const rm=matchMedia("(prefers-reduced-motion:reduce)").matches;
 let low=SET.low;
- 
+
 /* ---------- State ---------- */
+const SKILL_MAX=3;
 function sanitize(o){
   const r={n:0,total:0,own:{},skills:{}};
   if(!o||typeof o!=="object")return r;
@@ -288,7 +303,7 @@ function sanitize(o){
   const ow=o.own&&typeof o.own==="object"?o.own:{};
   DEFS.forEach(d=>{let v=Math.floor(num(ow[d.id]));if(d.max)v=Math.min(v,d.max);if(v)r.own[d.id]=v});
   const sk=o.skills&&typeof o.skills==="object"?o.skills:{};
-  Object.keys(sk).forEach(k=>{const v=Math.min(5,Math.floor(num(sk[k])));if(v)r.skills[k]=v});
+  Object.keys(sk).forEach(k=>{const v=Math.min(SKILL_MAX,Math.floor(num(sk[k])));if(v)r.skills[k]=v});
   if(typeof o.name==="string")r.name=o.name.slice(0,14);
   r.time=num(o.time);r.clicks=Math.floor(num(o.clicks));r.crits=Math.floor(num(o.crits));
   if(o.won)r.won=true;
@@ -298,21 +313,21 @@ let s=sanitize(null);
 try{const r=localStorage.getItem("mushroom-farm-v2");if(r)s=sanitize(JSON.parse(r))}catch(e){}
 const own=d=>s.own[d.id]||0;
 const cost=d=>Math.ceil(d.base*Math.pow(d.mult,own(d)));
-const skillMult=id=>1+skillLevel(id)*({strong:.25,harvest:.10,wisdom:.01}[id]||0);
-const allGain=()=>skillMult("harvest")*(1+skillLevel("wisdom")*.01*Math.floor(level()/10));
+const skillMult=id=>1+skillLevel(id)*({strong:.40,harvest:.15,wisdom:.02}[id]||0);
+const allGain=()=>skillMult("harvest")*(1+skillLevel("wisdom")*.02*Math.floor(level()/10));
 const perClick=()=>((1+DEFS.reduce((a,d)=>a+(d.click||0)*own(d),0))*skillMult("strong")*allGain());
-const perSec=()=>DEFS.reduce((a,d)=>a+(d.sec||0)*own(d),0)*(1+skillLevel("mycelium")*.15)*allGain();
-const critP=()=>Math.min(.75,.1+DEFS.reduce((a,d)=>a+(d.crit||0)*own(d),0)+skillLevel("keen")*.02);
+const perSec=()=>DEFS.reduce((a,d)=>a+(d.sec||0)*own(d),0)*(1+skillLevel("mycelium")*.25)*allGain();
+const critP=()=>Math.min(.75,.1+DEFS.reduce((a,d)=>a+(d.crit||0)*own(d),0)+skillLevel("keen")*.04);
 const level=()=>DEFS.reduce((a,d)=>a+own(d),0);
 const stage=()=>Math.min(9,Math.floor(level()/10));
- 
+
 const SHORT=[[1e24,"Sp"],[1e21,"Sx"],[1e18,"Qi"],[1e15,"Qa"],[1e12,"T"],[1e9,"B"],[1e6,"M"],[1e3,"k"]];
 function fmt(v){
   if(SET.num==="full")return Math.floor(v).toLocaleString("en-US");
   for(const [lim,suf] of SHORT)if(v>=lim)return (v/lim).toFixed(v/lim<10?2:v/lim<100?1:0)+suf;
   return Math.floor(v).toLocaleString("en-US");
 }
- 
+
 /* ---------- Audio ---------- */
 let ac=null,master=null,muted=!SET.sound;
 function audio(){
@@ -346,7 +361,7 @@ function sweep(f1,f2,dur,vol,delay){
 const PENT=[0,2,4,7,9,12,14,16];
 const rnd=()=>Math.pow(2,PENT[Math.floor(Math.random()*PENT.length)]/12)*(1+(Math.random()-.5)*.02);
 let lastPop=0,lastBuy=0,buyStreak=0;
- 
+
 function popSfx(crit){
   if(muted)return;const now=performance.now();
   if(now-lastPop<40)return;lastPop=now;
@@ -364,7 +379,7 @@ function buySfx(item){
 function evolveSfx(){[523.25,659.25,783.99,1046.5,1318.5,1568].forEach((f,i)=>tone(f,1.5,.13,i*.09))}
 function winSfx(){[523.25,659.25,783.99,1046.5,783.99,1046.5,1318.5,1568].forEach((f,i)=>tone(f,1.7,.13,i*.13))}
 function uiSfx(){tone(660,.12,.09,0,"triangle")}
- 
+
 /* ---------- Shop ---------- */
 const box=$("items");
 const btns=DEFS.map(d=>{
@@ -382,7 +397,7 @@ const btns=DEFS.map(d=>{
   };
   box.appendChild(b);return b;
 });
- 
+
 /* ---------- Rendering ---------- */
 let rq=0,booted=false,drawn=-1;
 function render(){if(rq)return;rq=requestAnimationFrame(()=>{rq=0;renderNow()})}
@@ -430,24 +445,24 @@ function renderStats(){
     '<div class="stat-section"><h3>🌲 Progress</h3>'+R("Mushroom stage",STG[stage()][0]+" ("+(stage()+1)+"/10)")+R("Upgrade levels",level())+R("Play time",(h?h+"h ":"")+m+"m "+sc+"s")+R("Moon Garden reached",s.won?"🏆 Yes":"Not yet")+'</div>');
 }
 const SKILLS=[
- {id:"strong",icon:"💪",name:"Forager's Grip",desc:"+25% mushrooms per click per rank",max:5},
- {id:"mycelium",icon:"🕸️",name:"Living Mycelium",desc:"+15% passive production per rank",max:5},
- {id:"keen",icon:"🍀",name:"Lucky Spores",desc:"+2% critical chance per rank",max:5},
- {id:"crit",icon:"💥",name:"Critical Bloom",desc:"Critical hits become 1× stronger per rank",max:5},
- {id:"harvest",icon:"🧺",name:"Deep Pockets",desc:"+10% to all mushroom gains per rank",max:5},
- {id:"wisdom",icon:"🌟",name:"Ancient Wisdom",desc:"+1% bonus per rank for every 10 upgrade levels",max:5}
+ {id:"strong",icon:"💪",name:"Forager's Grip",desc:"+40% mushrooms per click per rank",max:SKILL_MAX},
+ {id:"mycelium",icon:"🕸️",name:"Living Mycelium",desc:"+25% passive production per rank",max:SKILL_MAX},
+ {id:"keen",icon:"🍀",name:"Lucky Spores",desc:"+4% critical chance per rank",max:SKILL_MAX},
+ {id:"crit",icon:"💥",name:"Critical Bloom",desc:"Critical multiplier +2× per rank (base 5×)",max:SKILL_MAX},
+ {id:"harvest",icon:"🧺",name:"Deep Pockets",desc:"+15% to all mushroom gains per rank",max:SKILL_MAX},
+ {id:"wisdom",icon:"🌟",name:"Ancient Wisdom",desc:"+2% bonus per rank for every 10 upgrade levels",max:SKILL_MAX}
 ];
-const skillLevel=id=>Math.max(0,Math.min(5,Math.floor(Number(s.skills[id])||0)));
-const SP_START=10,SP_STEP=5;
+const skillLevel=id=>Math.max(0,Math.min(SKILL_MAX,Math.floor(Number(s.skills[id])||0)));
+const SP_START=10,SP_STEP=10;
 const earnedPoints=()=>level()<SP_START?0:1+Math.floor((level()-SP_START)/SP_STEP);
-const skillUnlock=i=>SP_START+i*SP_STEP;
+const skillUnlock=i=>SP_START+i*5;
 const skillPoints=()=>Math.max(0,earnedPoints()-SKILLS.reduce((n,k)=>n+skillLevel(k.id),0));
 function renderSkills(){
  const el=$("skills");const badge=$("skill-badge");if(badge){const pts=skillPoints();badge.textContent=pts;badge.hidden=pts<=0;}
  if(el.hidden)return;
  const pts=skillPoints();
- setHTML(el,'<div class="skill-head"><div><b>🌱 Mycelium Skilltree</b><small style="display:block;color:var(--muted);margin-top:3px">First skill point at 10 upgrade levels, then 1 more every 5 levels.</small></div><span class="skill-badge">'+pts+' pts</span></div><div class="skill-grid">'+SKILLS.map(k=>{const lv=skillLevel(k.id),locked=level()<skillUnlock(SKILLS.indexOf(k));return '<div class="skill"><div class="skill-icon">'+k.icon+'</div><div><b>'+k.name+' <span style="color:var(--muted)">Lv '+lv+'/'+k.max+'</span></b><small>'+k.desc+(locked?' · Unlocks at '+skillUnlock(SKILLS.indexOf(k))+' upgrade levels':'')+'</small></div><button class="btn" data-skill="'+k.id+'" '+(pts<1||lv>=k.max||locked?'disabled':'')+'>Upgrade · 1 pt</button></div>'}).join('')+'</div><small style="color:var(--muted)">Skill points are permanent until you reset your progress. Choose a build that suits your playstyle.</small>');
- 
+ setHTML(el,'<div class="skill-head"><div><b>🌱 Mycelium Skilltree</b><small style="display:block;color:var(--muted);margin-top:3px">1 skill point per 10 upgrade levels. '+(SKILLS.length*SKILL_MAX)+' points max out every skill.</small></div><span class="skill-badge">'+pts+' pts</span></div><div class="skill-grid">'+SKILLS.map(k=>{const lv=skillLevel(k.id),locked=level()<skillUnlock(SKILLS.indexOf(k));return '<div class="skill"><div class="skill-icon">'+k.icon+'</div><div><b>'+k.name+' <span style="color:var(--muted)">Lv '+lv+'/'+k.max+'</span></b><small>'+k.desc+(locked?' · Unlocks at '+skillUnlock(SKILLS.indexOf(k))+' upgrade levels':'')+'</small></div><button class="btn" data-skill="'+k.id+'" '+(pts<1||lv>=k.max||locked?'disabled':'')+'>Upgrade · 1 pt</button></div>'}).join('')+'</div><small style="color:var(--muted)">Skill points are permanent until you reset your progress. Choose a build that suits your playstyle.</small>');
+
 }
 $("skills").addEventListener("click",e=>{const b=e.target.closest("[data-skill]");if(!b||b.disabled)return;
   const k=SKILLS.find(x=>x.id===b.dataset.skill);if(!k||skillPoints()<1||skillLevel(k.id)>=k.max)return;
@@ -461,13 +476,13 @@ function renderBoard(){
   const list=[{n:"Admin",v:L,king:1}].concat(BOTS.map(b=>({n:b[0],v:b[1]})),[{n:me,v:s.total,me:1}]).sort((a,b)=>b.v-a.v);
   setHTML($("rows"),list.map((p,i)=>'<div class="row'+(p.me?' me':'')+(p.king?' king':'')+'"><span>'+(i+1)+'. '+(p.king?'👑 ':'')+esc(p.n)+'</span><b>'+fmt(p.v)+'</b></div>').join(""));
 }
- 
+
 /* ---------- Persistence ---------- */
 function save(){try{localStorage.setItem("mushroom-farm-v2",JSON.stringify(s));localStorage.setItem("mushroom-farm-set",JSON.stringify(SET))}catch(e){}}
 let svT=0;function saveSoon(){if(svT||!SET.auto)return;svT=setTimeout(()=>{svT=0;save()},1500)}
 setInterval(()=>{if(SET.auto&&!document.hidden)save()},10000);
 addEventListener("pagehide",save);addEventListener("visibilitychange",()=>{if(document.hidden)save()});
- 
+
 /* ---------- Clicking (optimized for mobile) ---------- */
 let PR=null;
 const updRect=()=>{const r=$("mushroom").getBoundingClientRect();PR=r;return r};
@@ -475,11 +490,11 @@ let lastPD=0;
 const mushroomEl=$("mushroom");
 mushroomEl.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;e.preventDefault();hit(e)});
 mushroomEl.addEventListener("contextmenu",e=>e.preventDefault());
- 
+
 /* Maus/Touch lösen schon pointerdown aus (detail>0); Tastatur-Klicks haben detail===0 */
 mushroomEl.addEventListener("click",e=>{if(e.detail===0)hit(e)});
 function hit(e){
-  const crit=Math.random()<critP(),g=perClick()*(crit?(5+skillLevel("crit")):1);
+  const crit=Math.random()<critP(),g=perClick()*(crit?(5+skillLevel("crit")*2):1);
   s.n+=g;s.total+=g;s.clicks=(s.clicks||0)+1;if(crit)s.crits=(s.crits||0)+1;render();
   let mx=e&&e.clientX,my=e&&e.clientY;if(!mx&&!my){const pr=updRect();mx=pr.left+pr.width/2;my=pr.top+pr.height/2}
   if(SET.particles)burst(mx,my,crit);popSfx(crit);
@@ -489,7 +504,7 @@ function hit(e){
 }
 let lastBump=0,last=Date.now();
 setInterval(()=>{const now=Date.now(),dt=(now-last)/1000;last=now;if(!document.hidden){s.time=(s.time||0)+Math.min(dt,1);const g=perSec()*dt;if(g>0){s.n+=g;s.total+=g;render()}}},200);
- 
+
 /* ---------- Particles (FPS optimized for mobile) ---------- */
 const cv=$("fx"),c2=cv.getContext("2d",{alpha:true,desynchronized:false});
 let P=[],raf=0,lastT=0;
@@ -518,12 +533,12 @@ function loop(){
     else{p.x+=p.vx;p.y+=p.vy;p.vy+=.08;c2.fillStyle=p.c;c2.beginPath();c2.arc(p.x,p.y,p.r,0,6.283);c2.fill();}}
   c2.globalAlpha=1;raf=P.length?requestAnimationFrame(loop):0;
 }
- 
+
 /* ---------- Tabs ---------- */
 const PANES=["items","stats","board","settings","skills"];
 function tab(i){PANES.forEach((id,k)=>{$(id).hidden=i!==k+1});[1,2,3,4,5].forEach(k=>{$("tab"+k).classList.toggle("on",i===k);$("tab"+k).setAttribute("aria-selected",i===k?"true":"false")});renderStats();renderBoard();renderSkills()}
 [1,2,3,4,5].forEach(k=>{$("tab"+k).onclick=()=>{tab(k);uiSfx()}});
- 
+
 /* ---------- Settings Wiring ---------- */
 function syncSettings(){$("set-sound").checked=SET.sound;$("set-vol").value=SET.vol;$("volval").textContent=SET.vol+" %";
   $("set-part").checked=SET.particles;$("set-anim").checked=SET.anim;$("set-low").checked=SET.low;
@@ -544,7 +559,7 @@ $("set-theme").onchange=e=>{SET.theme=e.target.value;applyTheme();saveSet()};
 $("set-num").onchange=e=>{SET.num=e.target.value;saveSet();render()};
 $("set-auto").onchange=e=>{SET.auto=e.target.checked;saveSet()};
 // Optional mute control is not present in this version of the interface.
- 
+
 /* Save Import/Export */
 function encodeSave(){return btoa(unescape(encodeURIComponent(JSON.stringify({v:2,s:s,set:SET}))));}
 function decodeSave(str){str=(str||"").trim();if(!str)return null;try{if(str[0]==="{")return JSON.parse(str);return JSON.parse(decodeURIComponent(escape(atob(str))))}catch(e){return null}}
@@ -557,15 +572,15 @@ $("imp-do").onclick=()=>{const data=decodeSave($("savetext").value),btn=$("imp-d
   s=sanitize(data.s);
   if(data.set&&typeof data.set==="object")for(const k in SET)if(k in data.set&&typeof data.set[k]===typeof SET[k])SET[k]=data.set[k];
   applySettings();prevDrawn=-1;$("nm").value=s.name||"";save();render();flash("Loaded!");uiSfx()};
- 
+
 /* Reset */
 let rt=0;$("reset").onclick=()=>{const b=$("reset");if(!rt){b.textContent="Confirm? Click again";rt=setTimeout(()=>{rt=0;b.textContent="Reset all progress"},2500);return}clearTimeout(rt);rt=0;b.textContent="Reset all progress";s=sanitize(null);prevDrawn=-1;$("nm").value="";save();drawn=-1;render();$("stage").animate([{opacity:.2},{opacity:1}],{duration:400})};
 $("nm").value=s.name||"";$("nm").oninput=e=>{s.name=e.target.value.trim().slice(0,14);renderBoard();saveSoon()};
- 
+
 /* Win Modal */
 function win(){s.won=true;save();$("winTxt").textContent="You harvested "+fmt(s.total)+" mushrooms and built the Moon Garden!";$("win").hidden=false;$("winBtn").focus();winSfx();for(let i=0;i<6;i++)setTimeout(()=>burst(innerWidth*(.15+Math.random()*.7),innerHeight*(.2+Math.random()*.4),true),i*150)}
 $("winBtn").onclick=()=>{$("win").hidden=true};addEventListener("keydown",e=>{if(e.key==="Escape")$("win").hidden=true});
- 
+
 /* Gamepad Support */
 let gi=0,prevB=[],axT=0,aT=0,padOn=false;
 const curTab=()=>PANES.findIndex(id=>!$(id).hidden)+1||1;
@@ -581,7 +596,7 @@ function padLoop(t){const pads=navigator.getGamepads?[...navigator.getGamepads()
     prevB=g.buttons.map(b=>b.pressed);requestAnimationFrame(padLoop);}
   else{if(padOn){padOn=false;document.body.classList.remove("pad");prevB=[]}setTimeout(()=>requestAnimationFrame(padLoop),400)}}
 requestAnimationFrame(padLoop);
- 
+
 /* Boot */
 applyTheme();
 document.documentElement.classList.toggle("low",SET.low);syncSettings();render();
