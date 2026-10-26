@@ -36,6 +36,10 @@ body{margin:0;color:var(--ink);font-family:var(--font-main);overflow:hidden;back
 /* Canvas Background im echten Vollbild */
 #bg{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:0}
 
+/* FPS Anzeige */
+#fps-counter{position:fixed;top:8px;right:12px;z-index:200;background:color-mix(in srgb,var(--surface) 80%,transparent);border:1px solid color-mix(in srgb,var(--ink) 15%,transparent);padding:2px 8px;border-radius:6px;font-family:monospace;font-size:0.75rem;color:var(--muted);pointer-events:none;backdrop-filter:blur(4px)}
+#fps-counter.hidden{display:none}
+
 /* Standard PC Layout */
 main{height:100vh;height:100dvh;display:flex;flex-direction:row;gap:20px;padding:20px 16px 40px;max-width:880px;margin:0 auto;overflow:hidden;position:relative;z-index:1}
 main>*{min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
@@ -98,9 +102,8 @@ body.sheet #fx{z-index:40}
 .tab .skill-badge{min-width:22px;height:22px;padding:0 6px;font-size:.72rem;margin-left:2px;vertical-align:middle}
 .tab:focus-visible{outline:3px solid var(--accent)}
 
-/* Items */
-.item{position:relative;display:grid;grid-template-columns:2.2rem 1fr auto;align-items:center;gap:8px;text-align:left;width:100%;padding:11px 13px;color:var(--ink);border:2px solid transparent;border-left:5px solid var(--c,#8b8b80);border-radius:10px;font:inherit;cursor:pointer;
-background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--surface)) var(--p,0%),var(--surface) var(--p,0%));transition:transform .08s,border-color .08s,opacity .15s}
+/* Items - Korrektur gegen unerwünschte Hintergrund-Linien/Striche */
+.item{position:relative;display:grid;grid-template-columns:2.2rem 1fr auto;align-items:center;gap:8px;text-align:left;width:100%;padding:11px 13px;color:var(--ink);border:2px solid transparent;border-left:5px solid var(--c,#8b8b80);border-radius:10px;font:inherit;cursor:pointer;background-color:var(--surface);transition:transform .08s,border-color .08s,opacity .15s}
 .item:disabled{opacity:.75;cursor:not-allowed}
 .item.locked{opacity:.4;background:var(--surface)}
 .item:not(:disabled):hover{border-color:var(--c)}
@@ -234,7 +237,7 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
  body.sheet #scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:25}
 }
 
-.skill{border-left:5px solid var(--c,#8b8b80);background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--surface)) var(--p,0%),var(--surface) var(--p,0%))}
+.skill{border-left:5px solid var(--c,#8b8b80);background-color:var(--surface)}
 .skill-icon{background:color-mix(in srgb,var(--c,#8b8b80) 24%,transparent)}
 .skill .btn{background:var(--c,var(--ok));color:color-mix(in srgb,var(--c,#000) 18%,#000)}
 .skill .btn:disabled{opacity:.5}
@@ -255,6 +258,7 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
 <body>
 <canvas id="bg" aria-hidden="true"></canvas>
 <canvas id="fx"></canvas>
+<div id="fps-counter" class="hidden">FPS: 60</div>
 <div class="win" id="win" role="dialog" aria-modal="true" aria-labelledby="winH" hidden><div class="card"><h2 id="winH">🏆 You won!</h2><p id="winTxt"></p><button id="winBtn">Keep playing</button></div></div>
 <div id="scrim"></div>
 <main>
@@ -298,7 +302,9 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
           <label class="switch"><input type="checkbox" id="set-sound"><span class="track"></span><span class="knob"></span></label></div>
         <div class="srow"><span class="lbl">Volume<small id="volval">70 %</small></span>
           <input type="range" id="set-vol" min="0" max="100" step="5" value="70" style="flex:0 0 40%;accent-color:var(--ok)"></div>
-        <h3>Visuals</h3>
+        <h3>Visuals &amp; Performance</h3>
+        <div class="srow"><span class="lbl">FPS Counter<small>Show real-time frame rate</small></span>
+          <label class="switch"><input type="checkbox" id="set-fps"><span class="track"></span><span class="knob"></span></label></div>
         <div class="srow"><span class="lbl">Particles<small>Spores on harvest</small></span>
           <label class="switch"><input type="checkbox" id="set-part"><span class="track"></span><span class="knob"></span></label></div>
         <div class="srow"><span class="lbl">Mushroom animation<small id="manim-sub">How the mushroom reacts to clicks</small></span>
@@ -370,7 +376,7 @@ const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
 /* Settings */
-const SET={sound:true,vol:70,particles:!IS_MOBILE,anim:!IS_MOBILE,low:IS_MOBILE,theme:"auto",font:"georgia",bg:"spores",num:"short",auto:true,manim:"squish",idle:true};
+const SET={sound:true,vol:70,particles:!IS_MOBILE,anim:!IS_MOBILE,low:IS_MOBILE,theme:"auto",font:"georgia",bg:"spores",num:"short",auto:true,manim:"squish",idle:true,fps:false};
 try{const r=localStorage.getItem("mushroom-farm-set");if(r)Object.assign(SET,JSON.parse(r))}catch(e){}
 const THEMES=["auto","light","dark","ocean","midnight","sunset","lavender","sakura"];
 const FONTS=["georgia","trebuchet","rounded","mono","impact"];
@@ -424,7 +430,6 @@ const level=()=>DEFS.reduce((a,d)=>a+own(d),0);
 const MAXSTAGE=19;
 const stage=()=>Math.min(MAXSTAGE,Math.floor(level()/10));
 
-/* KAUFBARE SKILLPUNKTE (Skaliert exponentiell) */
 const getPointCost=()=>Math.floor(1000 * Math.pow(3.5, s.boughtPoints||0));
 const skillPoints=()=>(s.boughtPoints||0) - SKILLS.reduce((n,k)=>n+skillLevel(k.id),0);
 
@@ -579,8 +584,6 @@ function renderNow(){
     setT(b.querySelector(".cost"),mx?"Max":fmt(c)+" 🍄");setT(b.querySelector(".own"),own(d)?"Lv "+own(d):"");
     b.querySelector(".tx b").textContent=hid?"???":d.name;b.querySelector(".tx small").textContent=hid?"Locked":d.desc;
     b.querySelector(".ic").textContent=hid?"🔒":(ICON[d.id]||"🍄");
-    const pp=Math.round(clamp(s.n/c*100,0,100)/5)*5;
-    if(b._p!==pp){b._p=pp;b.style.setProperty("--p",pp+"%")}
     const cc=hid?"#8b8b80":UCOL[d.id];if(b._c!==cc){b._c=cc;b.style.setProperty("--c",cc)}
   });
 }
@@ -624,8 +627,8 @@ function renderSkills(){
   '<div class="srow" style="margin-bottom:10px;background:var(--surface)"><div><b>Buy Skill Point</b><small style="display:block;color:var(--muted)">Cost: '+fmt(cost)+' 🍄</small></div><button class="btn" id="buy-pt-btn" '+(s.n<cost?'disabled':'')+'>Buy 1 Pt</button></div>'+
   autoToggleHtml+
   '<div class="skill-grid">'+
-  SKILLS.map(k=>{const lv=skillLevel(k.id),full=lv>=k.max,pct=Math.round(lv/k.max*100);
-   return '<div class="skill'+(full?' maxed':'')+'" style="--c:'+(SKCOL[k.id]||"#8b8b80")+';--p:'+pct+'%"><div class="skill-icon">'+k.icon+'</div><div><b>'+k.name+' <span class="sk-lv">Lv '+lv+'/'+k.max+'</span><span class="pips">'+Array.from({length:k.max},(_,i)=>'<i'+(i<lv?' class="on"':'')+'></i>').join('')+'</span></b><small>'+k.desc+'</small></div><button class="btn" data-skill="'+k.id+'" '+(pts<1||full?'disabled':'')+'>'+(full?'Max':'Upgrade · 1 pt')+'</button></div>'}).join('')+
+  SKILLS.map(k=>{const lv=skillLevel(k.id),full=lv>=k.max;
+   return '<div class="skill'+(full?' maxed':'')+'" style="--c:'+(SKCOL[k.id]||"#8b8b80")+'"><div class="skill-icon">'+k.icon+'</div><div><b>'+k.name+' <span class="sk-lv">Lv '+lv+'/'+k.max+'</span><span class="pips">'+Array.from({length:k.max},(_,i)=>'<i'+(i<lv?' class="on"':'')+'></i>').join('')+'</span></b><small>'+k.desc+'</small></div><button class="btn" data-skill="'+k.id+'" '+(pts<1||full?'disabled':'')+'>'+(full?'Max':'Upgrade · 1 pt')+'</button></div>'}).join('')+
   '</div>');
 
  const buyBtn=$("buy-pt-btn");
@@ -854,6 +857,19 @@ setInterval(()=>{
 let lastBump=0,last=Date.now(),lastRender=0;
 setInterval(()=>{const now=Date.now(),dt=(now-last)/1000;last=now;if(!document.hidden){s.time=(s.time||0)+Math.min(dt,1);const g=perSec()*dt;if(g>0){s.n+=g;s.total+=g;if(!low||now-lastRender>600){lastRender=now;render()}}}},200);
 
+/* FPS Counter Loop */
+let frameCount=0,lastFpsT=performance.now();
+function updateFps(t){
+  frameCount++;
+  if(t-lastFpsT>=1000){
+    const fps=Math.round((frameCount*1000)/(t-lastFpsT));
+    const fc=$("fps-counter");
+    if(fc&&!fc.hidden)fc.textContent=`FPS: ${fps}`;
+    frameCount=0;
+    lastFpsT=t;
+  }
+}
+
 /* Partikel Canvas */
 const cv=$("fx"),c2=cv.getContext("2d",{alpha:true,desynchronized:false});
 let P=[],raf=0,lastT=0;
@@ -875,8 +891,9 @@ function popText(x,y,t,crit,col,big){
   for(let i=P.length-1;i>=0;i--)if(P[i].txt&&++c>6)P.splice(i,1);kick();
 }
 function kick(){if(low)return;if(!raf){lastT=0;raf=requestAnimationFrame(loop)}}
-function loop(){
+function loop(t){
   if(low){c2.clearRect(0,0,innerWidth,innerHeight);P=[];raf=0;return}
+  updateFps(t);
   c2.clearRect(0,0,innerWidth,innerHeight);P=P.filter(p=>p.l>0);
   for(const p of P){p.l-=p.d||0.03;c2.globalAlpha=Math.max(p.l,0);
     if(p.txt){const k=(performance.now()-p.t0)/1000;if(k>=1){p.l=0;continue}
@@ -973,6 +990,7 @@ mq.addEventListener("change",()=>setSheet(false));
 /* Settings UI Controls */
 function syncSettings(){
   $("set-sound").checked=SET.sound;$("set-vol").value=SET.vol;$("volval").textContent=SET.vol+" %";
+  $("set-fps").checked=SET.fps;$("fps-counter").classList.toggle("hidden",!SET.fps);
   $("set-part").checked=SET.particles;$("set-anim").checked=SET.anim;$("set-low").checked=SET.low;
   $("set-theme").value=SET.theme;if(!(SET.font in FONTS))SET.font="georgia";$("set-font").value=SET.font;if(!(SET.bg in BGS))SET.bg="spores";$("set-bg").value=SET.bg;if(!(SET.manim in MANIMS))SET.manim="squish";$("set-manim").value=SET.manim;$("set-idle").checked=SET.idle;$("manim-sub").textContent=rm?"Device has reduce-motion on, so animations are gentler":"How the mushroom reacts to clicks";document.documentElement.dataset.manim=SET.manim;$("set-num").value=SET.num;$("set-auto").checked=SET.auto;
 }
@@ -994,6 +1012,7 @@ function saveSet(){try{localStorage.setItem("mushroom-farm-set",JSON.stringify(S
 $("set-sound").onchange=e=>{SET.sound=e.target.checked;muted=!SET.sound;if(SET.sound)audio();saveSet();syncSettings()};
 $("set-vol").oninput=e=>{SET.vol=+e.target.value;$("volval").textContent=SET.vol+" %";applyVol();saveSet()};
 $("set-vol").onchange=()=>{uiSfx();saveSet()};
+$("set-fps").onchange=e=>{SET.fps=e.target.checked;$("fps-counter").classList.toggle("hidden",!SET.fps);saveSet()};
 $("set-part").onchange=e=>{SET.particles=e.target.checked;saveSet()};
 $("set-anim").onchange=e=>{SET.anim=e.target.checked;saveSet()};
 $("set-low").onchange=e=>{setLow(e.target.checked)};
@@ -1046,7 +1065,7 @@ requestAnimationFrame(padLoop);
 applyTheme();
 applyFont();
 document.documentElement.classList.toggle("low",SET.low);syncSettings();
-if(!SET.low){bgSize();setBg();}
+if(!SET.low){bgSize();setBg();kick();}
 render();
 netInit().then(()=>{netSync();setInterval(netSync,BOARD_MS)});
 </script>
