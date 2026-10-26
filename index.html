@@ -844,7 +844,7 @@ function loop(){
     else if(p.fl){p.x+=p.vx+Math.sin(p.l*9+p.ph)*.6;p.y+=p.vy;p.r*=.965;c2.globalAlpha=Math.max(p.l,0)*.85;
       {const pl=FP[p.pi||1];c2.fillStyle=p.l>.66?pl[0]:p.l>.33?pl[1]:pl[2]}c2.beginPath();c2.arc(p.x,p.y,Math.max(p.r,.5),0,6.283);c2.fill();}
     else if(p.sp){p.x+=p.vx;p.y+=p.vy;const r=p.r*(.6+.4*Math.sin(p.l*14+p.ph));c2.globalAlpha=Math.max(p.l,0);c2.fillStyle=p.c;c2.beginPath();
-      c2.moveTo(p.x,p.y-r);c2.quadraticCurveTo(p.x,p.y,p.x+r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y+r);c2.quadraticCurveTo(p.x,p.y,p.x-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y+r);c2.quadraticCurveTo(p.x,p.y,p.x-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y-r);c2.fill();}
+      c2.moveTo(p.x,p.y-r);c2.quadraticCurveTo(p.x,p.y,p.x+r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y+r);c2.quadraticCurveTo(p.x,p.y,p.x,p.y+r);c2.quadraticCurveTo(p.x,p.y,p.x-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y-r);c2.fill();}
     else if(p.ring){p.ring+=4;c2.strokeStyle=p.c||"#e8b923";c2.lineWidth=2;c2.beginPath();c2.arc(p.x,p.y,p.ring,0,6.283);c2.stroke();}
     else{p.x+=p.vx;p.y+=p.vy;p.vy+=.08;c2.fillStyle=p.c;c2.beginPath();c2.arc(p.x,p.y,p.r,0,6.283);c2.fill();}}
   c2.globalAlpha=1;raf=P.length?requestAnimationFrame(loop):0;
