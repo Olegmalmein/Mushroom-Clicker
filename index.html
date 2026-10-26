@@ -33,8 +33,11 @@ html,body{height:100%;touch-action:manipulation;-webkit-user-select:none;user-se
 input,textarea,select{-webkit-user-select:text;user-select:text}
 body{margin:0;color:var(--ink);font-family:var(--font-main);overflow:hidden;background:var(--bg)}
 
+/* Canvas Background im echten Vollbild */
+#bg{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:0}
+
 /* Mobile-first layout */
-main{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+main{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative;z-index:1}
 main>*{min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
 
 /* Stage section */
@@ -84,7 +87,6 @@ html[data-manim="none"] #mushroom:active{transform:scale(.96)}
 #mushroom.burning::after{opacity:1;animation:firepulse .35s ease-in-out infinite alternate}
 @keyframes firepulse{from{transform:scale(.96)}to{transform:scale(1.08)}}
 body.sheet #fx{z-index:40}
-#bg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;border-radius:inherit}
 
 .count.burning #n{color:#fff3c4;text-shadow:0 0 5px #fff,0 -4px 10px rgb(var(--fa,255,170,40)),0 -9px 18px rgb(var(--fb,255,90,20));animation:numfire .18s ease-in-out infinite alternate}
 @keyframes numfire{from{text-shadow:0 0 4px #fff,0 -2px 8px rgb(var(--fa,255,170,40)),0 -6px 14px rgb(var(--fb,255,90,20)),0 -12px 24px rgba(var(--fb,255,90,20),.7)}to{text-shadow:0 0 6px #fff,2px -4px 10px rgb(var(--fa,255,170,40)),-2px -9px 18px rgb(var(--fb,255,90,20)),0 -16px 30px rgba(var(--fb,255,90,20),.6)}}
@@ -92,7 +94,7 @@ body.sheet #fx{z-index:40}
 @media(prefers-reduced-motion:reduce){#mushroom::before,#mushroom.burning::after{animation:none}}
 
 .stage h1,.stage .stagelbl,.stage .count-wrapper,.stage .rate,.stage .stats{position:relative;z-index:2}
-#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:100}
 
 .stats{display:flex;justify-content:center;gap:8px;margin:0 0 12px;flex-wrap:wrap}
 .stats div{background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(4px);border-radius:10px;padding:6px 12px;min-width:75px;border:1px solid color-mix(in srgb,var(--ink) 8%,transparent)}
@@ -264,13 +266,13 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 30%,var(--su
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+<canvas id="bg" aria-hidden="true"></canvas>
 <canvas id="fx"></canvas>
 <div class="win" id="win" role="dialog" aria-modal="true" aria-labelledby="winH" hidden><div class="card"><h2 id="winH">🏆 You won!</h2><p id="winTxt"></p><button id="winBtn">Keep playing</button></div></div>
 <div id="scrim"></div>
 <main>
 <div class="stage-container">
   <section class="stage" id="stage">
-    <canvas id="bg" aria-hidden="true"></canvas>
     <h1>Mushroom Farm</h1>
     <div class="stagelbl" id="stg"></div>
     <div class="count-wrapper">
@@ -405,7 +407,7 @@ let low=SET.low;
 /* State */
 const SKILL_MAX=3;
 function sanitize(o){
-  const r={n:0,total:0,own:{},skills:{},boughtPoints:0,usedPoints:0};
+  const r={n:0,total:0,own:{},skills:{},boughtPoints:0,usedPoints:0,autoClickerActive:true};
   if(!o||typeof o!=="object")return r;
   const num=v=>{v=Number(v);return Number.isFinite(v)&&v>=0?v:0};
   r.n=num(o.n);r.total=Math.max(num(o.total),r.n);
@@ -414,6 +416,7 @@ function sanitize(o){
   const sk=o.skills&&typeof o.skills==="object"?o.skills:{};
   Object.keys(sk).forEach(k=>{const v=Math.min(SKILL_MAX,Math.floor(num(sk[k])));if(v)r.skills[k]=v});
   r.boughtPoints=Math.floor(num(o.boughtPoints));
+  r.autoClickerActive=o.autoClickerActive!==false;
   if(typeof o.name==="string")r.name=o.name.slice(0,14);
   r.time=num(o.time);r.clicks=Math.floor(num(o.clicks));r.crits=Math.floor(num(o.crits));
   if(o.won)r.won=true;
@@ -479,10 +482,12 @@ const PENT=[0,2,4,7,9,12,14,16];
 const rnd=()=>Math.pow(2,PENT[Math.floor(Math.random()*PENT.length)]/12)*(1+(Math.random()-.5)*.02);
 let lastPop=0,lastBuy=0,buyStreak=0;
 
-function popSfx(crit){
+function popSfx(crit, isAuto=false){
   if(muted)return;const now=performance.now();
-  if(now-lastPop<40)return;lastPop=now;
-  const r=rnd();sweep(230*r,110*r,.13,crit?.3:.2,0);
+  if(isAuto && now-lastPop<120)return;
+  if(!isAuto && now-lastPop<40)return;
+  lastPop=now;
+  const r=rnd();sweep(230*r,110*r,.13,crit?.3:(isAuto?.1:.18),0);
   if(crit){tone(880*r,.7,.14,.01);tone(1320*r,.9,.09,.07);}
 }
 function buySfx(item){
@@ -507,10 +512,19 @@ function noise(dur,vol,f0,f1,delay,q){
   src.connect(f);f.connect(g);g.connect(master);src.start(t);src.stop(t+dur+.05);
   src.onended=()=>{try{g.disconnect()}catch(e){}};
 }
+/* Verbesserter Feuer-SFX (Knuspriger, dynamischer Sound) */
 function fireSfx(on,rk){
-  if(on){noise(.5,.26,300,2600,0,.9);sweep(120,520+rk*120,.45,.14,0);
-    if(!low){[0,1,2].slice(0,rk).forEach(i=>tone(392*Math.pow(1.5,i),.7,.07,.12+i*.08,"triangle"));noise(.25,.1,4000,1500,.1,2)}}
-  else{noise(.45,.14,2000,200,0,.8);sweep(420,110,.35,.09,0)}
+  if(on){
+    noise(.7,.32,220,3200,0,1.2);
+    sweep(180,680+rk*150,.55,.2,0);
+    if(!low){
+      [0,1,2,3].slice(0,rk+1).forEach(i=>tone(440*Math.pow(1.33,i),.8,.09,i*.06,"triangle"));
+      noise(.4,.15,4500,1200,.08,2.5);
+    }
+  }else{
+    noise(.5,.18,1800,150,0,1.0);
+    sweep(500,90,.4,.12,0);
+  }
 }
 function skillSfx(id,lv,max){
   if(muted)return;const up=1+(lv-1)*.12;
@@ -613,8 +627,16 @@ function renderSkills(){
  if(badge){badge.textContent=pts;badge.hidden=pts<=0}
  if(el.hidden)return;
  
+ const autoLv=skillLevel("autoclick");
+ const autoToggleHtml=autoLv>0?`
+  <div class="srow" style="margin-bottom:10px;background:var(--surface)">
+    <div><b>Auto-Clicker Toggle</b><small style="display:block;color:var(--muted)">Turn auto-clicking on or off</small></div>
+    <label class="switch"><input type="checkbox" id="autoclick-toggle" ${s.autoClickerActive?"checked":""}><span class="track"></span><span class="knob"></span></label>
+  </div>`:"";
+
  setHTML(el,'<div class="skill-head"><div><b>Mycelium Skilltree</b><small style="display:block;color:var(--muted);margin-top:3px">Buy skill points with mushrooms to upgrade your stats.</small></div><span class="skill-badge">'+pts+' pts</span></div>'+
   '<div class="srow" style="margin-bottom:10px;background:var(--surface)"><div><b>Buy Skill Point</b><small style="display:block;color:var(--muted)">Cost: '+fmt(cost)+' 🍄</small></div><button class="btn" id="buy-pt-btn" '+(s.n<cost?'disabled':'')+'>Buy 1 Pt</button></div>'+
+  autoToggleHtml+
   '<div class="skill-grid">'+
   SKILLS.map(k=>{const lv=skillLevel(k.id),full=lv>=k.max,pct=Math.round(lv/k.max*100);
    return '<div class="skill'+(full?' maxed':'')+'" style="--c:'+(SKCOL[k.id]||"#8b8b80")+';--p:'+pct+'%"><div class="skill-icon">'+k.icon+'</div><div><b>'+k.name+' <span class="sk-lv">Lv '+lv+'/'+k.max+'</span><span class="pips">'+Array.from({length:k.max},(_,i)=>'<i'+(i<lv?' class="on"':'')+'></i>').join('')+'</span></b><small>'+k.desc+'</small></div><button class="btn" data-skill="'+k.id+'" '+(pts<1||full?'disabled':'')+'>'+(full?'Max':'Upgrade · 1 pt')+'</button></div>'}).join('')+
@@ -629,6 +651,13 @@ function renderSkills(){
        s.boughtPoints=(s.boughtPoints||0)+1;
        uiSfx();save();render();renderSkills();
      }
+   };
+ }
+ const toggleInput=$("autoclick-toggle");
+ if(toggleInput){
+   toggleInput.onchange=e=>{
+     s.autoClickerActive=e.target.checked;
+     uiSfx();save();
    };
  }
 }
@@ -749,20 +778,20 @@ const FP=[null,["#ffe27a","#ff9a1f","#e2431f"],["#fff2a8","#ff7a1a","#c81e1e"],[
 const FCOL=[null,["255,170,40","255,90,20"],["255,150,30","230,50,20"],["140,215,255","60,110,255"]];
 let combo=0,lastComboT=0,fireT=0,fadeTimer=null;
 function fireUI(){const r=fireRank()||1,f=FCOL[r],rt=document.documentElement.style,t="×"+(1+.5*r);rt.setProperty("--fa",f[0]);rt.setProperty("--fb",f[1]);$("cfire").textContent=t}
-function flameAt(x,y,n,rk,sz){if(low||P.length>130)return;for(let i=0;i<n;i++)P.push({fl:1,pi:rk,x:x+(Math.random()-.5)*30,y:y+(Math.random()-.5)*10,vx:(Math.random()-.5)*.8,vy:-(1+Math.random()*1.6),r:(sz||4)+Math.random()*(sz||4),l:1,d:.05+Math.random()*.03,ph:Math.random()*6.283})}
+function flameAt(x,y,n,rk,sz){if(low||P.length>140)return;for(let i=0;i<n;i++)P.push({fl:1,pi:rk,x:x+(Math.random()-.5)*35,y:y+(Math.random()-.5)*12,vx:(Math.random()-.5)*1.0,vy:-(1.5+Math.random()*2.2),r:(sz||5)+Math.random()*(sz||5),l:1,d:.04+Math.random()*.03,ph:Math.random()*6.283})}
 function fireCombo(t){combo=(t-lastComboT<FIRE_GAP)?combo+1:1;lastComboT=t;const r=fireRank();if(r&&!burning&&combo>=12-2*r)setFire(true)}
 function emitFlames(){
   if(low)return;
-  const rk=fireRank()||1,cap=140;if(P.length>=cap-8)return;
-  const r=updRect(),n=(rm?1:2+rk);
+  const rk=fireRank()||1,cap=150;if(P.length>=cap-8)return;
+  const r=updRect(),n=(rm?2:3+rk*2);
   for(let i=0;i<n;i++){
-    P.push({fl:1,pi:rk,x:r.left+r.width*(.12+Math.random()*.76),y:r.top+r.height*(.18+Math.random()*.38),vx:(Math.random()-.5)*.8,vy:-(1.2+Math.random()*2.2),
-      r:5+Math.random()*8*r.width/220*(1+(rk-1)*.15),l:1,d:.035+Math.random()*.03,ph:Math.random()*6.283});
+    P.push({fl:1,pi:rk,x:r.left+r.width*(.1+Math.random()*.8),y:r.top+r.height*(.15+Math.random()*.45),vx:(Math.random()-.5)*1.0,vy:-(1.5+Math.random()*2.8),
+      r:6+Math.random()*10*r.width/220*(1+(rk-1)*.2),l:1,d:.03+Math.random()*.025,ph:Math.random()*6.283});
   }
   const nr=$("n").getBoundingClientRect();
-  if(nr.width>0)for(let i=0;i<2;i++)P.push({fl:1,pi:rk,x:nr.left+nr.width*Math.random(),y:nr.top+nr.height*(.15+Math.random()*.25),vx:(Math.random()-.5)*.5,vy:-(.8+Math.random()*1.4),r:2.5+Math.random()*3.5,l:1,d:.05+Math.random()*.03,ph:Math.random()*6.283});
-  if(rk>=2&&Math.random()<.5)P.push({sp:1,x:r.left+r.width*(.15+Math.random()*.7),y:r.top+r.height*(.2+Math.random()*.3),vx:(Math.random()-.5)*1.2,vy:-(1.5+Math.random()*2),r:3+Math.random()*3,l:1,d:.02,c:FP[rk][0],ph:Math.random()*6});
-  if(Math.random()<.15)noise(.04+Math.random()*.05,.06,2200+Math.random()*3000,null,0,2);
+  if(nr.width>0)for(let i=0;i<3;i++)P.push({fl:1,pi:rk,x:nr.left+nr.width*Math.random(),y:nr.top+nr.height*(.1+Math.random()*.3),vx:(Math.random()-.5)*.7,vy:-(1+Math.random()*1.8),r:3+Math.random()*4,l:1,d:.04+Math.random()*.03,ph:Math.random()*6.283});
+  if(rk>=2&&Math.random()<.6)P.push({sp:1,x:r.left+r.width*(.1+Math.random()*.8),y:r.top+r.height*(.15+Math.random()*.4),vx:(Math.random()-.5)*1.5,vy:-(2+Math.random()*2.5),r:4+Math.random()*4,l:1,d:.018,c:FP[rk][0],ph:Math.random()*6});
+  if(Math.random()<.2)noise(.05+Math.random()*.06,.08,2500+Math.random()*3500,null,0,2.5);
   kick();
 }
 
@@ -781,7 +810,7 @@ function setFire(v){
     fireUI();const rk=fireRank()||1,r=updRect();
     burst(r.left+r.width/2,r.top+r.height*.3,true,FP[rk][1]);
     fireSfx(true,rk);mushAnim(true);emitFlames();
-    if(!low)fireT=setInterval(emitFlames,55);
+    if(!low)fireT=setInterval(emitFlames,45);
   }else{
     $("mushroom").classList.remove("burning");
     $("n").closest(".count").classList.remove("burning");
@@ -793,17 +822,18 @@ function setFire(v){
   }
   render();
 }
-setInterval(()=>{if(burning&&(Date.now()-lastComboT>FIRE_END||document.hidden||!fireRank())){combo=0;setFire(false)}},100);
+setInterval(()=>{if(burning&&(Date.now()-lastComboT>FIRE_END||document.hidden||!fireRank()||(skillLevel("autoclick")>=3&&!s.autoClickerActive))){combo=0;setFire(false)}},100);
 
 /* Clicking & Auto-Clicker Logic */
 let PR=null;
 const updRect=()=>{const r=$("mushroom").getBoundingClientRect();PR=r;return r};
 const mushroomEl=$("mushroom");
-mushroomEl.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;e.preventDefault();hit(e)});
+mushroomEl.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;e.preventDefault();hit(e, false)});
 mushroomEl.addEventListener("contextmenu",e=>e.preventDefault());
-mushroomEl.addEventListener("click",e=>{if(e.detail===0)hit(e)});
+mushroomEl.addEventListener("click",e=>{if(e.detail===0)hit(e, false)});
 
 function hit(e, isAuto=false){
+  if(isAuto && !s.autoClickerActive) return;
   lastHit=Date.now();
   fireCombo(lastHit);
   const crit=Math.random()<critP(),g=perClick()*(crit?(5+skillLevel("crit")*2):1);
@@ -811,8 +841,8 @@ function hit(e, isAuto=false){
   let mx=e&&e.clientX,my=e&&e.clientY;
   if(!mx&&!my){const pr=updRect();mx=pr.left+pr.width/2;my=pr.top+pr.height/2}
   if(SET.particles&&!low)burst(mx,my,crit);
-  if(!isAuto||Math.random()<.3)popSfx(crit);
-  if(burning&&!low){noise(.06,.08,3200,1200,0,3);flameAt(mx,my-16,3,fireRank()||1,3)}
+  popSfx(crit, isAuto);
+  if(burning&&!low){noise(.06,.09,3500,1400,0,3.5);flameAt(mx,my-16,4,fireRank()||1,4)}
   if(!isAuto||Math.random()<.4)mushAnim(crit);
   const tn=Date.now();
   if(SET.anim&&!low){lastBump=tn;$("n").parentNode.animate([{transform:"scale(1.06)"},{transform:"scale(1)"}],{duration:120})}
@@ -823,7 +853,7 @@ function hit(e, isAuto=false){
 let autoClickAcc=0;
 setInterval(()=>{
   const autoLv=skillLevel("autoclick");
-  if(autoLv<=0||document.hidden)return;
+  if(autoLv<=0||!s.autoClickerActive||document.hidden)return;
   const clicksPerSec=[0,1,3,6][autoLv]||0;
   autoClickAcc+=clicksPerSec*0.1;
   while(autoClickAcc>=1){
@@ -845,16 +875,16 @@ function sizeFx(){if(low)return;const d=Math.min(devicePixelRatio||1,1.25);cv.wi
 sizeFx();addEventListener("resize",sizeFx);
 const COL=["#b4432c","#f6efdc","#e8b923","#8fc27f"];
 function burst(x,y,big,col){
-  if(low||!SET.particles)return;const cap=120;if(P.length>cap)P.splice(0,P.length-cap);
-  const n=(rm||IS_MOBILE?(big?4:2):(big?15:5));
-  for(let i=0;i<n;i++){const a=Math.random()*6.283,v=(big?2:1)*(1+Math.random()*2);
-    P.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-1.5,r:2+Math.random()*(big?4:2),l:1,c:col||(i%2?"#ffffff":COL[i%4])});}
+  if(low||!SET.particles)return;const cap=140;if(P.length>cap)P.splice(0,P.length-cap);
+  const n=(rm||IS_MOBILE?(big?5:3):(big?18:6));
+  for(let i=0;i<n;i++){const a=Math.random()*6.283,v=(big?2.2:1.2)*(1+Math.random()*2.2);
+    P.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-1.8,r:2.5+Math.random()*(big?5:3),l:1,c:col||(i%2?"#ffffff":COL[i%4])});}
   if(big&&!rm)P.push({x,y,ring:1,l:1,c:col});kick();
 }
 function popText(x,y,t,crit,col,big){
   if(low)return;
   let c=0;
-  const activeFont=getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim();
+  const activeFont=getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim() || "Georgia";
   P.push({txt:t,x,y,t0:performance.now(),dx:Math.random()*70-35,crit,col,fire:!!col&&!big,l:99,f:(crit?"900 36px ":big?"900 32px ":"800 25px ")+activeFont});
   for(let i=P.length-1;i>=0;i--)if(P[i].txt&&++c>6)P.splice(i,1);kick();
 }
@@ -866,8 +896,8 @@ function loop(){
     if(p.txt){const k=(performance.now()-p.t0)/1000;if(k>=1){p.l=0;continue}
       const sc=k<.2?.3+k/2:1-k;if(k<.2)c2.fillStyle=p.crit?"#ffe27a":"#fff6d6";else{c2.fillStyle=p.crit?"#ffe27a":"#fff6d6";c2.globalAlpha=1-k;}
       c2.font=p.f;c2.textAlign="center";const px=p.x+p.dx*k,py=p.y-k*78; c2.save();c2.translate(px,py);c2.scale(1+Math.sin(Math.min(k/.18,1)*Math.PI)*.18,1+Math.sin(Math.min(k/.18,1)*Math.PI)*.18);c2.lineJoin="round";c2.lineWidth=p.crit?5:4;c2.strokeStyle=p.crit?"#7b3d00":"rgba(38,48,31,.9)";c2.shadowColor=p.fire?"#ff8a1f":(p.crit?"#ffb300":"rgba(0,0,0,.35)");c2.shadowBlur=p.fire?16:(p.crit?18:7);c2.strokeText(p.txt,0,0);c2.fillStyle=p.col||(p.crit?"#ffe27a":"#fff6d6");c2.fillText(p.txt,0,0);if(p.crit){c2.font="900 12px sans-serif";c2.fillStyle="#fff";c2.fillText("CRITICAL!",0,-25)}c2.restore();}
-    else if(p.fl){p.x+=p.vx+Math.sin(p.l*9+p.ph)*.6;p.y+=p.vy;p.r*=.965;c2.globalAlpha=Math.max(p.l,0)*.85;
-      {const pl=FP[p.pi||1];c2.fillStyle=p.l>.66?pl[0]:p.l>.33?pl[1]:pl[2]}c2.beginPath();c2.arc(p.x,p.y,Math.max(p.r,.5),0,6.283);c2.fill();}
+    else if(p.fl){p.x+=p.vx+Math.sin(p.l*9+p.ph)*.7;p.y+=p.vy;p.r*=.962;c2.globalAlpha=Math.max(p.l,0)*.9;
+      {const pl=FP[p.pi||1];c2.fillStyle=p.l>.66?pl[0]:p.l>.33?pl[1]:pl[2]}c2.beginPath();c2.arc(p.x,p.y,Math.max(p.r,.6),0,6.283);c2.fill();}
     else if(p.sp){p.x+=p.vx;p.y+=p.vy;const r=p.r*(.6+.4*Math.sin(p.l*14+p.ph));c2.globalAlpha=Math.max(p.l,0);c2.fillStyle=p.c;c2.beginPath();
       c2.moveTo(p.x,p.y-r);c2.quadraticCurveTo(p.x,p.y,p.x+r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y+r);c2.quadraticCurveTo(p.x,p.y,p.x,p.y+r);c2.quadraticCurveTo(p.x,p.y,p.x-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x-r,p.y);c2.quadraticCurveTo(p.x,p.y,p.x,p.y-r);c2.fill();}
     else if(p.ring){p.ring+=4;c2.strokeStyle=p.c||"#e8b923";c2.lineWidth=2;c2.beginPath();c2.arc(p.x,p.y,p.ring,0,6.283);c2.stroke();}
@@ -875,11 +905,11 @@ function loop(){
   c2.globalAlpha=1;raf=P.length?requestAnimationFrame(loop):0;
 }
 
-/* Hintergrund Animationen */
+/* Hintergrund Animationen (Vollbild) */
 const BGS={spores:1,fireflies:1,embers:1,snow:1,rain:1,bubbles:1,stars:1,none:1};
-const BGN={spores:34,fireflies:16,embers:32,snow:50,rain:70,bubbles:22,stars:45};
+const BGN={spores:45,fireflies:22,embers:40,snow:60,rain:85,bubbles:30,stars:55};
 const bgc=$("bg"),bx=bgc.getContext("2d");
-let bgP=[],bgRaf=0,bgT=0,bgW=1,bgH=1,bgColT=0,bgShoot=null,bgCol={ok:"#3f6b35",accent:"#b4432c",dark:false};
+let bgP=[],bgRaf=0,bgT=0,bgW=1,bgH=1,bgColT=0,bgCol={ok:"#3f6b35",accent:"#b4432c",dark:false};
 function bgColors(){
   const cs=getComputedStyle(document.documentElement),g=n=>cs.getPropertyValue(n).trim();
   const h=g("--bg"),m=/^#([0-9a-f]{6})$/i.exec(h);let dark=false;
@@ -887,8 +917,8 @@ function bgColors(){
   bgCol={ok:g("--ok")||"#3f6b35",accent:g("--accent")||"#b4432c",dark};
 }
 function bgSize(){
-  if(low)return;const r=$("stage").getBoundingClientRect(),d=Math.min(devicePixelRatio||1,1.5);
-  bgW=Math.max(1,r.width);bgH=Math.max(1,r.height);bgc.width=Math.round(bgW*d);bgc.height=Math.round(bgH*d);bx.setTransform(d,0,0,d,0,0);bgP=[];
+  if(low)return;const d=Math.min(devicePixelRatio||1,1.5);
+  bgW=window.innerWidth;bgH=window.innerHeight;bgc.width=Math.round(bgW*d);bgc.height=Math.round(bgH*d);bx.setTransform(d,0,0,d,0,0);bgP=[];
 }
 function bgSpawn(init){
   const R=Math.random,W=bgW,H=bgH,p={x:R()*W,y:R()*H,ph:R()*6.283,a:.25+R()*.5,vx:0,vy:0,r:2,k:R()};
@@ -906,21 +936,21 @@ function bgSpawn(init){
 function bgLoop(t){
   bgRaf=0;if(low||SET.bg==="none"||document.hidden)return;
   const dt=Math.min(3,(t-(bgT||t))/16.7)||1,sp=(rm?.4:1)*dt;bgT=t;
-  if(!bgP.length){const n=Math.round(BGN[SET.bg]||30);for(let i=0;i<n;i++)bgP.push(bgSpawn(true))}
+  if(!bgP.length){const n=Math.round(BGN[SET.bg]||35);for(let i=0;i<n;i++)bgP.push(bgSpawn(true))}
   if(t-bgColT>2000){bgColT=t;bgColors()}
   const c=bx,W=bgW,H=bgH,m=SET.bg,K=bgCol;c.clearRect(0,0,W,H);
   for(let i=0;i<bgP.length;i++){
     const p=bgP[i];p.ph+=.03*sp;
     if(m==="spores"){p.x+=(p.vx+Math.sin(p.ph)*.25)*sp;p.y+=p.vy*sp;
       if(p.y<-10||p.x<-10||p.x>W+10){bgP[i]=bgSpawn(false);continue}
-      c.globalAlpha=p.a*.55*Math.min(1,p.y/(H*.3));c.fillStyle=K.ok;c.beginPath();c.arc(p.x,p.y,p.r,0,6.283);c.fill()}
+      c.globalAlpha=p.a*.55;c.fillStyle=K.ok;c.beginPath();c.arc(p.x,p.y,p.r,0,6.283);c.fill()}
     else if(m==="fireflies"){p.x+=(p.vx+Math.sin(p.ph*.7)*.5)*sp;p.y+=(p.vy+Math.cos(p.ph*.5)*.5)*sp;
       p.x=(p.x+W)%W;p.y=(p.y+H)%H;const g=Math.pow(.5+.5*Math.sin(p.ph*2+p.k*6),2);
       c.globalAlpha=g*.22;c.fillStyle="#ffe27a";c.beginPath();c.arc(p.x,p.y,p.r*4,0,6.283);c.fill();
       c.globalAlpha=.25+g*.75;c.fillStyle=K.dark?"#fff2a8":"#e0b41f";c.beginPath();c.arc(p.x,p.y,p.r,0,6.283);c.fill()}
     else if(m==="embers"){p.x+=(p.vx+Math.sin(p.ph*2)*.4)*sp;p.y+=p.vy*sp;
       if(p.y<-10){bgP[i]=bgSpawn(false);continue}
-      c.globalAlpha=p.a*(.55+.45*Math.sin(p.ph*3))*Math.min(1,p.y/(H*.5)+.2);c.fillStyle=p.k<.33?"#ffd84a":p.k<.66?"#ff8a1f":K.accent;c.beginPath();c.arc(p.x,p.y,p.r,0,6.283);c.fill()}
+      c.globalAlpha=p.a*(.55+.45*Math.sin(p.ph*3));c.fillStyle=p.k<.33?"#ffd84a":p.k<.66?"#ff8a1f":K.accent;c.beginPath();c.arc(p.x,p.y,p.r,0,6.283);c.fill()}
     else if(m==="snow"){p.x+=(p.vx+Math.sin(p.ph)*.4)*sp;p.y+=p.vy*sp;
       if(p.y>H+8){bgP[i]=bgSpawn(false);continue}
       c.globalAlpha=p.a*.8;c.fillStyle=K.dark?"#ffffff":"#8fb4d8";c.beginPath();c.arc((p.x+W)%W,p.y,p.r,0,6.283);c.fill()}
@@ -936,9 +966,9 @@ function bgLoop(t){
   c.globalAlpha=1;bgRaf=requestAnimationFrame(bgLoop);
 }
 function bgStart(){if(low||bgRaf||SET.bg==="none"||document.hidden)return;bgT=0;bgRaf=requestAnimationFrame(bgLoop)}
-function setBg(){if(!(SET.bg in BGS))SET.bg="spores";cancelAnimationFrame(bgRaf);bgRaf=0;bgP=[];bgShoot=null;bx.clearRect(0,0,bgW,bgH);if(!low){bgColors();bgStart()}}
+function setBg(){if(!(SET.bg in BGS))SET.bg="spores";cancelAnimationFrame(bgRaf);bgRaf=0;bgP=[];bx.clearRect(0,0,bgW,bgH);if(!low){bgColors();bgStart()}}
 document.addEventListener("visibilitychange",bgStart);
-if(window.ResizeObserver)new ResizeObserver(bgSize).observe($("stage"));else addEventListener("resize",bgSize);
+window.addEventListener("resize",()=>{bgSize();setBg()});
 
 /* Tabs */
 const PANES=["items","stats","board","settings","skills"];
