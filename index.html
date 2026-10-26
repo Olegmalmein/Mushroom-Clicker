@@ -102,8 +102,9 @@ body.sheet #fx{z-index:40}
 .tab .skill-badge{min-width:22px;height:22px;padding:0 6px;font-size:.72rem;margin-left:2px;vertical-align:middle}
 .tab:focus-visible{outline:3px solid var(--accent)}
 
-/* Items - Korrektur gegen unerwünschte Hintergrund-Linien/Striche */
-.item{position:relative;display:grid;grid-template-columns:2.2rem 1fr auto;align-items:center;gap:8px;text-align:left;width:100%;padding:11px 13px;color:var(--ink);border:2px solid transparent;border-left:5px solid var(--c,#8b8b80);border-radius:10px;font:inherit;cursor:pointer;background-color:var(--surface);transition:transform .08s,border-color .08s,opacity .15s}
+/* Items mit Füll-Animation (--p) */
+.item{position:relative;display:grid;grid-template-columns:2.2rem 1fr auto;align-items:center;gap:8px;text-align:left;width:100%;padding:11px 13px;color:var(--ink);border:2px solid transparent;border-left:5px solid var(--c,#8b8b80);border-radius:10px;font:inherit;cursor:pointer;
+background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 25%,var(--surface)) var(--p,0%),var(--surface) var(--p,0%));transition:transform .08s,border-color .08s,opacity .15s}
 .item:disabled{opacity:.75;cursor:not-allowed}
 .item.locked{opacity:.4;background:var(--surface)}
 .item:not(:disabled):hover{border-color:var(--c)}
@@ -127,14 +128,14 @@ body.sheet #fx{z-index:40}
 .row span:first-child{color:var(--muted)}.row b{text-align:right;font-size:1rem}
 .row.me{box-shadow:inset 0 0 0 2px var(--ok)}
 
-/* Skill tree */
+/* Skill tree mit Füll-Animation */
 .skill-head>div{min-width:0}
 .skill-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;background:var(--bg);border-radius:12px;margin:8px 0}
 .skill-badge{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;white-space:nowrap;line-height:1;min-width:30px;height:30px;padding:0 99px;border-radius:999px;background:#c62828;color:white;font-weight:900;box-shadow:0 2px 8px #c6282844}
 .skill-grid{display:grid;gap:9px;padding:4px 0 14px}
-.skill{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:12px;background:var(--surface);border:1px solid color-mix(in srgb,var(--ink) 12%,transparent);border-radius:12px}
-.skill-icon{width:42px;height:42px;display:grid;place-items:center;background:color-mix(in srgb,var(--ok) 18%,var(--bg));border-radius:10px;font-size:1.4rem}
-.skill b{display:block}.skill small{display:block;color:var(--muted);line-height:1.35;margin-top:3px}.skill .btn{padding:8px 10px;white-space:nowrap}.skill .btn:disabled{opacity:.45;cursor:not-allowed}
+.skill{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:12px;border:1px solid color-mix(in srgb,var(--ink) 12%,transparent);border-radius:12px;border-left:5px solid var(--c,#8b8b80);background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 25%,var(--surface)) var(--p,0%),var(--surface) var(--p,0%))}
+.skill-icon{width:42px;height:42px;display:grid;place-items:center;background:color-mix(in srgb,var(--c,#8b8b80) 24%,transparent);border-radius:10px;font-size:1.4rem}
+.skill b{display:block}.skill small{display:block;color:var(--muted);line-height:1.35;margin-top:3px}.skill .btn{padding:8px 10px;white-space:nowrap;background:var(--c,var(--ok));color:color-mix(in srgb,var(--c,#000) 18%,#000)}.skill .btn:disabled{opacity:.45;cursor:not-allowed}
 
 .stat-hero{padding:16px;border-radius:14px;background:linear-gradient(135deg,var(--ok),color-mix(in srgb,var(--ok) 40%,var(--surface)));color:white;margin:8px 0 10px}
 .stat-hero small{display:block;opacity:.85}.stat-hero strong{display:block;font:700 1.8rem var(--font-main);margin-top:3px}
@@ -237,10 +238,6 @@ body.sheet #fx{z-index:40}
  body.sheet #scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:25}
 }
 
-.skill{border-left:5px solid var(--c,#8b8b80);background-color:var(--surface)}
-.skill-icon{background:color-mix(in srgb,var(--c,#8b8b80) 24%,transparent)}
-.skill .btn{background:var(--c,var(--ok));color:color-mix(in srgb,var(--c,#000) 18%,#000)}
-.skill .btn:disabled{opacity:.5}
 .pips{display:inline-flex;gap:3px;margin-left:7px;vertical-align:middle}
 .pips i{display:block;width:9px;height:9px;border-radius:50%;border:2px solid var(--c)}
 .pips i.on{background:var(--c);box-shadow:0 0 6px var(--c)}
@@ -584,6 +581,8 @@ function renderNow(){
     setT(b.querySelector(".cost"),mx?"Max":fmt(c)+" 🍄");setT(b.querySelector(".own"),own(d)?"Lv "+own(d):"");
     b.querySelector(".tx b").textContent=hid?"???":d.name;b.querySelector(".tx small").textContent=hid?"Locked":d.desc;
     b.querySelector(".ic").textContent=hid?"🔒":(ICON[d.id]||"🍄");
+    const pp=Math.round(clamp(s.n/c*100,0,100)/5)*5;
+    if(b._p!==pp){b._p=pp;b.style.setProperty("--p",pp+"%")}
     const cc=hid?"#8b8b80":UCOL[d.id];if(b._c!==cc){b._c=cc;b.style.setProperty("--c",cc)}
   });
 }
@@ -627,8 +626,8 @@ function renderSkills(){
   '<div class="srow" style="margin-bottom:10px;background:var(--surface)"><div><b>Buy Skill Point</b><small style="display:block;color:var(--muted)">Cost: '+fmt(cost)+' 🍄</small></div><button class="btn" id="buy-pt-btn" '+(s.n<cost?'disabled':'')+'>Buy 1 Pt</button></div>'+
   autoToggleHtml+
   '<div class="skill-grid">'+
-  SKILLS.map(k=>{const lv=skillLevel(k.id),full=lv>=k.max;
-   return '<div class="skill'+(full?' maxed':'')+'" style="--c:'+(SKCOL[k.id]||"#8b8b80")+'"><div class="skill-icon">'+k.icon+'</div><div><b>'+k.name+' <span class="sk-lv">Lv '+lv+'/'+k.max+'</span><span class="pips">'+Array.from({length:k.max},(_,i)=>'<i'+(i<lv?' class="on"':'')+'></i>').join('')+'</span></b><small>'+k.desc+'</small></div><button class="btn" data-skill="'+k.id+'" '+(pts<1||full?'disabled':'')+'>'+(full?'Max':'Upgrade · 1 pt')+'</button></div>'}).join('')+
+  SKILLS.map(k=>{const lv=skillLevel(k.id),full=lv>=k.max,pct=Math.round(lv/k.max*100);
+   return '<div class="skill'+(full?' maxed':'')+'" style="--c:'+(SKCOL[k.id]||"#8b8b80")+';--p:'+pct+'%"><div class="skill-icon">'+k.icon+'</div><div><b>'+k.name+' <span class="sk-lv">Lv '+lv+'/'+k.max+'</span><span class="pips">'+Array.from({length:k.max},(_,i)=>'<i'+(i<lv?' class="on"':'')+'></i>').join('')+'</span></b><small>'+k.desc+'</small></div><button class="btn" data-skill="'+k.id+'" '+(pts<1||full?'disabled':'')+'>'+(full?'Max':'Upgrade · 1 pt')+'</button></div>'}).join('')+
   '</div>');
 
  const buyBtn=$("buy-pt-btn");
@@ -975,12 +974,17 @@ window.addEventListener("resize",()=>{bgSize();setBg()});
 
 /* Tabs */
 const PANES=["items","stats","board","settings","skills"];
-function tab(i){PANES.forEach((id,k)=>{$(id).hidden=i!==k+1});[1,2,3,4,5].forEach(k=>{$("tab"+k).classList.toggle("on",i===k);$("tab"+k).setAttribute("aria-selected",i===k?"true":"false")});renderStats();renderBoard();renderSkills()}
+function curTab(){return PANES.findIndex(id=>!$(id).hidden)+1||1}
+function tab(i){
+  PANES.forEach((id,k)=>{$(id).hidden=i!==k+1});
+  [1,2,3,4,5].forEach(k=>{$("tab"+k).classList.toggle("on",i===k);$("tab"+k).setAttribute("aria-selected",i===k?"true":"false")});
+  renderStats();renderBoard();renderSkills();
+}
 const mq=matchMedia("(max-width:759.98px)");
 let sheet=false;
 function setSheet(v){sheet=!!v&&mq.matches;document.body.classList.toggle("sheet",sheet)}
 [1,2,3,4,5].forEach(k=>{$("tab"+k).onclick=()=>{
-  if(mq.matches&&sheet&&curTab()===k)setSheet(false);
+  if(mq.matches&&sheet&&curTab()===k){setSheet(false)}
   else{tab(k);if(mq.matches)setSheet(true)}
   uiSfx()}});
 $("sheet-close").onclick=()=>{setSheet(false);uiSfx()};
@@ -1047,7 +1051,6 @@ $("winBtn").onclick=()=>{$("win").hidden=true};addEventListener("keydown",e=>{if
 
 /* Gamepad Support */
 let gi=0,prevB=[],axT=0,aT=0,padOn=false;
-const curTab=()=>PANES.findIndex(id=>!$(id).hidden)+1||1;
 function selItem(n){gi=(n+btns.length)%btns.length;btns.forEach((b,i)=>b.classList.toggle("sel",i===gi));btns[gi]?.scrollIntoView({block:"nearest"})}
 function padLoop(t){const pads=navigator.getGamepads?[...navigator.getGamepads()]:[];const g=pads.find(p=>p?.connected);
   if(g){if(!padOn){padOn=true;document.body.classList.add("pad");selItem(gi)}
