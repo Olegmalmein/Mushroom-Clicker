@@ -84,9 +84,9 @@ h1{font-family:var(--font-main);font-size:1.9rem;margin:0 0 6px;text-align:cente
 #mushroom{-webkit-touch-callout:none;width:min(220px,65vw,30vh);aspect-ratio:1;border:0;background:none;cursor:pointer;padding:0;display:block;margin:8px auto 0;position:relative;overflow:visible}
 #mushroom:active{transform:none}
 html[data-manim="none"] #mushroom:active{transform:scale(.96)}
-#mz{transform-origin:50% 92%;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,.18))}
+#mz{transform-origin:50% 92%;display:block;will-change:transform;filter:drop-shadow(0 4px 12px rgba(0,0,0,.18))}
 #mushroom svg{position:relative;z-index:1;overflow:visible}
-#mushroom::before{content:"";position:absolute;inset:-20%;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,color-mix(in srgb,var(--glow,#fff) 75%,transparent) 0%,transparent 70%);animation:glowpulse 3.2s ease-in-out infinite}
+#mushroom::before{content:"";position:absolute;inset:-20%;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,color-mix(in srgb,var(--glow,#fff) 75%,transparent) 0%,transparent 70%);animation:glowpulse 3.2s ease-in-out infinite;will-change:transform,opacity}
 #mushroom:not([data-glow])::before{display:none}
 
 /* Feuer-Effekt */
@@ -107,7 +107,7 @@ body.sheet #fx{z-index:40}
 .stats div{background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(4px);border-radius:10px;padding:6px 12px;min-width:75px;border:1px solid color-mix(in srgb,var(--ink) 8%,transparent)}
 .stats b{display:block;font-size:.95rem}.stats small{color:var(--muted);font-size:.68rem;letter-spacing:0.04em}
 .stagelbl{color:var(--muted);font-size:.8rem;margin-bottom:2px;text-align:center}
-.shop{display:grid;gap:8px}
+.shop{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
 [hidden]{display:none!important}
 
 /* Tabs */
@@ -119,7 +119,7 @@ body.sheet #fx{z-index:40}
 .tab:focus-visible{outline:3px solid var(--accent)}
 
 /* Items mit Füll-Animation (--p) */
-.item{position:relative;display:grid;grid-template-columns:2.2rem 1fr auto;align-items:center;gap:8px;text-align:left;width:100%;padding:11px 13px;color:var(--ink);border:2px solid transparent;border-left:5px solid var(--c,#8b8b80);border-radius:10px;font:inherit;cursor:pointer;
+.item{position:relative;display:grid;grid-template-columns:2.2rem minmax(0,1fr) auto;align-items:center;gap:8px;text-align:left;width:100%;padding:11px 13px;color:var(--ink);border:2px solid transparent;border-left:5px solid var(--c,#8b8b80);border-radius:10px;font:inherit;cursor:pointer;
 background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 25%,var(--surface)) var(--p,0%),var(--surface) var(--p,0%));transition:transform .08s,border-color .08s,opacity .15s}
 .item:disabled{opacity:.75;cursor:not-allowed}
 .item.locked{opacity:.4;background:var(--surface)}
@@ -143,7 +143,7 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 25%,var(--su
 @keyframes readyping{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--c) 70%,transparent)}100%{box-shadow:0 0 0 12px transparent}}
 
 /* Stats tab */
-.statlist{display:grid;gap:4px;padding:8px 0}
+.statlist{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;padding:8px 0}
 .statlist h3{margin:10px 0 4px;font-family:var(--font-main);font-size:1rem;color:var(--ink)}
 .row{display:flex;justify-content:space-between;gap:8px;padding:8px 12px;background:var(--bg);border-radius:8px}
 .row span:first-child{color:var(--muted)}.row b{text-align:right;font-size:1rem}
@@ -164,10 +164,11 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 25%,var(--su
 
 
 /* Settings */
-.setwrap{display:grid;gap:8px;padding:8px 0}
+.setwrap{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding:8px 0}
 .setwrap h3{margin:6px 0 0;font-family:var(--font-main);font-size:1rem;color:var(--ink)}
-.srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:8px}
-.srow .lbl{display:flex;flex-direction:column}
+.srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:8px;min-width:0}
+.srow .lbl{display:flex;flex-direction:column;flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.sel{font:inherit;font-size:.92rem;padding:6px 8px;border-radius:6px;background:var(--bg);color:var(--ink);border:2px solid color-mix(in srgb,var(--ink) 15%,transparent);flex:0 0 46%;min-width:0;text-overflow:ellipsis}
 .srow .lbl small{color:var(--muted);font-size:.72rem}
 
 .switch{position:relative;flex:0 0 auto;width:50px;height:28px;cursor:pointer}
@@ -255,6 +256,9 @@ body.sk-fs #fps-counter{z-index:10070}
 .tv-ctl{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px;z-index:10}
 .tv-ctl button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 88%,transparent);color:var(--ink);font:700 1.05rem var(--font-main);cursor:pointer;line-height:1;padding:0;backdrop-filter:blur(4px)}
 .tv-ctl button:focus-visible{outline:3px solid var(--accent)}
+.tv-auto{position:absolute;left:8px;top:8px;z-index:10;display:flex;align-items:center;gap:6px;padding:3px 5px 3px 12px;border-radius:99px;background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--line);font-size:.74rem;font-weight:800;color:var(--ink);box-shadow:0 3px 10px -4px rgba(0,0,0,.4)}
+.tv-auto .switch{width:40px;height:22px}.tv-auto .switch .knob{width:18px;height:18px}.tv-auto .switch input:checked~.knob{transform:translateX(18px)}
+#skills.sk-full .tv-auto{left:calc(10px + env(safe-area-inset-left,0px));top:calc(140px + env(safe-area-inset-top,0px))}
 .tv-leg{position:absolute;left:8px;bottom:8px;display:flex;gap:6px;pointer-events:none;flex-wrap:wrap;z-index:10}
 .tv-leg span{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--bg) 80%,transparent);border:1px solid var(--c);color:var(--c);backdrop-filter:blur(4px)}
 .tdet{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin:2px 0 8px}
@@ -273,6 +277,8 @@ body.sk-fs #fps-counter{z-index:10070}
 .chip.dim{color:var(--muted);font-weight:600}
 .tfoot{display:flex;justify-content:center;padding:0 0 10px}
 .low .tv .flow{display:none}
+.mob .stats div,.mob .tv-ctl button,.mob .tv-leg span,.mob #fps-counter,.mob .tv-auto{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.mob #skills.sk-full>.skill-head,.mob #skills.sk-full>.srow,.mob #skills.sk-full>.tdet{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:color-mix(in srgb,var(--surface) 95%,transparent)!important}
 
 /* Win modal */
 .win{position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.6);z-index:50;padding:16px}
@@ -357,6 +363,13 @@ select{border-radius:calc(var(--r) - 4px)!important}
 @keyframes skrank{0%{box-shadow:0 0 0 0 var(--c)}25%{transform:scale(1.035);box-shadow:0 0 24px 4px color-mix(in srgb,var(--c) 75%,transparent)}100%{transform:scale(1);box-shadow:0 0 0 0 transparent}}
 @keyframes skicon{0%{transform:scale(1) rotate(0)}30%{transform:scale(1.55) rotate(-12deg)}60%{transform:scale(.9) rotate(6deg)}100%{transform:scale(1) rotate(0)}}
 .sk-lv{color:color-mix(in srgb,var(--c,#8b8b80) 65%,var(--ink));font-weight:700;font-size:.85em;white-space:nowrap}
+/* Kleine Handys: kompaktere Zeilen und Schalter */
+@media(max-width:420px){
+ .srow{padding:8px 10px;gap:8px}
+ .srow .lbl small{font-size:.68rem}
+ .switch{width:44px;height:26px}.switch .knob{width:22px;height:22px}.switch input:checked~.knob{transform:translateX(18px)}
+ .sel{font-size:.85rem;padding:5px 6px}
+}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -406,17 +419,17 @@ select{border-radius:calc(var(--r) - 4px)!important}
         <div class="srow"><span class="lbl">Sound effects<small>Synthesized clicks and chords</small></span>
           <label class="switch"><input type="checkbox" id="set-sound"><span class="track"></span><span class="knob"></span></label></div>
         <div class="srow"><span class="lbl">Volume<small id="volval">70 %</small></span>
-          <input type="range" id="set-vol" min="0" max="100" step="5" value="70" style="flex:0 0 40%;accent-color:var(--ok)"></div>
+          <input type="range" id="set-vol" min="0" max="100" step="5" value="70" style="flex:0 1 40%;min-width:0;accent-color:var(--ok)"></div>
         <h3>Visuals &amp; Performance</h3>
         <div class="srow"><span class="lbl">FPS Counter<small>Show real-time frame rate</small></span>
           <label class="switch"><input type="checkbox" id="set-fps"><span class="track"></span><span class="knob"></span></label></div>
         <div class="srow"><span class="lbl">Particles<small>Spores on harvest</small></span>
           <label class="switch"><input type="checkbox" id="set-part"><span class="track"></span><span class="knob"></span></label></div>
         <div class="srow"><span class="lbl">Mushroom animation<small id="manim-sub">How the mushroom reacts to clicks</small></span>
-          <select id="set-manim" style="font:inherit;padding:6px;border-radius:6px;background:var(--bg);color:var(--ink);border:2px solid color-mix(in srgb,var(--ink) 15%,transparent);flex:0 0 48%">
+          <select id="set-manim" class="sel">
             <option value="squish">Squish</option><option value="pop">Pop</option><option value="jelly">Jelly</option><option value="wobble">Wobble</option><option value="bounce">Bounce</option><option value="shake">Shake</option><option value="none">None</option></select></div>
         <div class="srow"><span class="lbl">Background animation<small>Floating effect behind the mushroom</small></span>
-          <select id="set-bg" style="font:inherit;padding:6px;border-radius:6px;background:var(--bg);color:var(--ink);border:2px solid color-mix(in srgb,var(--ink) 15%,transparent);flex:0 0 48%">
+          <select id="set-bg" class="sel">
             <option value="spores">Spores</option><option value="fireflies">Fireflies</option><option value="embers">Embers</option><option value="snow">Snow</option><option value="rain">Rain</option><option value="bubbles">Bubbles</option><option value="stars">Stars</option><option value="none">None</option></select></div>
         <div class="srow"><span class="lbl">Idle animation<small>Mushroom plays its animation now and then</small></span>
           <label class="switch"><input type="checkbox" id="set-idle"><span class="track"></span><span class="knob"></span></label></div>
@@ -426,18 +439,18 @@ select{border-radius:calc(var(--r) - 4px)!important}
           <label class="switch"><input type="checkbox" id="set-low"><span class="track"></span><span class="knob"></span></label></div>
         <h3>Theme</h3>
         <div class="srow"><span class="lbl">Appearance<small>Colors for background, tabs &amp; HUD</small></span>
-          <select id="set-theme" style="font:inherit;padding:6px;border-radius:6px;background:var(--bg);color:var(--ink);border:2px solid color-mix(in srgb,var(--ink) 15%,transparent);flex:0 0 48%">
+          <select id="set-theme" class="sel">
             <option value="auto">Auto (System)</option>
             <optgroup label="Light"><option value="light">Light</option><option value="sunset">Sunset</option><option value="lavender">Lavender</option><option value="sakura">Sakura</option><option value="arctic">Arctic</option><option value="mint">Mint</option><option value="bubblegum">Bubblegum</option></optgroup>
             <optgroup label="Dark"><option value="dark">Dark</option><option value="ocean">Ocean</option><option value="midnight">Midnight</option><option value="forest">Forest</option><option value="ember">Ember</option><option value="cyber">Cyber</option><option value="coffee">Coffee</option><option value="royal">Royal</option></optgroup></select></div>
         <div class="srow"><span class="lbl">Font Style<small>Main font for interface and numbers</small></span>
-          <select id="set-font" style="font:inherit;padding:6px;border-radius:6px;background:var(--bg);color:var(--ink);border:2px solid color-mix(in srgb,var(--ink) 15%,transparent);flex:0 0 48%">
+          <select id="set-font" class="sel">
             <optgroup label="Classic"><option value="georgia">Georgia (Serif)</option><option value="trebuchet">Trebuchet (Sans)</option><option value="nunito">Nunito (Soft)</option><option value="rounded">Fredoka (Rounded)</option></optgroup>
             <optgroup label="Special"><option value="cinzel">Cinzel (Fantasy)</option><option value="orbitron">Orbitron (Sci-Fi)</option><option value="patrick">Patrick Hand (Handwritten)</option><option value="bangers">Bangers (Comic)</option><option value="pixel">Press Start 2P (Pixel)</option></optgroup>
             <optgroup label="Bold &amp; Mono"><option value="impact">Impact (Bold)</option><option value="mono">Courier (Monospace)</option></optgroup></select></div>
         <h3>Gameplay</h3>
         <div class="srow"><span class="lbl">Numbers<small>Short or full display</small></span>
-          <select id="set-num" style="font:inherit;padding:6px;border-radius:6px;background:var(--bg);color:var(--ink);border:2px solid color-mix(in srgb,var(--ink) 15%,transparent);flex:0 0 48%">
+          <select id="set-num" class="sel">
             <option value="short">Short (1.25M)</option><option value="full">Full (1,250,000)</option></select></div>
         <div class="srow"><span class="lbl">Autosave<small>Saves automatically</small></span>
           <label class="switch"><input type="checkbox" id="set-auto"><span class="track"></span><span class="knob"></span></label></div>
@@ -499,9 +512,12 @@ function applyTheme(){
 }
 
 try{matchMedia("(prefers-color-scheme:dark)").addEventListener("change",()=>{if(SET.theme==="auto")applyTheme()})}catch(e){}
+let FONT_MAIN="Georgia";
+function readFont(){FONT_MAIN=getComputedStyle(document.documentElement).getPropertyValue("--font-main").trim()||"Georgia"}
 function applyFont(){
   if(!FONTS.includes(SET.font))SET.font="georgia";
   document.documentElement.setAttribute("data-font",SET.font);
+  readFont();
 }
 
 const rm=matchMedia("(prefers-reduced-motion:reduce)").matches;
@@ -751,9 +767,10 @@ function renderNow(){
     const can=!b.disabled&&!hid;
     if(can&&!b._can&&booted&&SET.anim&&!low&&!rm){b.classList.remove("ready");void b.offsetWidth;b.classList.add("ready");setTimeout(()=>b.classList.remove("ready"),1050)}
     b._can=can;
-    setT(b.querySelector(".cost"),mx?"Max":fmt(c)+" 🍄");setT(b.querySelector(".own"),own(d)?"Lv "+own(d):"");
-    b.querySelector(".tx b").textContent=hid?"???":d.name;b.querySelector(".tx small").textContent=hid?"Locked":d.desc;
-    b.querySelector(".ic").textContent=hid?"🔒":(ICON[d.id]||"🍄");
+    const E=b._e||(b._e={cost:b.querySelector(".cost"),own:b.querySelector(".own"),nm:b.querySelector(".tx b"),ds:b.querySelector(".tx small"),ic:b.querySelector(".ic")});
+    setT(E.cost,mx?"Max":fmt(c)+" 🍄");setT(E.own,own(d)?"Lv "+own(d):"");
+    setX(E.nm,hid?"???":d.name);setX(E.ds,hid?"Locked":d.desc);
+    setX(E.ic,hid?"🔒":(ICON[d.id]||"🍄"));
     const pp=Math.round(clamp(s.n/c*100,0,100)/5)*5;
     if(b._p!==pp){b._p=pp;b.style.setProperty("--p",pp+"%")}
     const cc=hid?"#8b8b80":UCOL[d.id];if(b._c!==cc){b._c=cc;b.style.setProperty("--c",cc)}
@@ -976,8 +993,12 @@ function skSetFS(on){
   document.body.classList.toggle("sk-fs",on);
   const bt=el.querySelector('[data-z="fs"]');
   if(bt){bt.textContent=on?"✕":"⛶";bt.setAttribute("aria-label",on?"Exit fullscreen":"Fullscreen");bt.title=on?"Exit fullscreen (Esc)":"Fullscreen (F)"}
-  requestAnimationFrame(()=>skHome(false));setTimeout(()=>skHome(false),250);
+  requestAnimationFrame(()=>{skHome(false);skPlaceAuto()});setTimeout(()=>{skHome(false);skPlaceAuto()},250);
 }
+function skPlaceAuto(){const a=$("sk-auto");if(!a)return;
+  if(SKFS.on){const row=document.querySelector("#skills.sk-full>.srow");if(row){const r=row.getBoundingClientRect();if(r.height)a.style.top=Math.round(r.bottom+8)+"px"}}
+  else a.style.top=""}
+addEventListener("resize",skPlaceAuto);addEventListener("orientationchange",()=>setTimeout(skPlaceAuto,200));
 function skToggleFullscreen(){skSetFS(!SKFS.on)}
 document.addEventListener("fullscreenchange",()=>{
   if(!document.fullscreenElement&&SKFS.on)skSetFS(false);
@@ -1003,8 +1024,8 @@ function skBuild(){
   el.innerHTML=
   '<div class="skill-head"><div><b>Mycelium Skilltree</b><small id="sk-sub" style="display:block;color:var(--muted);margin-top:3px"></small></div><span class="skill-badge" id="sk-pts">0 pts</span></div>'+
   '<div class="srow" style="margin-bottom:8px;background:var(--surface)"><div><b>Buy Skill Point</b><small id="sk-cost" style="display:block;color:var(--muted)"></small></div><button class="btn" id="buy-pt-btn" type="button">Buy 1 Pt</button></div>'+
-  '<div class="srow" id="sk-auto" style="margin-bottom:8px;background:var(--surface)" hidden><div><b>Auto-Clicker Toggle</b><small style="display:block;color:var(--muted)">Turn auto-clicking on or off</small></div><label class="switch"><input type="checkbox" id="autoclick-toggle"><span class="track"></span><span class="knob"></span></label></div>'+
   '<div class="tv" id="tv"><svg id="tsvg" aria-label="Skill tree"><g id="tg"></g></svg>'+
+  '<div class="tv-auto" id="sk-auto" hidden><span>⚙️ Auto-Click</span><label class="switch" title="Auto-Clicker an/aus"><input type="checkbox" id="autoclick-toggle" aria-label="Auto-Clicker"><span class="track"></span><span class="knob"></span></label></div>'+
   '<div class="tv-ctl"><button type="button" data-z="fs" aria-label="Fullscreen" title="Fullscreen (F)">⛶</button><button type="button" data-z="in" aria-label="Zoom in">+</button><button type="button" data-z="out" aria-label="Zoom out">−</button><button type="button" data-z="home" aria-label="Center">⌖</button><button type="button" data-z="tall" aria-label="Enlarge">⤢</button></div>'+
   '<div class="tv-leg"><span style="--c:'+BRANCH.g.c+'">Growth</span><span style="--c:'+BRANCH.r.c+'">Harvest</span><span style="--c:'+BRANCH.b.c+'">Mind</span></div></div>'+
   '<div class="tdet" id="tdet"></div>'+
@@ -1034,7 +1055,7 @@ function skBuild(){
   SK.built=true;
   // --- Interaktion: Pan / Pinch / Tap ---
   const tv=$("tv"),ptrs=new Map();let drag=null,pinch=null;
-  tv.addEventListener("pointerdown",e=>{if(e.target.closest(".tv-ctl"))return;try{tv.setPointerCapture(e.pointerId)}catch(_){}
+  tv.addEventListener("pointerdown",e=>{if(e.target.closest(".tv-ctl,.tv-auto"))return;try{tv.setPointerCapture(e.pointerId)}catch(_){}
     ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(ptrs.size===1){const nn=e.target.closest&&e.target.closest("[data-n]");drag={sx:e.clientX,sy:e.clientY,ox:TV.x,oy:TV.y,moved:false,n:nn?nn.dataset.n:null};$("tg").style.transition="none"}
     else if(ptrs.size===2){if(drag)drag.moved=true;const [a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,mx:(a.x+b.x)/2,my:(a.y+b.y)/2}}});
@@ -1210,7 +1231,7 @@ function fireCombo(t){combo=(t-lastComboT<FIRE_GAP)?combo+1:1;lastComboT=t;const
 function emitFlames(){
   if(low)return;
   const rk=fireRank()||1,cap=150;if(P.length>=cap-8)return;
-  const r=updRect(),n=(rm?2:3+rk*2);
+  const r=updRect(),n=(rm?2:(IS_MOBILE||PERF.heavy)?2+rk:3+rk*2);
   for(let i=0;i<n;i++){
     P.push({fl:1,pi:rk,x:r.left+r.width*(.1+Math.random()*.8),y:r.top+r.height*(.15+Math.random()*.45),vx:(Math.random()-.5)*1.0,vy:-(1.5+Math.random()*2.8),
       r:6+Math.random()*10*r.width/220*(1+(rk-1)*.2),l:1,d:.03+Math.random()*.025,ph:Math.random()*6.283});
@@ -1237,7 +1258,7 @@ function setFire(v){
     fireUI();const rk=fireRank()||1,r=updRect();
     burst(r.left+r.width/2,r.top+r.height*.3,true,FP[rk][1]);
     fireSfx(true,rk);mushAnim(true);emitFlames();
-    if(!low)fireT=setInterval(emitFlames,45);
+    if(!low)fireT=setInterval(emitFlames,IS_MOBILE?80:45);
   }else{
     $("mushroom").classList.remove("burning");
     $("n").closest(".count").classList.remove("burning");
@@ -1312,13 +1333,33 @@ function updateFps(t){
 
 /* Partikel Canvas */
 const cv=$("fx"),c2=cv.getContext("2d",{alpha:true,desynchronized:false});
-let P=[],raf=0,lastT=0;
-function sizeFx(){if(low)return;const d=Math.min(devicePixelRatio||1,1.25);cv.width=innerWidth*d;cv.height=innerHeight*d;c2.setTransform(d,0,0,d,0,0)}
+let P=[],raf=0,lastT=0,fxD=1;
+function sizeFx(){if(low)return;const d=fxD=IS_MOBILE?1:Math.min(devicePixelRatio||1,1.25);cv.width=innerWidth*d;cv.height=innerHeight*d;c2.setTransform(d,0,0,d,0,0);TXS.clear()}
+/* Performance-Wächter: erkennt niedrige FPS und schaltet Effekte automatisch herunter */
+const PERF={heavy:false,ema:16.7,lt:0,ok:0};
+function perfTick(t){
+  const dt=t-PERF.lt;PERF.lt=t;if(dt<=0||dt>250)return;
+  PERF.ema+=(dt-PERF.ema)*.08;
+  if(!PERF.heavy){if(PERF.ema>36){PERF.heavy=true;PERF.ok=0}}
+  else if(PERF.ema<22){if(++PERF.ok>150)PERF.heavy=false}else PERF.ok=0;
+}
+/* Zahlen-Pop-ups werden einmal in ein Bild gezeichnet (shadowBlur pro Frame war sehr teuer) */
+const TXS=new Map();
+function textSprite(txt,crit,col,fire,font){
+  const key=txt+"|"+(crit?1:0)+"|"+(col||"")+"|"+(fire?1:0)+"|"+font+"|"+fxD;let sp=TXS.get(key);if(sp)return sp;
+  const d=fxD,m=document.createElement("canvas"),x=m.getContext("2d");x.font=font;
+  const w=Math.ceil(x.measureText(txt).width)+48,h=crit?112:80,ox=w/2,oy=crit?80:52;
+  m.width=Math.ceil(w*d);m.height=Math.ceil(h*d);x.setTransform(d,0,0,d,0,0);
+  x.font=font;x.textAlign="center";x.lineJoin="round";x.lineWidth=crit?5:4;x.strokeStyle=crit?"#7b3d00":"rgba(38,48,31,.9)";
+  x.shadowColor=fire?"#ff8a1f":(crit?"#ffb300":"rgba(0,0,0,.35)");x.shadowBlur=fire?16:(crit?18:7);
+  x.strokeText(txt,ox,oy);x.fillStyle=col||(crit?"#ffe27a":"#fff6d6");x.fillText(txt,ox,oy);
+  if(crit){x.font="900 12px sans-serif";x.fillStyle="#fff";x.fillText("CRITICAL!",ox,oy-25)}
+  sp={c:m,w,h,ox,oy};if(TXS.size>60)TXS.delete(TXS.keys().next().value);TXS.set(key,sp);return sp}
 sizeFx();addEventListener("resize",sizeFx);
 const COL=["#b4432c","#f6efdc","#e8b923","#8fc27f"];
 function burst(x,y,big,col){
-  if(low||!SET.particles)return;const cap=140;if(P.length>cap)P.splice(0,P.length-cap);
-  const n=(rm||IS_MOBILE?(big?5:3):(big?18:6));
+  if(low||!SET.particles)return;const cap=PERF.heavy?70:140;if(P.length>cap)P.splice(0,P.length-cap);
+  const n=Math.ceil((rm||IS_MOBILE?(big?5:3):(big?18:6))/(PERF.heavy?2:1));
   for(let i=0;i<n;i++){const a=Math.random()*6.283,v=(big?2.2:1.2)*(1+Math.random()*2.2);
     P.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-1.8,r:2.5+Math.random()*(big?5:3),l:1,c:col||(i%2?"#ffffff":COL[i%4])});}
   if(big&&!rm)P.push({x,y,ring:1,l:1,c:col});kick();
@@ -1326,19 +1367,18 @@ function burst(x,y,big,col){
 function popText(x,y,t,crit,col,big){
   if(low)return;
   let c=0;
-  const activeFont=getComputedStyle(document.documentElement).getPropertyValue('--font-main').trim() || "Georgia";
-  P.push({txt:t,x,y,t0:performance.now(),dx:Math.random()*70-35,crit,col,fire:!!col&&!big,l:99,f:(crit?"900 36px ":big?"900 32px ":"800 25px ")+activeFont});
+  P.push({txt:t,x,y,t0:performance.now(),dx:Math.random()*70-35,crit,col,fire:!!col&&!big,l:99,f:(crit?"900 36px ":big?"900 32px ":"800 25px ")+FONT_MAIN});
   for(let i=P.length-1;i>=0;i--)if(P[i].txt&&++c>6)P.splice(i,1);kick();
 }
 function kick(){if(low)return;if(!raf){lastT=0;raf=requestAnimationFrame(loop)}}
 function loop(t){
   if(low){c2.clearRect(0,0,innerWidth,innerHeight);P=[];raf=0;return}
-  updateFps(t);
+  updateFps(t);perfTick(t);
   c2.clearRect(0,0,innerWidth,innerHeight);P=P.filter(p=>p.l>0);
   for(const p of P){p.l-=p.d||0.03;c2.globalAlpha=Math.max(p.l,0);
     if(p.txt){const k=(performance.now()-p.t0)/1000;if(k>=1){p.l=0;continue}
-      const sc=k<.2?.3+k/2:1-k;if(k<.2)c2.fillStyle=p.crit?"#ffe27a":"#fff6d6";else{c2.fillStyle=p.crit?"#ffe27a":"#fff6d6";c2.globalAlpha=1-k;}
-      c2.font=p.f;c2.textAlign="center";const px=p.x+p.dx*k,py=p.y-k*78; c2.save();c2.translate(px,py);c2.scale(1+Math.sin(Math.min(k/.18,1)*Math.PI)*.18,1+Math.sin(Math.min(k/.18,1)*Math.PI)*.18);c2.lineJoin="round";c2.lineWidth=p.crit?5:4;c2.strokeStyle=p.crit?"#7b3d00":"rgba(38,48,31,.9)";c2.shadowColor=p.fire?"#ff8a1f":(p.crit?"#ffb300":"rgba(0,0,0,.35)");c2.shadowBlur=p.fire?16:(p.crit?18:7);c2.strokeText(p.txt,0,0);c2.fillStyle=p.col||(p.crit?"#ffe27a":"#fff6d6");c2.fillText(p.txt,0,0);if(p.crit){c2.font="900 12px sans-serif";c2.fillStyle="#fff";c2.fillText("CRITICAL!",0,-25)}c2.restore();}
+      const sp=p.spr||(p.spr=textSprite(p.txt,p.crit,p.col,p.fire,p.f)),pk=1+Math.sin(Math.min(k/.18,1)*Math.PI)*.18;
+      c2.globalAlpha=k<.2?1:1-k;c2.save();c2.translate(p.x+p.dx*k,p.y-k*78);c2.scale(pk,pk);c2.drawImage(sp.c,-sp.ox,-sp.oy,sp.w,sp.h);c2.restore();}
     else if(p.fl){p.x+=p.vx+Math.sin(p.l*9+p.ph)*.7;p.y+=p.vy;p.r*=.962;c2.globalAlpha=Math.max(p.l,0)*.9;
       {const pl=FP[p.pi||1];c2.fillStyle=p.l>.66?pl[0]:p.l>.33?pl[1]:pl[2]}c2.beginPath();c2.arc(p.x,p.y,Math.max(p.r,.6),0,6.283);c2.fill();}
     else if(p.sp){p.x+=p.vx;p.y+=p.vy;const r=p.r*(.6+.4*Math.sin(p.l*14+p.ph));c2.globalAlpha=Math.max(p.l,0);c2.fillStyle=p.c;c2.beginPath();
@@ -1363,7 +1403,7 @@ function bgColors(){
   bgCol={ok:g("--ok")||"#3f6b35",accent:g("--accent")||"#b4432c",dark};
 }
 function bgSize(){
-  if(low)return;const d=Math.min(devicePixelRatio||1,1.5);
+  if(low)return;const d=IS_MOBILE?1:Math.min(devicePixelRatio||1,1.5);
   bgW=window.innerWidth;bgH=window.innerHeight;bgc.width=Math.round(bgW*d);bgc.height=Math.round(bgH*d);bx.setTransform(d,0,0,d,0,0);bgP=[];
 }
 function bgSpawn(init){
@@ -1381,8 +1421,11 @@ function bgSpawn(init){
 }
 function bgLoop(t){
   bgRaf=0;if(low||SET.bg==="none"||document.hidden)return;
+  perfTick(t);
+  const gap=PERF.heavy?66:(IS_MOBILE?33:0);
+  if(gap&&bgT&&t-bgT<gap-3){bgRaf=requestAnimationFrame(bgLoop);return}
   const dt=Math.min(3,(t-(bgT||t))/16.7)||1,sp=(rm?.4:1)*dt;bgT=t;
-  if(!bgP.length){const n=Math.round(BGN[SET.bg]||35);for(let i=0;i<n;i++)bgP.push(bgSpawn(true))}
+  if(!bgP.length){const n=Math.round((BGN[SET.bg]||35)*(IS_MOBILE?.6:1));for(let i=0;i<n;i++)bgP.push(bgSpawn(true))}
   if(t-bgColT>2000){bgColT=t;bgColors()}
   const c=bx,W=bgW,H=bgH,m=SET.bg,K=bgCol;c.clearRect(0,0,W,H);
   for(let i=0;i<bgP.length;i++){
@@ -1510,6 +1553,7 @@ function padLoop(t){const pads=navigator.getGamepads?[...navigator.getGamepads()
 requestAnimationFrame(padLoop);
 
 /* Boot */
+document.documentElement.classList.toggle("mob",IS_MOBILE);
 applyTheme();
 applyFont();
 document.documentElement.classList.toggle("low",SET.low);syncSettings();
