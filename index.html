@@ -50,7 +50,7 @@ input,textarea,select{-webkit-user-select:text;user-select:text}
 body{margin:0;color:var(--ink);font-family:var(--font-main);overflow:hidden;background:var(--bg)}
 
 /* Canvas Background im echten Vollbild */
-#bg{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:0}
+#bg{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
 
 /* FPS Anzeige */
 #fps-counter{position:fixed;top:8px;right:12px;z-index:200;background:color-mix(in srgb,var(--surface) 80%,transparent);border:1px solid color-mix(in srgb,var(--ink) 15%,transparent);padding:2px 8px;border-radius:6px;font-family:monospace;font-size:0.75rem;color:var(--muted);pointer-events:none;backdrop-filter:blur(4px)}
@@ -191,9 +191,34 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 25%,var(--su
 .tv{position:relative;height:340px;border-radius:var(--r);overflow:hidden;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--surface) 75%,var(--bg)) 0%,var(--bg) 78%);border:1px solid var(--line);touch-action:none;-webkit-user-select:none;user-select:none;cursor:grab;margin:6px 0}
 .tv:active{cursor:grabbing}.tv.tall{height:min(64dvh,600px)}
 
-/* VOLLBILD-SKILLTREE KONTROLLEN & MODUS */
-.tv.fullscreen{position:fixed!important;inset:0!important;z-index:9999!important;width:100vw!important;height:100vh!important;height:100dvh!important;border-radius:0!important;margin:0!important;border:none!important}
+/* VOLLBILD-SKILLTREE: Baum füllt den ganzen Bildschirm, Bedienelemente schweben als Glas-HUD darüber */
 body.sk-fs{overflow:hidden!important}
+body.sk-fs #fx{z-index:10050}
+body.sk-fs .win{z-index:10060}
+body.sk-fs #fps-counter{z-index:10070}
+#skills.sk-full{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin:0;overflow:hidden;background:var(--bg);pointer-events:none;touch-action:none;
+  padding:calc(10px + env(safe-area-inset-top,0px)) calc(10px + env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) calc(10px + env(safe-area-inset-left,0px));
+  animation:skfsin .22s ease-out}
+@keyframes skfsin{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+#skills.sk-full>*{position:relative;z-index:2;pointer-events:auto}
+#skills.sk-full>.tv{position:absolute;inset:0;z-index:0;height:auto;margin:0;border:0;border-radius:0}
+#skills.sk-full>.skill-head,#skills.sk-full>.srow{width:min(calc(100% - 58px),380px);margin:0!important;background:color-mix(in srgb,var(--surface) 82%,transparent)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);box-shadow:0 6px 18px -8px rgba(0,0,0,.5)}
+#skills.sk-full>.skill-head{padding:8px 12px}
+#skills.sk-full>.srow{padding:8px 12px}
+#skills.sk-full>.tdet{margin:auto 0 0;width:min(100%,460px);max-height:42dvh;overflow-y:auto;overscroll-behavior:contain;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 10px 30px -10px rgba(0,0,0,.6)}
+#skills.sk-full>.tfoot{display:none}
+#skills.sk-full .tv-ctl{top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));gap:8px}
+#skills.sk-full .tv-ctl button{width:42px;height:42px;border-radius:12px;font-size:1.2rem;box-shadow:0 4px 12px -4px rgba(0,0,0,.5);backdrop-filter:blur(8px)}
+#skills.sk-full .tv-ctl button:hover{background:var(--surface)}
+#skills.sk-full .tv-ctl [data-z="tall"]{display:none}
+#skills.sk-full .tv-leg{left:auto;right:calc(10px + env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+#skills.sk-full .tv-leg span{font-size:.7rem;padding:3px 10px}
+@media (max-width:700px){#skills.sk-full .tv-leg{display:none}}
+@media (max-height:520px){
+  #skills.sk-full>.tdet{width:min(100%,380px);max-height:56dvh;padding:8px 10px}
+  #skills.sk-full .td-bon{display:none}
+  #skills.sk-full>.srow small{display:none}
+}
 
 .tv svg{width:100%;height:100%;display:block;touch-action:none}
 #tg{transform-origin:0 0;will-change:transform}
@@ -473,6 +498,7 @@ function applyTheme(){
   if(m&&bg)m.setAttribute("content",bg);
 }
 
+try{matchMedia("(prefers-color-scheme:dark)").addEventListener("change",()=>{if(SET.theme==="auto")applyTheme()})}catch(e){}
 function applyFont(){
   if(!FONTS.includes(SET.font))SET.font="georgia";
   document.documentElement.setAttribute("data-font",SET.font);
@@ -515,12 +541,15 @@ const stage=()=>Math.min(MAXSTAGE,Math.floor(level()/10));
 
 const getPointCost=()=>Math.max(1,Math.floor(1000*Math.pow(2.4,s.boughtPoints||0)*(1-sk("pdisc"))));
 /* Keine Skill Points mehr beim 10x Upgrade */
-const skillPoints=()=>(s.boughtPoints||0)-skSpent();
+const skillPoints=()=>Math.max(0,(s.boughtPoints||0)-skSpent());
 
 const SHORT=[[1e24,"Sp"],[1e21,"Sx"],[1e18,"Qi"],[1e15,"Qa"],[1e12,"T"],[1e9,"B"],[1e6,"M"],[1e3,"k"]];
 function fmt(v){
   if(SET.num==="full")return Math.floor(v).toLocaleString("en-US");
-  for(const [lim,suf] of SHORT)if(v>=lim)return (v/lim).toFixed(v/lim<10?2:v/lim<100?1:0)+suf;
+  for(let i=0;i<SHORT.length;i++){const [lim,suf]=SHORT[i];if(v>=lim){
+    const x=v/lim,txt=x.toFixed(x<10?2:x<100?1:0);
+    if(parseFloat(txt)>=1000&&i>0){const [l2,s2]=SHORT[i-1];return (v/l2).toFixed(2)+s2}
+    return txt+suf}}
   return Math.floor(v).toLocaleString("en-US");
 }
 
@@ -927,15 +956,47 @@ const TV={x:0,y:0,z:1,fit:.4,homed:false};
 const SVGNS="http://www.w3.org/2000/svg";
 const mk=(tag,attrs,parent)=>{const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e};
 
-function skToggleFullscreen(){
-  const tv = $("tv");
-  if(!tv) return;
-  const isFS = tv.classList.toggle("fullscreen");
-  document.body.classList.toggle("sk-fs", isFS);
-  const fsBtn = tv.querySelector('[data-z="fs"]');
-  if(fsBtn) fsBtn.textContent = isFS ? "🗗" : "⛶";
-  setTimeout(() => skHome(true), 50);
+/* Vollbild: #skills wird an <body> gehängt (unabhängig von Sheet/Scroll-Containern),
+   zusätzlich echtes Browser-Vollbild wo verfügbar (iPhone-Safari: nur Overlay) */
+const SKFS={on:false,ph:null};
+function skSetFS(on){
+  const el=$("skills");if(!el||!SK.built)return;
+  on=!!on;if(on===SKFS.on)return;
+  SKFS.on=on;
+  if(on){
+    SKFS.ph=document.createComment("skills");el.parentNode.insertBefore(SKFS.ph,el);
+    document.body.appendChild(el);el.classList.add("sk-full");
+    try{const de=document.documentElement;if(de.requestFullscreen&&!document.fullscreenElement){const r=de.requestFullscreen({navigationUI:"hide"});if(r&&r.catch)r.catch(()=>{})}}catch(_){}
+  }else{
+    el.classList.remove("sk-full");
+    if(SKFS.ph&&SKFS.ph.parentNode){SKFS.ph.parentNode.insertBefore(el,SKFS.ph);SKFS.ph.remove()}
+    SKFS.ph=null;
+    try{if(document.fullscreenElement&&document.exitFullscreen){const r=document.exitFullscreen();if(r&&r.catch)r.catch(()=>{})}}catch(_){}
+  }
+  document.body.classList.toggle("sk-fs",on);
+  const bt=el.querySelector('[data-z="fs"]');
+  if(bt){bt.textContent=on?"✕":"⛶";bt.setAttribute("aria-label",on?"Exit fullscreen":"Fullscreen");bt.title=on?"Exit fullscreen (Esc)":"Fullscreen (F)"}
+  requestAnimationFrame(()=>skHome(false));setTimeout(()=>skHome(false),250);
 }
+function skToggleFullscreen(){skSetFS(!SKFS.on)}
+document.addEventListener("fullscreenchange",()=>{
+  if(!document.fullscreenElement&&SKFS.on)skSetFS(false);
+  else if(SKFS.on)setTimeout(()=>skHome(false),120)});
+addEventListener("keydown",e=>{
+  if(!SKFS.on||e.ctrlKey||e.metaKey||e.altKey)return;
+  const tg=e.target;if(tg&&/^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName))return;
+  const tv=$("tv");if(!tv)return;const r=tv.getBoundingClientRect(),k=e.key,st=70;let h=true;
+  if(k==="+"||k==="=")skZoomAt(r.width/2,r.height/2,1.25,true);
+  else if(k==="-"||k==="_")skZoomAt(r.width/2,r.height/2,.8,true);
+  else if(k==="0"||k==="h"||k==="H")skHome(true);
+  else if(k==="f"||k==="F")skSetFS(false);
+  else if(k==="u"||k==="U"){if(SK.sel&&SK.sel!=="core")skBuyNode(SK.sel)}
+  else if(k==="ArrowLeft"){TV.x+=st;skApply(true)}
+  else if(k==="ArrowRight"){TV.x-=st;skApply(true)}
+  else if(k==="ArrowUp"){TV.y+=st;skApply(true)}
+  else if(k==="ArrowDown"){TV.y-=st;skApply(true)}
+  else h=false;
+  if(h)e.preventDefault()});
 
 function skBuild(){
   const el=$("skills");
@@ -944,7 +1005,7 @@ function skBuild(){
   '<div class="srow" style="margin-bottom:8px;background:var(--surface)"><div><b>Buy Skill Point</b><small id="sk-cost" style="display:block;color:var(--muted)"></small></div><button class="btn" id="buy-pt-btn" type="button">Buy 1 Pt</button></div>'+
   '<div class="srow" id="sk-auto" style="margin-bottom:8px;background:var(--surface)" hidden><div><b>Auto-Clicker Toggle</b><small style="display:block;color:var(--muted)">Turn auto-clicking on or off</small></div><label class="switch"><input type="checkbox" id="autoclick-toggle"><span class="track"></span><span class="knob"></span></label></div>'+
   '<div class="tv" id="tv"><svg id="tsvg" aria-label="Skill tree"><g id="tg"></g></svg>'+
-  '<div class="tv-ctl"><button type="button" data-z="fs" aria-label="Fullscreen">⛶</button><button type="button" data-z="in" aria-label="Zoom in">+</button><button type="button" data-z="out" aria-label="Zoom out">−</button><button type="button" data-z="home" aria-label="Center">⌖</button><button type="button" data-z="tall" aria-label="Enlarge">⤢</button></div>'+
+  '<div class="tv-ctl"><button type="button" data-z="fs" aria-label="Fullscreen" title="Fullscreen (F)">⛶</button><button type="button" data-z="in" aria-label="Zoom in">+</button><button type="button" data-z="out" aria-label="Zoom out">−</button><button type="button" data-z="home" aria-label="Center">⌖</button><button type="button" data-z="tall" aria-label="Enlarge">⤢</button></div>'+
   '<div class="tv-leg"><span style="--c:'+BRANCH.g.c+'">Growth</span><span style="--c:'+BRANCH.r.c+'">Harvest</span><span style="--c:'+BRANCH.b.c+'">Mind</span></div></div>'+
   '<div class="tdet" id="tdet"></div>'+
   '<div class="tfoot"><button class="btn alt" id="sk-respec" type="button">Respec tree (free)</button></div>';
@@ -1004,6 +1065,7 @@ function skBuild(){
     if(!rsT){b.textContent="Confirm? Tap again";rsT=setTimeout(()=>{rsT=0;b.textContent="Respec tree (free)"},2600);return}
     clearTimeout(rsT);rsT=0;b.textContent="Respec tree (free)";s.skills={};SKC=null;SK.sel=null;combo=0;uiSfx();save();render();skForce()};
   addEventListener("resize",()=>{if(TV.homed){const r=tv.getBoundingClientRect();if(r.width>20){TV.fit=Math.min(r.width,r.height)/1180;skApply(false)}}});
+  if(window.ResizeObserver)new ResizeObserver(()=>{const r=tv.getBoundingClientRect();if(r.width>20&&r.height>20&&!TV.homed)skHome(false)}).observe(tv);
 }
 function skApply(anim){
   const tv=$("tv"),g=$("tg");if(!tv)return;const w=tv.clientWidth,h=tv.clientHeight,R=580;
@@ -1193,9 +1255,10 @@ setInterval(()=>{if(burning&&(Date.now()-lastComboT>FIRE_END||document.hidden||!
 let PR=null;
 const updRect=()=>{const r=$("mushroom").getBoundingClientRect();PR=r;return r};
 const mushroomEl=$("mushroom");
-mushroomEl.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;e.preventDefault();hit(e, false)});
+let ptrT=-1e9;
+mushroomEl.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;e.preventDefault();ptrT=performance.now();hit(e, false)});
 mushroomEl.addEventListener("contextmenu",e=>e.preventDefault());
-mushroomEl.addEventListener("click",e=>{if(e.detail===0)hit(e, false)});
+mushroomEl.addEventListener("click",e=>{if(e.detail===0&&performance.now()-ptrT>700)hit(e, false)});
 
 function hit(e, isAuto=false){
   if(isAuto && !s.autoClickerActive) return;
@@ -1226,6 +1289,7 @@ setInterval(()=>{
     hit(null,true);
   }
   if(autoLv>=3&&skillLevel("fire")>0&&!burning){
+    lastComboT=Date.now();
     setFire(true);
   }
 },100);
@@ -1356,6 +1420,7 @@ window.addEventListener("resize",()=>{bgSize();setBg()});
 const PANES=["items","stats","settings","skills"];
 function curTab(){return PANES.findIndex(id=>!$(id).hidden)+1||1}
 function tab(i){
+  if(i!==4&&typeof SKFS!=="undefined"&&SKFS.on)skSetFS(false);
   PANES.forEach((id,k)=>{$(id).hidden=i!==k+1});
   [1,2,3,4].forEach(k=>{$("tab"+k).classList.toggle("on",i===k);$("tab"+k).setAttribute("aria-selected",i===k?"true":"false")});
   renderStats();renderSkills();
@@ -1366,6 +1431,7 @@ function setSheet(v){sheet=!!v&&mq.matches;document.body.classList.toggle("sheet
 [1,2,3,4].forEach(k=>{$("tab"+k).onclick=()=>{
   if(mq.matches&&sheet&&curTab()===k){setSheet(false)}
   else{tab(k);if(mq.matches)setSheet(true)}
+  if(k===4)requestAnimationFrame(()=>{if(curTab()===4)renderSkills()});
   uiSfx()}});
 $("sheet-close").onclick=()=>{setSheet(false);uiSfx()};
 $("scrim").onclick=()=>setSheet(false);
@@ -1422,11 +1488,11 @@ $("imp-do").onclick=()=>{const data=decodeSave($("savetext").value),btn=$("imp-d
   applySettings();prevDrawn=-1;save();render();flash("Loaded!");uiSfx()};
 
 /* Reset */
-let rt=0;$("reset").onclick=()=>{const b=$("reset");if(!rt){b.textContent="Confirm? Click again";rt=setTimeout(()=>{rt=0;b.textContent="Reset all progress"},2500);return}clearTimeout(rt);rt=0;b.textContent="Reset all progress";s=sanitize(null);prevDrawn=-1;$("nm").value="";save();drawn=-1;render();$("stage").animate([{opacity:.2},{opacity:1}],{duration:400})};
+let rt=0;$("reset").onclick=()=>{const b=$("reset");if(!rt){b.textContent="Confirm? Click again";rt=setTimeout(()=>{rt=0;b.textContent="Reset all progress"},2500);return}clearTimeout(rt);rt=0;b.textContent="Reset all progress";s=sanitize(null);SKC=null;SK.sel=null;combo=0;if(burning)setFire(false);prevDrawn=-1;save();drawn=-1;render();skForce();$("stage").animate([{opacity:.2},{opacity:1}],{duration:400})};
 
 /* Win Modal */
 function win(){s.won=true;save();$("winTxt").textContent="You harvested "+fmt(s.total)+" mushrooms and built the Moon Garden!";$("win").hidden=false;$("winBtn").focus();winSfx();if(!low)for(let i=0;i<6;i++)setTimeout(()=>burst(innerWidth*(.15+Math.random()*.7),innerHeight*(.2+Math.random()*.4),true),i*150)}
-$("winBtn").onclick=()=>{$("win").hidden=true};addEventListener("keydown",e=>{if(e.key==="Escape"){$("win").hidden=true;setSheet(false);const tv=$("tv");if(tv&&tv.classList.contains("fullscreen"))skToggleFullscreen()}});
+$("winBtn").onclick=()=>{$("win").hidden=true};addEventListener("keydown",e=>{if(e.key==="Escape"){if(SKFS.on){skSetFS(false);return}$("win").hidden=true;setSheet(false)}});
 
 /* Gamepad Support */
 let gi=0,prevB=[],axT=0,aT=0,padOn=false;
