@@ -286,6 +286,17 @@ body.sk-fs #fps-counter{z-index:10070}
 .mob .stats div,.mob .tv-ctl button,.mob .tv-leg span,.mob #fps-counter,.mob .tv-auto{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 .mob #skills.sk-full>.skill-head,.mob #skills.sk-full>.srow,.mob #skills.sk-full>.tdet{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:color-mix(in srgb,var(--surface) 95%,transparent)!important}
 
+
+/* ===== MOBILE PERFORMANCE ===== */
+.mob .nd .body,.mob .nd .deco,.mob .scn-g i,.mob #mz,.mob .td-top .skill-icon{filter:none!important}
+.mob .scn-g i,.mob .nd.root .halo,.mob .nd.afford .halo,.mob .nd.afford .reach,.mob .td-top .btn,.mob .tab.rgb,.mob .btn-rgb-rainbow,.mob .skill.maxed,.mob #mushroom::before,.mob #mushroom.burning::after{animation:none!important}
+.mob .tv .flow{display:none}
+.mob .tab.rgb,.mob .btn-rgb-rainbow{box-shadow:none!important}
+.mob .scn-row,.mob .item,.mob .skill{contain:layout paint style}
+.mob .scn-row{content-visibility:auto;contain-intrinsic-size:auto 120px}
+.mob *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.mob .stage,.mob .main-content{box-shadow:none!important}
+
 /* Win modal */
 .win{position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.6);z-index:50;padding:16px}
 .win .card{background:var(--surface);color:var(--ink);border-radius:16px;padding:22px 20px;max-width:340px;width:100%;text-align:center;animation:winin .4s cubic-bezier(.2,1.4,.4,1)}
@@ -741,7 +752,7 @@ const level=()=>DEFS.reduce((a,d)=>a+own(d),0);
 const MAXSTAGE=19;
 const stage=()=>Math.min(MAXSTAGE,Math.floor(level()/10));
 
-const getPointCost=()=>Math.max(1,Math.floor(1000*Math.pow(2.4,s.boughtPoints||0)*(1-sk("pdisc"))));
+const getPointCost=()=>Math.max(1,Math.floor(400*Math.pow(1.9,s.boughtPoints||0)*(1-sk("pdisc"))));
 /* Keine Skill Points mehr beim 10x Upgrade */
 const skillPoints=()=>Math.max(0,(s.boughtPoints||0)-skSpent());
 
@@ -1499,7 +1510,7 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 /* Persistence */
 function save(){try{localStorage.setItem("mushroom-farm-v2",JSON.stringify(s));localStorage.setItem("mushroom-farm-set",JSON.stringify(SET))}catch(e){}}
 let svT=0;function saveSoon(){if(svT||!SET.auto)return;svT=setTimeout(()=>{svT=0;save()},1500)}
-setInterval(()=>{if(SET.auto&&!document.hidden)save()},10000);
+setInterval(()=>{if(SET.auto&&!document.hidden)save()},IS_MOBILE?20000:10000);
 addEventListener("pagehide",save);addEventListener("visibilitychange",()=>{if(document.hidden)save()});
 
 /* Mushroom Animations */
@@ -1624,7 +1635,7 @@ setInterval(()=>{
   const autoLv=skillLevel("autoclick");
   if(autoLv<=0||!s.autoClickerActive||document.hidden)return;
   const clicksPerSec=([0,1,3,6][autoLv]||0)+(autoLv>0?sk("auto"):0);
-  autoClickAcc+=clicksPerSec*0.1;
+  autoClickAcc+=clicksPerSec*(IS_MOBILE?0.2:0.1);
   while(autoClickAcc>=1){
     autoClickAcc-=1;
     hit(null,true);
@@ -1633,10 +1644,10 @@ setInterval(()=>{
     lastComboT=Date.now();
     setFire(true);
   }
-},100);
+},IS_MOBILE?200:100);
 
 let lastBump=0,last=Date.now(),lastRender=0;
-setInterval(()=>{const now=Date.now(),dt=(now-last)/1000;last=now;if(!document.hidden){s.time=(s.time||0)+Math.min(dt,1);const g=perSec()*dt;if(g>0){s.n+=g;s.total+=g;if(!low||now-lastRender>600){lastRender=now;render()}}}},200);
+setInterval(()=>{const now=Date.now(),dt=(now-last)/1000;last=now;if(!document.hidden){s.time=(s.time||0)+Math.min(dt,1);const g=perSec()*dt;if(g>0){s.n+=g;s.total+=g;if((!low&&!IS_MOBILE)||now-lastRender>(IS_MOBILE?500:600)){lastRender=now;render()}}}},200);
 
 /* FPS Counter Loop */
 let frameCount=0,lastFpsT=performance.now();
@@ -1900,7 +1911,7 @@ function renderScene(){
     h+='<div class="scn-row" data-id="'+d.id+'" style="--c:'+c+'"><div class="scn-lbl"><b>'+d.name+'</b><span>×'+n+(n>show?" · +"+(n-show)+" more":"")+'</span></div><div class="scn-g">'+g+'</div></div>'});
   setHTML(SCN,h||'<div class="scn-empty">Your farm is empty.<br>Buy your first upgrade from the list on the right.</div>');
 }
-setInterval(renderScene,500);
+setInterval(()=>{if(!document.hidden)renderScene()},IS_MOBILE?1200:500);
 
 
 /* Boot */
