@@ -46,6 +46,39 @@
 :root[data-theme="mint"]{--bg:#ecf8f1;--surface:#cdeedd;--ink:#12392a;--muted:#5a8a73;--accent:#e0527a;--ok:#1e9e6a;color-scheme:light}
 :root[data-theme="bubblegum"]{--bg:#fff0f8;--surface:#ffd6ec;--ink:#3d1635;--muted:#a0628a;--accent:#7a4dff;--ok:#ff4fa3;color-scheme:light}
 
+
+/* Gold-Pilz: Timer-Ring, Glitzer, Bonus-Effekt (unten -> oben) */
+#golden-mushroom .gold-ring{position:absolute;left:-7px;top:-7px;width:calc(100% + 14px);height:calc(100% + 14px);transform:rotate(-90deg);pointer-events:none;overflow:visible}
+#golden-mushroom .gold-ring circle{fill:none;stroke-width:3;stroke-linecap:round}
+#golden-mushroom .gold-ring .trk{stroke:rgba(255,255,255,.28)}
+#golden-mushroom .gold-ring .tm{stroke:#ffd84a;stroke-dasharray:207.3;stroke-dashoffset:0;filter:drop-shadow(0 0 3px #ffd84a)}
+#golden-mushroom.on .gold-ring .tm{animation:goldTimer 12s linear forwards}
+@keyframes goldTimer{to{stroke-dashoffset:207.3}}
+#golden-mushroom .gold-glint{position:absolute;width:11px;height:11px;background:#fffbd0;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);pointer-events:none;opacity:0;animation:goldGlint 1.8s ease-in-out infinite}
+#golden-mushroom .g1{top:-5px;right:3px}#golden-mushroom .g2{bottom:14px;left:-7px;animation-delay:.9s}
+@keyframes goldGlint{0%,100%{transform:scale(0) rotate(0);opacity:0}50%{transform:scale(1) rotate(45deg);opacity:1}}
+#golden-mushroom:hover{filter:drop-shadow(0 0 12px #ffd84a)}
+#gold-status{position:relative;overflow:hidden}
+#gold-status::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:var(--gp,100%);background:#8a5200;opacity:.55;transition:width .25s linear}
+#gold-rise{position:absolute;inset:0;z-index:2;border-radius:inherit;pointer-events:none;overflow:hidden;opacity:0;visibility:hidden;transition:opacity .7s ease,visibility 0s linear .7s}
+html.gold-on #gold-rise{opacity:1;visibility:visible;transition-delay:0s}
+html.gold-ending #gold-rise{animation:grEnd .5s ease-in-out infinite alternate}
+@keyframes grEnd{from{opacity:1}to{opacity:.4}}
+#gold-rise .gr-glow{position:absolute;left:0;right:0;bottom:0;height:62%;background:linear-gradient(to top,rgba(255,196,48,.40),rgba(255,214,90,.14) 48%,transparent);animation:grBreath 2.6s ease-in-out infinite}
+@keyframes grBreath{0%,100%{opacity:.7}50%{opacity:1}}
+#gold-rise .gr-bands{position:absolute;inset:0;background:linear-gradient(to top,transparent 0,rgba(255,228,120,.16) 50%,transparent 100%);background-size:100% 320px;-webkit-mask-image:linear-gradient(to top,#000,transparent 92%);mask-image:linear-gradient(to top,#000,transparent 92%);animation:grBands 5s linear infinite;animation-play-state:paused}
+html.gold-on #gold-rise .gr-bands{animation-play-state:running}
+@keyframes grBands{to{background-position:0 -320px}}
+#gold-rise .gr-wave{position:absolute;left:0;right:0;bottom:-34%;height:34%;opacity:0;background:linear-gradient(to top,transparent,rgba(255,238,160,.8) 55%,rgba(255,255,255,.0))}
+html.gold-wave #gold-rise .gr-wave{animation:grWave 1.3s ease-out}
+@keyframes grWave{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-420%);opacity:0}}
+#gold-rise .gr-sp i{position:absolute;bottom:-24px;left:var(--x);width:var(--s);height:var(--s);border-radius:50%;background:radial-gradient(circle,#fffbd0 0%,#ffd84a 45%,transparent 72%);opacity:0;animation:grRise var(--d) linear var(--dl) infinite;animation-play-state:paused}
+html.gold-on #gold-rise .gr-sp i{animation-play-state:running}
+@keyframes grRise{0%{transform:translate(0,0) scale(.6);opacity:0}10%{opacity:.95}85%{opacity:.7}100%{transform:translate(var(--dx),calc(var(--h,600px)*-1 - 30px)) scale(1.15);opacity:0}}
+html.gold-on .stage{box-shadow:0 0 0 2px rgba(244,198,79,.55),0 0 30px rgba(244,193,59,.45)}
+html.gold-on .count{filter:drop-shadow(0 0 8px rgba(255,213,74,.55))}
+.low #gold-rise .gr-sp,.low #gold-rise .gr-bands{display:none}
+@media(prefers-reduced-motion:reduce){#gold-rise .gr-sp,#gold-rise .gr-bands,#gold-rise .gr-wave,#golden-mushroom .gold-glint{display:none}}
 *{box-sizing:border-box}
 html,body{height:100%;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 input,textarea,select{-webkit-user-select:text;user-select:text}
@@ -143,6 +176,8 @@ background:linear-gradient(90deg,color-mix(in srgb,var(--c,#8b8b80) 25%,var(--su
 .item:not(:disabled):active{transform:scale(.98)}
 .item:focus-visible{outline:3px solid var(--accent)}
 .item b{display:block;font-size:1rem}.item small{color:var(--muted);font-size:.75rem}
+.item .eta{display:block;margin-top:2px;font-weight:700;color:var(--ok);opacity:.9}.item .eta:empty{display:none}
+.kbd-help{line-height:1.7}.kbd-help kbd{font:700 .72rem monospace;padding:1px 6px;border-radius:5px;border:1px solid color-mix(in srgb,var(--ink) 25%,transparent);background:color-mix(in srgb,var(--ink) 8%,transparent)}
 .ic{width:2.2rem;height:2.2rem;display:grid;place-items:center;border-radius:50%;font-size:1.2rem;background:color-mix(in srgb,var(--c,#8b8b80) 24%,transparent)}
 .rt{display:flex;flex-direction:column;align-items:flex-end}
 .cost{font-weight:700;white-space:nowrap;color:color-mix(in srgb,var(--c,#8b8b80) 70%,var(--ink));font-size:1rem}
@@ -651,6 +686,7 @@ body.pad #padhint:not(:empty){display:block}
 <main>
 <div class="stage-container">
   <section class="stage" id="stage">
+    <div id="gold-rise" aria-hidden="true"><i class="gr-glow"></i><i class="gr-bands"></i><i class="gr-wave"></i><div class="gr-sp"></div></div>
     <h1>Mushroom Farm</h1>
     <div class="stagelbl" id="stg"></div>
     <div class="count-wrapper">
@@ -659,7 +695,7 @@ body.pad #padhint:not(:empty){display:block}
     <div class="rate" id="rate"></div>
     <div id="gold-status" hidden>2× GOLDEN BONUS · 01:00</div>
     <button id="golden-mushroom" type="button" aria-label="Collect golden mushroom for double gains" title="Collect for 60 seconds of double gains">
-      <span class="gold-aura" aria-hidden="true"></span>
+      <span class="gold-aura" aria-hidden="true"></span><svg class="gold-ring" viewBox="0 0 72 72" aria-hidden="true"><circle class="trk" cx="36" cy="36" r="33"/><circle class="tm" cx="36" cy="36" r="33"/></svg><i class="gold-glint g1"></i><i class="gold-glint g2"></i>
       <svg class="gold-shape" viewBox="0 0 72 78" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
         <defs><linearGradient id="goldCap" x1="0" y1="0" x2=".85" y2="1"><stop offset="0" stop-color="#fff9b8"/><stop offset=".34" stop-color="#ffdf48"/><stop offset=".72" stop-color="#f4ad16"/><stop offset="1" stop-color="#a96308"/></linearGradient><linearGradient id="goldStem" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#fff9d9"/><stop offset=".5" stop-color="#fff0a0"/><stop offset="1" stop-color="#d9a12c"/></linearGradient></defs>
         <ellipse cx="36" cy="70" rx="20" ry="4" fill="#9b650d" opacity=".2"/>
@@ -739,6 +775,9 @@ body.pad #padhint:not(:empty){display:block}
             <option value="short">Short (1.25M)</option><option value="full">Full (1,250,000)</option></select></div>
         <div class="srow"><span class="lbl">Autosave<small>Saves automatically</small></span>
           <label class="switch"><input type="checkbox" id="set-auto"><span class="track"></span><span class="knob"></span></label></div>
+        <div class="srow"><span class="lbl">Offline earnings<small>While away: 50 % of passive income, max. 2 h</small></span>
+          <label class="switch"><input type="checkbox" id="set-offline"><span class="track"></span><span class="knob"></span></label></div>
+        <div class="srow"><span class="lbl kbd-help">Keyboard<small><kbd>Space</kbd> / <kbd>Enter</kbd> click · <kbd>1</kbd>–<kbd>4</kbd> tabs · <kbd>Q</kbd> buy amount · <kbd>G</kbd> golden mushroom · <kbd>M</kbd> sound</small></span></div>
         <h3>Save data</h3>
         <div class="btnrow">
           <button class="btn" id="exp">Copy code</button>
@@ -779,11 +818,16 @@ const DEFS=[
  {id:"hoehle",name:"Crystal Cave",desc:"+900 mushrooms per second",base:1500000,mult:1.18,sec:900},
  {id:"sturm",name:"Spore Storm",desc:"+1,000 mushrooms per click",base:25000000,mult:1.35,click:1000},
  {id:"riss",name:"Time Rift",desc:"+50,000 mushrooms per second",base:700000000,mult:1.18,sec:50000},
- {id:"sing",name:"Mushroom Singularity",desc:"+1,000,000 mushrooms per second",base:40000000000,mult:1.18,sec:1000000}
+ {id:"sing",name:"Mushroom Singularity",desc:"+1,000,000 mushrooms per second",base:40000000000,mult:1.18,sec:1000000},
+ {id:"kom",name:"Compost Heap",desc:"+20 mushrooms per second",base:6000,mult:1.18,sec:20},
+ {id:"ring",name:"Fairy Ring",desc:"+1% crit chance (max 10)",base:60000,mult:1.5,crit:.01,max:10},
+ {id:"mess",name:"Foraging Knife",desc:"+400 mushrooms per click",base:4000000,mult:1.35,click:400},
+ {id:"bov",name:"Giant Puffball",desc:"+6,000 mushrooms per click",base:400000000,mult:1.35,click:6000},
+ {id:"nurs",name:"Nebula Nursery",desc:"+350,000 mushrooms per second",base:9000000000,mult:1.18,sec:350000}
 ];
 DEFS.sort((a,b)=>a.base-b.base);
-const ICON={hand:"🧤",korb:"🧺",kel:"🕳️",gew:"🌱",lab:"🧪",wald:"🌲",glueck:"🍀",spat:"⛏️",zh:"✨",fab:"🏭",reak:"⚛️",mond:"🌙",tau:"💧",zan:"🥢",netz:"🕸️",hund:"🐕",hoehle:"💎",sturm:"🌪️",riss:"⏳",sing:"🌀"};
-const UCOL={hand:"#e07a2f",korb:"#b8863b",kel:"#8a6a4a",gew:"#3fa64f",glueck:"#1fa385",spat:"#e0b41f",lab:"#3aa6c9",wald:"#2f7d4f",zh:"#b05ad6",fab:"#8c96a3",reak:"#d43f6a",mond:"#5b6fd6",tau:"#4aa3df",zan:"#9c8a3a",netz:"#7a6bb0",hund:"#a9703f",hoehle:"#46c7c0",sturm:"#c4553b",riss:"#c9a227",sing:"#8f3fd6"};
+const ICON={hand:"🧤",korb:"🧺",kel:"🕳️",gew:"🌱",lab:"🧪",wald:"🌲",glueck:"🍀",spat:"⛏️",zh:"✨",fab:"🏭",reak:"⚛️",mond:"🌙",tau:"💧",zan:"🥢",netz:"🕸️",hund:"🐕",hoehle:"💎",sturm:"🌪️",riss:"⏳",sing:"🌀",kom:"🪱",ring:"🧚",mess:"🔪",bov:"💨",nurs:"🌌"};
+const UCOL={hand:"#e07a2f",korb:"#b8863b",kel:"#8a6a4a",gew:"#3fa64f",glueck:"#1fa385",spat:"#e0b41f",lab:"#3aa6c9",wald:"#2f7d4f",zh:"#b05ad6",fab:"#8c96a3",reak:"#d43f6a",mond:"#5b6fd6",tau:"#4aa3df",zan:"#9c8a3a",netz:"#7a6bb0",hund:"#a9703f",hoehle:"#46c7c0",sturm:"#c4553b",riss:"#c9a227",sing:"#8f3fd6",kom:"#7a5a3a",ring:"#d96fb0",mess:"#a8b0ba",bov:"#d9cfae",nurs:"#6a4dd6"};
 const STG=[["Forest Mushroom","#c9533a","#a03420","#f6efdc","#e9dfc4",""],["Blue Mushroom","#5b8fd6","#2d5a9e","#e6f0ff","#e6e2d0",""],["Golden Mushroom","#f0c040","#c58a0f","#fff6c8","#efe3c0","#f0c040"],["Magic Mushroom","#9b5fd0","#5e2a91","#f3dcff","#e8dcec","#b57bff"],["Crystal Mushroom","#4fd1e0","#1f8fa3","#e6fcff","#d5eef0","#4fd1e0"],["Ember Mushroom","#ffa21f","#d8321c","#fff0b3","#f3dfc0","#ff6a2a"],["Moon Mushroom","#4a5596","#1e2347","#fff6c0","#d9d6e8","#c9c4ff"],["Rainbow Mushroom","#ff5fa2","#4aa8ff","#ffffff","#efe9ff","#ffd84a"],["Star Mushroom","#2b2f77","#0d0f33","#ffe9a8","#d7d4ea","#ffd84a"],["Ancient Mushroom","#00e5ff","#b100ff","#ffffff","#f0e6ff","#00e5ff"],
 ["Frost Mushroom","#bfe9ff","#5aa9d6","#ffffff","#e3f2fb","#9fe0ff"],["Coral Mushroom","#ff8a75","#e0405a","#fff1e6","#f8dfd0","#ff7a8a"],["Jade Mushroom","#4de0a5","#0c7a58","#eafff5","#d6efe4","#3dffb0"],["Obsidian Mushroom","#4b4f63","#0b0b14","#9ad7ff","#c9c9d6","#7a8cff"],["Solar Mushroom","#fff06a","#ff8a00","#fffbe0","#f7e7c0","#ffd23a"],["Nebula Mushroom","#c04dff","#2a0f6e","#ffd6f6","#e4d6f3","#e06bff"],["Aurora Mushroom","#43ffb4","#6a4dff","#e9fff6","#dff3ec","#55ffe0"],["Cosmic Mushroom","#ff4fd8","#2f1dff","#fff0ff","#e8ddf7","#ff70e8"],["Void Mushroom","#3a0a5e","#000000","#d38bff","#d9cfe3","#a64dff"],["Celestial Mushroom","#fff7d6","#ffb300","#ffffff","#fff3d0","#ffe27a"]];
 const SPOTS=[[60,68,13],[112,46,9],[146,86,14],[92,100,8],[40,100,7],[130,60,6],[78,40,6],[100,70,6],[168,108,5],[34,106,5]];
@@ -791,7 +835,7 @@ const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
 /* Settings */
-const SET={sound:true,vol:70,particles:!IS_MOBILE,anim:!IS_MOBILE,low:IS_MOBILE,theme:"auto",font:"georgia",bg:"spores",num:"short",auto:true,manim:"squish",idle:true,fps:false,layout:"farm",csnd:"new",bq:1};
+const SET={sound:true,vol:70,particles:!IS_MOBILE,anim:!IS_MOBILE,low:IS_MOBILE,theme:"auto",font:"georgia",bg:"spores",num:"short",auto:true,manim:"squish",idle:true,fps:false,layout:"farm",csnd:"new",bq:1,offline:true};
 try{const r=localStorage.getItem("mushroom-farm-set");if(r)Object.assign(SET,JSON.parse(r))}catch(e){}
 const THEMES=["auto","light","dark","ocean","midnight","sunset","lavender","sakura","forest","ember","cyber","coffee","royal","arctic","mint","bubblegum"];
 const FONTS=["georgia","trebuchet","rounded","mono","impact","nunito","cinzel","orbitron","patrick","bangers","pixel"];
@@ -830,7 +874,7 @@ function sanitize(o){
   if(o.treeV!==2)r.skills={};
   r.boughtPoints=Math.floor(num(o.boughtPoints));
   r.autoClickerActive=o.autoClickerActive!==false;
-  r.time=num(o.time);r.clicks=Math.floor(num(o.clicks));r.crits=Math.floor(num(o.crits));r.echoes=Math.floor(num(o.echoes));
+  r.lastSeen=num(o.lastSeen);r.time=num(o.time);r.clicks=Math.floor(num(o.clicks));r.crits=Math.floor(num(o.crits));r.echoes=Math.floor(num(o.echoes));
   if(o.won)r.won=true;
   return r;
 }
@@ -862,8 +906,12 @@ const getPointCost=()=>Math.max(1,Math.floor(400*Math.pow(1.9,s.boughtPoints||0)
 /* Keine Skill Points mehr beim 10x Upgrade */
 const skillPoints=()=>Math.max(0,(s.boughtPoints||0)-skSpent());
 
-const SHORT=[[1e24,"Sp"],[1e21,"Sx"],[1e18,"Qi"],[1e15,"Qa"],[1e12,"T"],[1e9,"B"],[1e6,"M"],[1e3,"k"]];
+const NMAX=1e300;
+function capN(){for(const k of["n","total"]){const v=s[k];if(!Number.isFinite(v)||v>NMAX)s[k]=Number.isNaN(v)||v<0?0:NMAX}}
+const SHORT=[[1e33,"Dc"],[1e30,"No"],[1e27,"Oc"],[1e24,"Sp"],[1e21,"Sx"],[1e18,"Qi"],[1e15,"Qa"],[1e12,"T"],[1e9,"B"],[1e6,"M"],[1e3,"k"]];
 function fmt(v){
+  if(!Number.isFinite(v))return v>0?"∞":"0";
+  if(v>=1e36)return v.toExponential(2).replace("e+","e");
   if(SET.num==="full")return Math.floor(v).toLocaleString("en-US");
   for(let i=0;i<SHORT.length;i++){const [lim,suf]=SHORT[i];if(v>=lim){
     const x=v/lim,txt=x.toFixed(x<10?2:x<100?1:0);
@@ -1087,9 +1135,10 @@ function skillSfx(id,lv,max){
 const box=$("items");
 const btns=DEFS.map(d=>{
   const b=document.createElement("button");b.className="item";b.type="button";
-  b.innerHTML='<span class="ic">'+(ICON[d.id]||"🍄")+'</span><span class="tx"><b>'+d.name+'</b><small>'+d.desc+'</small></span><span class="rt"><span class="cost"></span><span class="own"></span></span>';
+  b.innerHTML='<span class="ic">'+(ICON[d.id]||"🍄")+'</span><span class="tx"><b>'+d.name+'</b><small>'+d.desc+'</small><small class="eta"></small></span><span class="rt"><span class="cost"></span><span class="own"></span></span>';
   b.onclick=()=>{
     const c=cost(d),mx=d.max&&own(d)>=d.max;
+    if(b.classList.contains("locked"))return;
     const q=qOf(),B=q>1?bulk(d,q):null;
     if(s.n<c||mx){denySfx();if(SET.anim&&!low)b.animate([{transform:"translateX(0)"},{transform:"translateX(-5px)"},{transform:"translateX(5px)"},{transform:"translateX(-3px)"},{transform:"translateX(0)"}],{duration:260});return}
     const bn=B&&B.n>1?B.n:1;
@@ -1109,7 +1158,7 @@ BQBAR.addEventListener("click",e=>{const x=e.target.closest("[data-q]");if(!x)re
 syncBQ();
 
 /* Upgrade-VFX */
-const UKIND={hand:"spark",korb:"spark",spat:"spark",zh:"spark",kel:"rise",gew:"rise",lab:"rise",wald:"rise",fab:"rise",reak:"rise",mond:"rise",glueck:"gem",tau:"rise",zan:"spark",netz:"rise",hund:"spark",hoehle:"gem",sturm:"spark",riss:"gem",sing:"gem"};
+const UKIND={hand:"spark",korb:"spark",spat:"spark",zh:"spark",kel:"rise",gew:"rise",lab:"rise",wald:"rise",fab:"rise",reak:"rise",mond:"rise",glueck:"gem",tau:"rise",zan:"spark",netz:"rise",hund:"spark",hoehle:"gem",sturm:"spark",riss:"gem",sing:"gem",kom:"rise",ring:"gem",mess:"spark",bov:"spark",nurs:"gem"};
 const CONF=["#ffe27a","#ffffff","#ff7a9a","#7fd8ff","#8fe39a"];
 function fxRing(x,y,c,sp,lw,fill){P.push({x,y,ring:1,l:1,c,d:.04,sp,lw,fill})}
 function upgradeFx(b,d,qn){
@@ -1182,21 +1231,34 @@ function scnPulse(id){if(SET.layout==="farm"&&innerWidth<760)renderMFarm()}
 /* Golden mushroom: rare clickable bonus, doubles all gains for 60 seconds */
 const goldBtn=$("golden-mushroom"),goldStatus=$("gold-status");
 function hideGolden(){goldBtn.classList.remove("on");goldBtn.classList.add("leaving");setTimeout(()=>goldBtn.classList.remove("leaving"),450)}
-function scheduleGolden(){clearTimeout(goldSpawnTimer);goldSpawnTimer=setTimeout(()=>{
-  if(!document.hidden){goldBtn.classList.remove("leaving");goldBtn.classList.add("on");goldBtn.setAttribute("aria-label","Golden mushroom! Collect for 60 seconds of double gains");}
-  else {scheduleGolden();return;}
-  clearTimeout(goldExpireTimer);goldExpireTimer=setTimeout(()=>{hideGolden();scheduleGolden()},12000);
-},25000+Math.random()*45000)}
+const GOLD_MIN=120000,GOLD_VAR=180000;   /* 2–5 Minuten, gerechnet ab Ende des Bonus */
+function placeGolden(){const st=$("stage");if(!st)return;const W=st.clientWidth,H=st.clientHeight,R=Math.random;
+  goldBtn.style.right="auto";goldBtn.style.left=(8+R()*Math.max(0,W-64-16)).toFixed(0)+"px";goldBtn.style.top=(H*.12+R()*Math.max(0,H*.76-68)).toFixed(0)+"px"}
+function scheduleGolden(retry){clearTimeout(goldSpawnTimer);
+  const wait=retry?4000:GOLD_MIN+Math.random()*GOLD_VAR+Math.max(0,goldUntil-Date.now());
+  goldSpawnTimer=setTimeout(()=>{
+    if(document.hidden||Date.now()<goldUntil){scheduleGolden(true);return}   /* nie während des Gold-Effekts oder im Hintergrund */
+    placeGolden();goldBtn.classList.remove("leaving");goldBtn.classList.add("on");goldBtn.setAttribute("aria-label","Golden mushroom! Collect for 60 seconds of double gains");
+    if(!muted){tone(1318,.22,.05,0,"sine");tone(1760,.32,.04,.11,"sine")}
+    clearTimeout(goldExpireTimer);goldExpireTimer=setTimeout(()=>{hideGolden();scheduleGolden()},12000);
+  },wait)}
 function collectGolden(){if(!goldBtn.classList.contains("on"))return;hideGolden();clearTimeout(goldExpireTimer);goldUntil=Date.now()+60000;goldStatus.hidden=false;goldBtn.setAttribute("aria-label","Golden mushroom collected");
   if(!muted){tone(784,.18,.09,0,"sine");tone(1175,.24,.09,.08,"sine");tone(1568,.32,.07,.17,"sine")}
-  const r=goldBtn.getBoundingClientRect();if(!low)burst(r.left+r.width/2,r.top+r.height/2,true);render();scheduleGolden();saveSoon();}
+  const r=goldBtn.getBoundingClientRect();if(!low){burst(r.left+r.width/2,r.top+r.height/2,true);popText(r.left+r.width/2,r.top,"2× GOLD!",false,"#ffd84a",true)}goldWave();render();scheduleGolden();saveSoon();}
+const RT=document.documentElement;
+function goldSize(){const r=$("gold-rise"),st=$("stage");if(r&&st)r.style.setProperty("--h",st.clientHeight+"px")}
+addEventListener("resize",goldSize);
+function goldWave(){goldSize();RT.classList.add("gold-on");RT.classList.remove("gold-wave");void RT.offsetWidth;RT.classList.add("gold-wave");setTimeout(()=>RT.classList.remove("gold-wave"),1400)}
+{const sp=document.querySelector("#gold-rise .gr-sp");if(sp)for(let i=0;i<26;i++){const e=document.createElement("i"),R=Math.random;e.style.cssText="--x:"+(R()*100).toFixed(1)+"%;--s:"+(4+R()*9).toFixed(1)+"px;--d:"+(4+R()*4).toFixed(1)+"s;--dl:-"+(R()*8).toFixed(1)+"s;--dx:"+((R()-.5)*60).toFixed(0)+"px";sp.appendChild(e)}}
 goldBtn.addEventListener("click",collectGolden);scheduleGolden();
-setInterval(()=>{const left=Math.max(0,Math.ceil((goldUntil-Date.now())/1000));if(left>0){goldStatus.hidden=false;goldStatus.textContent="2× GOLDEN BONUS · "+String(Math.floor(left/60)).padStart(2,"0")+":"+String(left%60).padStart(2,"0");render()}else if(!goldStatus.hidden){goldStatus.hidden=true;render()}},250);
+setInterval(()=>{const left=Math.max(0,Math.ceil((goldUntil-Date.now())/1000));RT.classList.toggle("gold-on",left>0);RT.classList.toggle("gold-ending",left>0&&left<=5);if(left>0)goldStatus.style.setProperty("--gp",Math.min(100,(goldUntil-Date.now())/600)+"%");if(left>0){goldStatus.hidden=false;goldStatus.textContent="2× GOLDEN BONUS · "+String(Math.floor(left/60)).padStart(2,"0")+":"+String(left%60).padStart(2,"0");render()}else if(!goldStatus.hidden){goldStatus.hidden=true;render()}},250);
 
 /* Rendering */
 let rq=0,booted=false,drawn=-1;
 function render(){if(rq)return;rq=requestAnimationFrame(()=>{rq=0;renderNow()})}
 setTimeout(()=>{booted=true},800);
+function fmtEta(sec){sec=Math.ceil(sec);if(sec<60)return sec+"s";if(sec<3600)return Math.floor(sec/60)+"m "+(sec%60)+"s";if(sec<86400)return Math.floor(sec/3600)+"h "+Math.floor(sec%3600/60)+"m";if(sec<86400*100)return Math.floor(sec/86400)+"d "+Math.floor(sec%86400/3600)+"h";return">100d"}
+let _tt="";function setTitle(){const x=fmt(s.n)+" 🍄 · Mushroom Farm";if(x!==_tt){_tt=x;document.title=x}}
 function setHTML(el,h){if(el._h!==h){el._h=h;el.innerHTML=h}}
 function setX(el,t){if(el.textContent!==t)el.textContent=t}
 function setT(el,t){if(el.textContent===t)return;el.textContent=t;
@@ -1219,19 +1281,21 @@ let prevDrawn=-1;
 function renderNow(){
   drawMush();
   setX($("stg"),"Stage "+(stage()+1)+" · "+STG[stage()][0]+" · "+(stage()>=MAXSTAGE?"max":(level()%10)+"/10"));
-  setX($("n"),fmt(s.n));renderStats();renderSkills();
+  setX($("n"),fmt(s.n));setTitle();renderStats();renderSkills();
   setT($("rate"),fmt(perSec())+" / sec");setT($("st1"),fmt(perClick()));setT($("st2"),Math.round(critP()*100)+" %");setX($("st3"),fmt(s.total));
+  const _rate=perSec();
   DEFS.forEach((d,i)=>{
-    const b=btns[i],c=cost(d),mx=d.max&&own(d)>=d.max,hid=!(own(d)>0||s.total>=d.base*.6);
-    b.disabled=mx||s.n<c;b.classList.toggle("locked",hid);
+    const b=btns[i],c=cost(d),mx=d.max&&own(d)>=d.max,hid=!(own(d)>0||s.total>=c*.6);
+    b.disabled=mx||hid||s.n<c;b.classList.toggle("locked",hid);
     const can=!b.disabled&&!hid;
     if(can&&!b._can&&booted&&SET.anim&&!low&&!rm&&!IS_MOBILE){b.classList.remove("ready");void b.offsetWidth;b.classList.add("ready");setTimeout(()=>b.classList.remove("ready"),1050)}
     b._can=can;
-    const E=b._e||(b._e={cost:b.querySelector(".cost"),own:b.querySelector(".own"),nm:b.querySelector(".tx b"),ds:b.querySelector(".tx small"),ic:b.querySelector(".ic")});
+    const E=b._e||(b._e={cost:b.querySelector(".cost"),own:b.querySelector(".own"),nm:b.querySelector(".tx b"),ds:b.querySelector(".tx small:not(.eta)"),eta:b.querySelector(".eta"),ic:b.querySelector(".ic")});
     const _q=qOf(),_B=(_q>1&&!mx&&!hid)?bulk(d,_q):null;
     setT(E.cost,mx?"Max":(_B&&_B.n>1?"×"+_B.n+" · "+fmt(_B.tot):fmt(c))+" 🍄");setT(E.own,own(d)?"Lv "+own(d):"");
     setX(E.nm,hid?"???":d.name);setX(E.ds,hid?"Locked":d.desc);
     setX(E.ic,hid?"🔒":(ICON[d.id]||"🍄"));
+    setX(E.eta,(!hid&&!mx&&s.n<c&&_rate>0)?"⏱ ~"+fmtEta((c-s.n)/_rate)+" idle":"");
     const pp=Math.round(clamp(s.n/c*100,0,100)/5)*5;
     if(b._p!==pp){b._p=pp;b.style.setProperty("--p",pp+"%")}
     const cc=hid?"#8b8b80":UCOL[d.id];if(b._c!==cc){b._c=cc;b.style.setProperty("--c",cc)}
@@ -1686,7 +1750,7 @@ function skillFx(id,lv,max,rect,center){
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 /* Persistence */
-function save(){try{localStorage.setItem("mushroom-farm-v2",JSON.stringify(s));localStorage.setItem("mushroom-farm-set",JSON.stringify(SET))}catch(e){}}
+function save(){capN();s.lastSeen=Date.now();try{localStorage.setItem("mushroom-farm-v2",JSON.stringify(s));localStorage.setItem("mushroom-farm-set",JSON.stringify(SET))}catch(e){}}
 let svT=0;function saveSoon(){if(svT||!SET.auto)return;svT=setTimeout(()=>{svT=0;save()},1500)}
 setInterval(()=>{if(SET.auto&&!document.hidden)save()},IS_MOBILE?20000:10000);
 addEventListener("pagehide",save);addEventListener("visibilitychange",()=>{if(document.hidden)save()});
@@ -1796,7 +1860,7 @@ function hit(e, isAuto=false){
   fireCombo(lastHit);
   const crit=Math.random()<critP();let g=perClick()*(crit?(5+sk("critx")):1);if(crit&&sk("critSec")>0)g+=perSec()*sk("critSec");
   const echo=sk("echo")>0&&Math.random()<sk("echo");if(echo)g*=2;
-  s.n+=g;s.total+=g;s.clicks=(s.clicks||0)+1;if(crit)s.crits=(s.crits||0)+1;if(echo)s.echoes=(s.echoes||0)+1;render();
+  s.n+=g;s.total+=g;capN();s.clicks=(s.clicks||0)+1;if(crit)s.crits=(s.crits||0)+1;if(echo)s.echoes=(s.echoes||0)+1;render();
   let mx=e&&e.clientX,my=e&&e.clientY;
   if(!mx&&!my){const pr=updRect();mx=pr.left+pr.width/2;my=pr.top+pr.height/2}
   if(SET.particles&&!low)burst(mx,my,crit);
@@ -1828,7 +1892,12 @@ setInterval(()=>{
 },IS_MOBILE?200:100);
 
 let lastBump=0,last=Date.now(),lastRender=0;
-setInterval(()=>{const now=Date.now(),dt=(now-last)/1000;last=now;if(!document.hidden){s.time=(s.time||0)+Math.min(dt,1);const g=perSec()*dt;if(g>0){s.n+=g;s.total+=g;if((!low&&!IS_MOBILE)||now-lastRender>(IS_MOBILE?500:600)){lastRender=now;render()}}}},200);
+setInterval(()=>{const now=Date.now();let dt=(now-last)/1000;last=now;
+  if(document.hidden)return;                       /* Hintergrund wird über creditAway() beim Zurückkommen verrechnet */
+  if(dt>30){creditAway(dt);return}                 /* Gerät war im Standby: nur Offline-Rate mit Obergrenze */
+  if(dt<0)dt=0;
+  s.time=(s.time||0)+Math.min(dt,1);const g=perSec()*dt;
+  if(g>0){s.n+=g;s.total+=g;capN();if((!low&&!IS_MOBILE)||now-lastRender>(IS_MOBILE?500:600)){lastRender=now;render()}}},200);
 
 /* FPS Counter Loop */
 let frameCount=0,lastFpsT=performance.now();
@@ -1842,6 +1911,10 @@ function updateFps(t){
     lastFpsT=t;
   }
 }
+
+let fpsRaf=0;
+function fpsLoop(t){if(!SET.fps){fpsRaf=0;return}if(t-lastFpsT>2000){frameCount=0;lastFpsT=t}updateFps(t);fpsRaf=requestAnimationFrame(fpsLoop)}
+function fpsSync(){if(SET.fps&&!fpsRaf)fpsRaf=requestAnimationFrame(fpsLoop)}
 
 /* Partikel Canvas */
 const cv=$("fx"),c2=cv.getContext("2d",{alpha:true,desynchronized:false});
@@ -1900,7 +1973,7 @@ function echoFx(x,y,g,crit){
 function kick(){if(low)return;if(!raf){lastT=0;raf=requestAnimationFrame(loop)}}
 function loop(t){
   if(low){c2.clearRect(0,0,innerWidth,innerHeight);P=[];raf=0;return}
-  updateFps(t);perfTick(t);
+  perfTick(t);
   c2.clearRect(0,0,innerWidth,innerHeight);P=P.filter(p=>p.l>0);
   for(const p of P){p.l-=p.d||0.03;c2.globalAlpha=Math.max(p.l,0);
     if(p.txt){const k=(performance.now()-p.t0)/1000;if(k>=1){p.l=0;continue}
@@ -2026,6 +2099,8 @@ mq.addEventListener("change",()=>setSheet(false));
 
 /* Settings UI Controls */
 function syncSettings(){
+  fpsSync();
+  if($("set-offline"))$("set-offline").checked=!!SET.offline;
   $("set-sound").checked=SET.sound;$("set-vol").value=SET.vol;$("volval").textContent=SET.vol+" %";
   $("set-fps").checked=SET.fps;$("fps-counter").classList.toggle("hidden",!SET.fps);
   $("set-part").checked=SET.particles;$("set-anim").checked=SET.anim;$("set-low").checked=SET.low;
@@ -2049,7 +2124,7 @@ function saveSet(){try{localStorage.setItem("mushroom-farm-set",JSON.stringify(S
 $("set-sound").onchange=e=>{SET.sound=e.target.checked;muted=!SET.sound;if(SET.sound)audio();saveSet();syncSettings()};
 $("set-vol").oninput=e=>{SET.vol=+e.target.value;$("volval").textContent=SET.vol+" %";applyVol();saveSet()};
 $("set-vol").onchange=()=>{uiSfx();saveSet()};
-$("set-fps").onchange=e=>{SET.fps=e.target.checked;$("fps-counter").classList.toggle("hidden",!SET.fps);saveSet()};
+$("set-fps").onchange=e=>{SET.fps=e.target.checked;$("fps-counter").classList.toggle("hidden",!SET.fps);fpsSync();saveSet()};
 $("set-part").onchange=e=>{SET.particles=e.target.checked;saveSet()};
 $("set-anim").onchange=e=>{SET.anim=e.target.checked;saveSet()};
 $("set-low").onchange=e=>{setLow(e.target.checked)};
@@ -2062,6 +2137,7 @@ $("set-idle").onchange=e=>{SET.idle=e.target.checked;saveSet()};
 $("set-csnd").onchange=e=>{SET.csnd=["new","classic","bubble","wood","chime"].includes(e.target.value)?e.target.value:"new";saveSet();lastPop=0;popSfx(false);setTimeout(()=>{lastPop=0;popSfx(true)},260)};
 $("set-num").onchange=e=>{SET.num=e.target.value;saveSet();render()};
 $("set-auto").onchange=e=>{SET.auto=e.target.checked;saveSet()};
+$("set-offline").onchange=e=>{SET.offline=e.target.checked;saveSet();uiSfx()};
 
 /* Save Import/Export */
 function encodeSave(){return btoa(unescape(encodeURIComponent(JSON.stringify({v:2,s:s,set:SET}))));}
@@ -2077,11 +2153,49 @@ $("imp-do").onclick=()=>{const data=decodeSave($("savetext").value),btn=$("imp-d
   applySettings();prevDrawn=-1;save();render();flash("Loaded!");uiSfx()};
 
 /* Reset */
-let rt=0;$("reset").onclick=()=>{const b=$("reset");if(!rt){b.textContent="Confirm? Click again";rt=setTimeout(()=>{rt=0;b.textContent="Reset all progress"},2500);return}clearTimeout(rt);rt=0;b.textContent="Reset all progress";s=sanitize(null);SKC=null;SK.sel=null;combo=0;if(burning)setFire(false);prevDrawn=-1;save();drawn=-1;render();skForce();$("stage").animate([{opacity:.2},{opacity:1}],{duration:400})};
+let rt=0;$("reset").onclick=()=>{const b=$("reset");if(!rt){b.textContent="Confirm? Click again";rt=setTimeout(()=>{rt=0;b.textContent="Reset all progress"},2500);return}clearTimeout(rt);rt=0;b.textContent="Reset all progress";s=sanitize(null);SKC=null;SK.sel=null;combo=0;if(burning)setFire(false);goldUntil=0;goldStatus.hidden=true;autoClickAcc=0;hiddenAt=0;prevDrawn=-1;save();drawn=-1;render();skForce();$("stage").animate([{opacity:.2},{opacity:1}],{duration:400})};
 
 /* Win Modal */
 function win(){s.won=true;save();$("winTxt").textContent="You harvested "+fmt(s.total)+" mushrooms and built the Moon Garden!";$("win").hidden=false;$("winBtn").focus();winSfx();if(!low)for(let i=0;i<6;i++)setTimeout(()=>burst(innerWidth*(.15+Math.random()*.7),innerHeight*(.2+Math.random()*.4),true),i*150)}
 $("winBtn").onclick=()=>{$("win").hidden=true};addEventListener("keydown",e=>{if(e.key==="Escape"){if(SKFS.on){skSetFS(false);return}if(Date.now()-(SKFS.exitAt||0)<600)return;$("win").hidden=true;setSheet(false)}});
+
+/* QoL: Offline earnings */
+const OFF_RATE=.5,OFF_CAP=7200;let hiddenAt=0;
+function fmtAway(sec){sec=Math.round(sec);if(sec<3600)return Math.max(1,Math.round(sec/60))+" min";return Math.floor(sec/3600)+" h "+Math.round(sec%3600/60)+" min"}
+function creditAway(raw){
+  if(!SET.offline||!(raw>=30))return;
+  const away=Math.min(raw,OFF_CAP),rate=perSec()/goldMult(),g=rate*away*OFF_RATE;
+  if(!(g>=1))return;
+  s.n+=g;s.total+=g;capN();render();saveSoon();
+  padToast("Welcome back! +"+fmt(g)+" 🍄 while you were away ("+fmtAway(raw)+(raw>OFF_CAP?", capped at 2 h":"")+")",5000);
+}
+addEventListener("visibilitychange",()=>{if(document.hidden){hiddenAt=Date.now()}else{last=Date.now();
+  /* Mehrere Tabs: hat ein anderer Tab inzwischen neuer gespeichert, dessen Stand übernehmen statt ihn zu überschreiben */
+  try{const raw=localStorage.getItem("mushroom-farm-v2"),r=raw&&JSON.parse(raw);
+    if(r&&Number(r.lastSeen)>(s.lastSeen||0)+1000&&Number(r.total)>=(s.total||0)*.999){s=sanitize(r);SKC=null;render();skForce()}}catch(_){}
+  if(hiddenAt){const a=(Date.now()-hiddenAt)/1000;hiddenAt=0;creditAway(a)}}});
+
+/* QoL: Keyboard shortcuts */
+addEventListener("keydown",e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;
+  if(typeof SKFS!=="undefined"&&SKFS.on)return;
+  if(!$("win").hidden)return;
+  const tg=e.target,tn=tg&&tg.tagName;
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test(tn)||(tg&&tg.isContentEditable))return;
+  const k=e.key;
+  if(k===" "||k==="Enter"){
+    if(tn==="BUTTON"){
+      /* per Tastatur fokussierte Buttons behalten ihr normales Verhalten; nach einem Mausklick bleibt der Fokus nur "hängen" -> Leertaste klickt weiter den Pilz */
+      let kb=false;try{kb=tg.matches(":focus-visible")}catch(_){kb=true}
+      if(kb)return;tg.blur();
+    }
+    e.preventDefault();hit({button:0});
+  }
+  else if(k>="1"&&k<="4"){$("tab"+k).click()}
+  else if(k==="q"||k==="Q"){const i=BQS.indexOf(SET.bq);SET.bq=BQS[(i+1)%BQS.length];syncBQ();saveSet();uiSfx();render();padToast("Buy amount: "+(SET.bq==="all"?"All":"×"+SET.bq),1200)}
+  else if(k==="g"||k==="G"){const gb=$("golden-mushroom");if(gb&&gb.classList.contains("on"))gb.click()}
+  else if(k==="m"||k==="M"){const c=$("set-sound");c.checked=!c.checked;c.dispatchEvent(new Event("change",{bubbles:true}));padToast("Sound "+(SET.sound?"on":"off"),1200)}
+});
 
 /* Gamepad Support v2 */
 const PAD={gi:0,si:0,idx:-1,on:false,prev:[],rep:{},aT:0,ctx:"",lastT:0,pad:null,toastT:0};
@@ -2093,8 +2207,8 @@ const PAD_HINT={
   tree:"Stick/D-Pad  Select   \u00b7   A  Buy   \u00b7   X  Max   \u00b7   Y  +Skill point   \u00b7   R-Stick  Pan   \u00b7   LT/RT  Zoom   \u00b7   Select  Home   \u00b7   B/Start  Back"
 };
 const padDz=(v,d=.18)=>Math.abs(v)<d?0:(v-Math.sign(v)*d)/(1-d);
-function padToast(m){let e=$("padtoast");if(!e){e=document.createElement("div");e.id="padtoast";document.body.appendChild(e)}
-  e.textContent=m;e.classList.add("on");clearTimeout(PAD.toastT);PAD.toastT=setTimeout(()=>e.classList.remove("on"),2200)}
+function padToast(m,ms){let e=$("padtoast");if(!e){e=document.createElement("div");e.id="padtoast";document.body.appendChild(e)}
+  e.textContent=m;e.classList.add("on");clearTimeout(PAD.toastT);PAD.toastT=setTimeout(()=>e.classList.remove("on"),ms||2200)}
 function padHint(c){let e=$("padhint");if(!e){e=document.createElement("div");e.id="padhint";document.body.appendChild(e)}e.textContent=PAD_HINT[c]||""}
 function padRumble(ms,weak,strong){const g=PAD.pad;if(!g||!PAD.on)return;
   try{const a=g.vibrationActuator;
@@ -2245,6 +2359,7 @@ applyFont();
 document.documentElement.classList.toggle("low",SET.low);syncSettings();
 bgSize();setBg();if(!SET.low)kick();
 render();
+{const ls=s.lastSeen;if(ls>0)setTimeout(()=>creditAway((Date.now()-ls)/1000),600)}
 
 </script>
 </body>
